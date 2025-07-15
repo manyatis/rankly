@@ -7,6 +7,12 @@ import Image from 'next/image';
 export default function AEOPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +84,8 @@ export default function AEOPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white" style={{fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"}}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+      {/* Navbar */}
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
@@ -88,10 +95,30 @@ export default function AEOPage() {
               <span>SearchDogAI</span>
             </Link>
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</Link>
-              <Link href="/aeo" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">What is AEO</Link>
-              <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
-              <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</Link>
+              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
+              <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
+              <a href="#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
+            </div>
+            <button className='md:hidden p-2 text-gray-600 hover:text-gray-900' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+            <div className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <div className="absolute inset-0 bg-black opacity-50" onClick={closeMobileMenu} />
+              <div className={`absolute right-0 top-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="flex flex-col p-6 space-y-6 mt-16">
+                  <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Features</a>
+                  <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO</a>
+                  <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</a>
+                  <a href="#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center" onClick={closeMobileMenu}>Get Started</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -120,7 +147,7 @@ export default function AEOPage() {
               The AEO industry has exploded since January 2025, with significant venture capital investment and growing enterprise adoption as businesses prepare for the AI-first search future.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="bg-blue-50 rounded-lg p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">25%</div>
@@ -147,7 +174,7 @@ export default function AEOPage() {
               These companies are at the forefront of AI Engine Optimization, helping businesses dominate AI-powered search results.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {companies.map((company, index) => (
               <div key={index} className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
@@ -187,7 +214,7 @@ export default function AEOPage() {
             <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90">
               While enterprise AEO platforms require extensive setup and ongoing management, SearchDogAI offers a revolutionary one-click solution that delivers professional AEO and SEO optimization through automated GitHub integration.
             </p>
-            
+
             <div className="grid md:grid-cols-3 gap-8 mb-8">
               <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
                 <h3 className="text-xl font-semibold mb-3">⚡ Instant Setup</h3>
@@ -202,7 +229,7 @@ export default function AEOPage() {
                 <p className="opacity-90">One-time $24.75 for waitlist members vs. thousands per month for enterprise platforms.</p>
               </div>
             </div>
-            
+
             <Link href="/#waitlist" className="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block">
               Join Waitlist - Get 75% Off
             </Link>
@@ -219,7 +246,7 @@ export default function AEOPage() {
               The shift to AI-powered search is happening now. Here&apos;s why you need AEO optimization today.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white rounded-lg p-8 shadow-sm">
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
@@ -233,7 +260,7 @@ export default function AEOPage() {
                 <li>• Traditional SEO alone is no longer sufficient</li>
               </ul>
             </div>
-            
+
             <div className="bg-white rounded-lg p-8 shadow-sm">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
                 <span className="text-2xl">✅</span>
