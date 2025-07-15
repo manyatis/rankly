@@ -59,15 +59,57 @@ export default function Home() {
           </div>
         </div>
       </nav>
+      {/* AI Search Statistics Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              AI Search Is Reshaping SEO & Introducing AEO
+            </h2>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
+              The search landscape is rapidly evolving. AI Engine Optimization (AEO) is now essential alongside traditional SEO to ensure visibility in AI-powered search results.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">60%</div>
+              <p className="text-sm text-gray-600">of searches now complete without clicks thanks to AI Overviews</p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">86%</div>
+              <p className="text-sm text-gray-600">of SEO professionals have integrated AI into their strategy</p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">20-40%</div>
+              <p className="text-sm text-gray-600">reduction in organic click-through rates due to AI Overviews</p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">82%</div>
+              <p className="text-sm text-gray-600">of users find AI-powered search more helpful than traditional search</p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-6 shadow-sm max-w-4xl mx-auto">
+            <p className="text-gray-700 text-center leading-relaxed">
+              <strong>The reality:</strong> Google's AI Overviews now appear in 13.14% of all queries (up from 6.49% in just two months), 
+              while 19% of search results now include AI-generated content. Companies using AI in their SEO strategies 
+              see <strong className="text-blue-600">30% improvement in rankings within 6 months</strong>. 
+              The future isn't about ranking #1 anymore — it's about being the answer AI engines choose through AEO optimization.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="bg-white">
         <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Strategic AI SEO Solutions
+              Strategic AI SEO & AEO Solutions
             </h1>
             <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Professional SEO optimization through automated GitHub integration. 
+              Professional SEO and AI Engine Optimization (AEO) through automated GitHub integration. 
               Comprehensive analysis, targeted improvements, and seamless implementation via pull request.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
@@ -116,10 +158,10 @@ export default function Home() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Services</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive SEO solutions designed to maximize your website&apos;s potential.
+              Comprehensive SEO and AEO solutions designed to maximize your website&apos;s potential.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-8">
             <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
                 <span className="text-2xl">📊</span>
@@ -127,6 +169,15 @@ export default function Home() {
               <h3 className="text-xl font-semibold mb-3 text-gray-900">SEO Analysis</h3>
               <p className="text-gray-600 leading-relaxed">
                 Get instant AI-powered analysis of your website&apos;s search engine optimization with detailed grades and recommendations.
+              </p>
+            </div>
+            <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-2xl">🤖</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">AEO Optimization</h3>
+              <p className="text-gray-600 leading-relaxed">
+                AI Engine Optimization specifically designed to make your content visible and preferred by AI search engines like ChatGPT and Claude.
               </p>
             </div>
             <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
@@ -177,6 +228,10 @@ export default function Home() {
                 <li className="flex items-center">
                   <span className="text-gray-900 mr-3">✓</span>
                   Complete SEO analysis and grading
+                </li>
+                <li className="flex items-center">
+                  <span className="text-gray-900 mr-3">✓</span>
+                  AEO optimization for AI search engines
                 </li>
                 <li className="flex items-center">
                   <span className="text-gray-900 mr-3">✓</span>
