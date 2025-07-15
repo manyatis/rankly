@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -47,10 +49,10 @@ export default function Home() {
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-              <img src="/dog.png" alt="SearchDogAI" width="24" height="24" className="object-contain" />
+            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
+              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
               <span>SearchDogAI</span>
-            </a>
+            </Link>
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
               <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</a>
@@ -93,10 +95,10 @@ export default function Home() {
           
           <div className="bg-white rounded-lg p-6 shadow-sm max-w-4xl mx-auto">
             <p className="text-gray-700 text-center leading-relaxed">
-              <strong>The reality:</strong> Google's AI Overviews now appear in 13.14% of all queries (up from 6.49% in just two months), 
+              <strong>The reality:</strong> Google&apos;s AI Overviews now appear in 13.14% of all queries (up from 6.49% in just two months), 
               while 19% of search results now include AI-generated content. Companies using AI in their SEO strategies 
               see <strong className="text-blue-600">30% improvement in rankings within 6 months</strong>. 
-              The future isn't about ranking #1 anymore — it's about being the answer AI engines choose through AEO optimization.
+              The future isn&apos;t about ranking #1 anymore — it&apos;s about being the answer AI engines choose through AEO optimization.
             </p>
           </div>
         </div>
@@ -293,7 +295,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src="/dog.png" alt="SearchDogAI" width="20" height="20" className="object-contain" />
+              <Image src="/dog.png" alt="SearchDogAI" width={20} height={20} className="object-contain" />
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">

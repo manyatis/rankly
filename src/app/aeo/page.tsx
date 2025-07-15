@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AEOPage() {
   const [email, setEmail] = useState('');
@@ -81,15 +83,15 @@ export default function AEOPage() {
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-              <img src="/dog.png" alt="SearchDogAI" width="24" height="24" className="object-contain" />
+            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
+              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
               <span>SearchDogAI</span>
-            </a>
+            </Link>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
-              <a href="/aeo" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">What is AEO</a>
-              <a href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
-              <a href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
+              <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</Link>
+              <Link href="/aeo" className="text-blue-600 hover:text-blue-700 transition-colors font-medium">What is AEO</Link>
+              <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
+              <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</Link>
             </div>
           </div>
         </div>
@@ -126,7 +128,7 @@ export default function AEOPage() {
             </div>
             <div className="bg-blue-50 rounded-lg p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">13.14%</div>
-              <p className="text-sm text-gray-600">of all queries now show Google's AI Overviews</p>
+              <p className="text-sm text-gray-600">of all queries now show Google&apos;s AI Overviews</p>
             </div>
             <div className="bg-blue-50 rounded-lg p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">2025</div>
@@ -201,9 +203,9 @@ export default function AEOPage() {
               </div>
             </div>
             
-            <a href="/#waitlist" className="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block">
+            <Link href="/#waitlist" className="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block">
               Join Waitlist - Get 75% Off
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -214,7 +216,7 @@ export default function AEOPage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Why AEO Is Critical for Your Business</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              The shift to AI-powered search is happening now. Here's why you need AEO optimization today.
+              The shift to AI-powered search is happening now. Here&apos;s why you need AEO optimization today.
             </p>
           </div>
           
@@ -276,8 +278,8 @@ export default function AEOPage() {
               </form>
             ) : (
               <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
-                <p className="font-semibold text-gray-900">🎉 You're on the list!</p>
-                <p className="text-gray-600">We'll notify you when SearchDogAI launches.</p>
+                <p className="font-semibold text-gray-900">🎉 You&apos;re on the list!</p>
+                <p className="text-gray-600">We&apos;ll notify you when SearchDogAI launches.</p>
               </div>
             )}
           </div>
@@ -289,7 +291,7 @@ export default function AEOPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src="/dog.png" alt="SearchDogAI" width="20" height="20" className="object-contain" />
+              <Image src="/dog.png" alt="SearchDogAI" width={20} height={20} className="object-contain" />
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
