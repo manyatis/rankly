@@ -47,12 +47,13 @@ export default function Home() {
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <a href="#" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-              <img src="/dog.png" alt="SearchDogAi" width="24" height="24" className="object-contain" />
-              <span>SearchDogAi</span>
+            <a href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
+              <img src="/dog.png" alt="SearchDogAI" width="24" height="24" className="object-contain" />
+              <span>SearchDogAI</span>
             </a>
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
+              <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
               <a href="#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
             </div>
@@ -280,7 +281,7 @@ export default function Home() {
             ) : (
               <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
                 <p className="font-semibold text-gray-900">🎉 You&apos;re on the list!</p>
-                <p className="text-gray-600">We&apos;ll notify you when SearchDogAi launches.</p>
+                <p className="text-gray-600">We&apos;ll notify you when SearchDogAI launches.</p>
               </div>
             )}
           </div>
@@ -292,18 +293,12 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-900">
-                <path d="M18 6c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zM8 6c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2z" fill="currentColor"/>
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.63 3.34 1.68 4.58L12 20l5.32-6.42C18.37 12.34 19 10.74 19 9c0-3.87-3.13-7-7-7z" fill="currentColor"/>
-                <circle cx="10" cy="10" r="1" fill="white"/>
-                <circle cx="14" cy="10" r="1" fill="white"/>
-                <path d="M12 13c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="white"/>
-              </svg>
-              <span className="text-xl font-semibold text-gray-900">SearchDogAi</span>
+              <img src="/dog.png" alt="SearchDogAI" width="20" height="20" className="object-contain" />
+              <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">Privacy-first AI SEO optimization</span>
-              <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAi</span>
+              <span className="text-gray-600">Privacy-first AI SEO & AEO optimization</span>
+              <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
             </div>
           </div>
         </div>

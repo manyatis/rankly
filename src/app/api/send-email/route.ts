@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   const mailOptions = {
     from: process.env.OUTLOOK_USER,
     to: 'mikejohnmaniatis@gmail.com',
-    subject: 'New Waitlist Signup - SearchDogAi',
+    subject: 'New Waitlist Signup - SearchDogAI',
     text: `A new user has joined the waitlist: ${email}`,
   };
 
