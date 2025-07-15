@@ -132,7 +132,7 @@ export default function AEOPage() {
               Top AEO Companies & Solutions
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Discover the leading AI Engine Optimization (AEO) companies that are shaping how businesses optimize for AI-powered search engines and chatbots in 2024.
+              Discover the leading AI Engine Optimization (AEO) companies that are shaping how businesses optimize for AI-powered search engines and chatbots in 2025.
             </p>
           </div>
         </div>
