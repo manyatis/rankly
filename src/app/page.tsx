@@ -60,7 +60,7 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
-              <a href="#waitlist" className="bg-gray-900 text-white px-6 py-2 rounded-md hover:bg-gray-800 transition-colors font-medium">Get Started</a>
+              <a href="#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function Home() {
               Comprehensive analysis, targeted improvements, and seamless implementation via pull request.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-              <a href="#waitlist" className="bg-gray-900 text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors font-medium">
+              <a href="#waitlist" className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">
                 Get Started
               </a>
               <a href="#features" className="border border-gray-300 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-50 transition-colors font-medium">
@@ -101,7 +101,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {steps.map((step, index) => (
               <div key={index} className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-lg text-xl font-bold mb-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-lg text-xl font-bold mb-6">
                   {step.number}
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -223,9 +223,9 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  className="bg-gray-900 text-white px-8 py-3 rounded-md font-semibold hover:bg-gray-800 transition-colors"
+                  className="bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors shadow-md"
                 >
-                  Join Waitlist
+                  Join Wait List
                 </button>
               </form>
             ) : (
