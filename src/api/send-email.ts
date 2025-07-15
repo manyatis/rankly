@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+"use server";
+
 import nodemailer from 'nodemailer';
 
-export async function POST(req: Request) {
-  const { email } = await req.json();
-
+// This is a server action function
+export async function sendWaitlistEmail(email: string) {
   if (!email) {
-    return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    throw new Error('Email is required');
   }
 
   const transporter = nodemailer.createTransport({
@@ -20,16 +20,14 @@ export async function POST(req: Request) {
 
   const mailOptions = {
     from: process.env.OUTLOOK_USER,
-    to: 'mikejohnmaniatis@gmail.com',
+    to: process.env.OUTLOOK_USER,
     subject: 'New Waitlist Signup - SearchDogAI',
     text: `A new user has joined the waitlist: ${email}`,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Email send error:', error);
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    throw new Error('Failed to send email');
   }
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { sendWaitlistEmail } from '../api/send-email';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -25,18 +26,8 @@ export default function Home() {
     e.preventDefault();
 
     try {
-      const res = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        setIsSubmitted(true);
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Something went wrong.');
-      }
+      sendWaitlistEmail(email);
+      setIsSubmitted(true);
     } catch (err) {
       console.error('Error submitting email:', err);
       alert('Failed to join waitlist.');
