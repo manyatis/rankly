@@ -59,7 +59,7 @@ export default function Home() {
             <div className="text-3xl mb-4">📊</div>
             <h3 className="text-xl font-semibold mb-3">Free SEO Analysis</h3>
             <p className="text-gray-600">
-              Get instant AI-powered analysis of your website's search engine optimization with detailed grades and recommendations.
+              Get instant AI-powered analysis of your website&apos;s search engine optimization with detailed grades and recommendations.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-lg">
@@ -142,8 +142,8 @@ export default function Home() {
             </form>
           ) : (
             <div className="bg-green-500 rounded-lg p-4 max-w-md mx-auto">
-              <p className="font-semibold">🎉 You're on the list!</p>
-              <p className="text-green-100">We'll notify you when SearchDogAi launches.</p>
+              <p className="font-semibold">🎉 You&apos;re on the list!</p>
+              <p className="text-green-100">We&apos;ll notify you when SearchDogAi launches.</p>
             </div>
           )}
         </div>
