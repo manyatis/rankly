@@ -220,7 +220,7 @@ export default function AEOPage() {
               Join thousands of businesses preparing for the AI-first search future. Get notified when SearchDogAI launches with your exclusive 75% discount.
             </p>
 
-            <Waitlis /t>
+            <Waitlist />
           </div>
         </div>
       </div>

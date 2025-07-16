@@ -71,7 +71,7 @@ export default function Home() {
               AEO & SEO Analytics Platform
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive analytics and optimization solutions for AI Engine Optimization (AEO) and Search Engine Optimization (SEO). 
+              Comprehensive analytics and optimization solutions for AI Engine Optimization (AEO) and Search Engine Optimization (SEO).
               Monitor your visibility, track performance, and optimize for the future of search.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
@@ -119,8 +119,8 @@ export default function Home() {
 
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 max-w-4xl mx-auto">
             <p className="text-gray-700 text-lg text-center leading-relaxed">
-              <strong>The new reality:</strong> Traditional SEO alone isn&apos;t enough. Companies need comprehensive analytics 
-              to track their performance across both traditional search engines and AI platforms. 
+              <strong>The new reality:</strong> Traditional SEO alone isn&apos;t enough. Companies need comprehensive analytics
+              to track their performance across both traditional search engines and AI platforms.
               <strong className="text-blue-600"> AEO optimization is becoming as critical as SEO</strong> for maintaining online visibility.
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function Home() {
               Everything you need to monitor, analyze, and optimize your search presence across traditional and AI-powered platforms.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {analyticsFeatures.map((feature, index) => (
               <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
@@ -162,7 +162,7 @@ export default function Home() {
               Choose the perfect analytics and optimization package for your business needs.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {solutions.map((solution, index) => (
               <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-shadow">
@@ -180,9 +180,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                  Learn More
-                </button>
+
               </div>
             ))}
           </div>
@@ -198,11 +196,11 @@ export default function Home() {
               Start with our free AEO Score tool, then join the waitlist for 50% off our comprehensive analytics platform.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free (limited time)</h3>
                 <div className="text-4xl font-bold text-blue-600 mb-2">$0</div>
                 <p className="text-gray-600">Get started with basic AEO analysis</p>
               </div>
@@ -219,18 +217,13 @@ export default function Home() {
                   </svg>
                   Basic visibility analysis
                 </li>
-                <li className="flex items-center text-gray-700">
-                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  5 queries per month
-                </li>
+
               </ul>
               <Link href="/aeo-score" className="block w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium text-center">
                 Try Free Tool
               </Link>
             </div>
-            
+
             <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-500 relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">50% Off Waitlist</span>
@@ -273,8 +266,11 @@ export default function Home() {
                 Join Waitlist - 50% Off
               </button>
             </div>
-            
-            <div className="bg-white rounded-xl p-8 shadow-sm">
+
+            <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-500 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">50% Off Waitlist</span>
+              </div>
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
                 <div className="flex items-center justify-center gap-3 mb-2">
