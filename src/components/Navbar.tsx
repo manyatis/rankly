@@ -3,12 +3,25 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '../hooks/useAuth';
+import LoginModal from './LoginModal';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+  };
+
+  const handleLogin = () => {
+    setLoginModalOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    closeMobileMenu();
   };
 
   return (
@@ -25,7 +38,27 @@ export default function Navbar() {
             <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">AEO Score Tool</Link>
             <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn AEO</Link>
             <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
-            <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Join Waitlist</Link>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-600 text-sm">Welcome, {user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                >
+                  Login
+                </button>
+                <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Join Waitlist</Link>
+              </div>
+            )}
           </div>
           <button className='md:hidden p-2 text-gray-600 hover:text-gray-900' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,12 +78,40 @@ export default function Navbar() {
                 <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>AEO Score Tool</Link>
                 <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn AEO</Link>
                 <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
-                <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center" onClick={closeMobileMenu}>Join Waitlist</Link>
+                {user ? (
+                  <div className="space-y-4">
+                    <div className="text-gray-600 text-sm">Welcome, {user.email}</div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => {
+                        setLoginModalOpen(true);
+                        closeMobileMenu();
+                      }}
+                      className="w-full text-left text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg"
+                    >
+                      Login
+                    </button>
+                    <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center block" onClick={closeMobileMenu}>Join Waitlist</Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={handleLogin}
+      />
     </nav>
   );
 }

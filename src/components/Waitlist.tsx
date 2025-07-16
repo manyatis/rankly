@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { sendWaitlistEmail } from '../api/send-email';
+import { sendWaitlistEmail } from '../app/api/send-email/send-email';
 
 interface WaitlistProps {
   variant?: 'default' | 'aeo';

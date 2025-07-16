@@ -10,7 +10,7 @@ export default function Home() {
   const analyticsFeatures = [
     {
       icon: "📊",
-      title: "AEO Analytics",
+      title: "AEO/GEO Analytics",
       description: "Comprehensive analysis of your website's AI Engine Optimization performance with detailed visibility scoring across multiple AI platforms."
     },
     {
@@ -26,7 +26,7 @@ export default function Home() {
     {
       icon: "📈",
       title: "Performance Reports",
-      description: "Detailed reports on your AEO/SEO performance with actionable recommendations and improvement tracking over time."
+      description: "Detailed reports on your AEO/GEO/SEO performance with actionable recommendations and improvement tracking over time."
     },
     {
       icon: "🤖",
@@ -43,7 +43,7 @@ export default function Home() {
   const solutions = [
     {
       title: "Enterprise Analytics Suite",
-      description: "Complete AEO and SEO analytics platform with custom dashboards, API access, and dedicated support.",
+      description: "Complete AEO/GEO and SEO analytics platform with custom dashboards, API access, and dedicated support.",
       features: ["Custom dashboards", "API integration", "White-label reports", "Dedicated support"]
     },
     {
@@ -68,10 +68,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              AEO & SEO Analytics Platform
+              AEO/GEO & SEO Analytics Platform
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive analytics and optimization solutions for AI Engine Optimization (AEO) and Search Engine Optimization (SEO).
+              Comprehensive analytics and optimization solutions for Answers/Generative Engine Optimization (AEO/GEO) and Search Engine Optimization (SEO).
               Monitor your visibility, track performance, and optimize for the future of search.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">

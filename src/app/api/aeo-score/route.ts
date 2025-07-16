@@ -41,7 +41,7 @@ async function queryOpenAI(businessDescription: string): Promise<string> {
     });
 
     const response = await client.responses.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1-mini',
       tools: [{ type: 'web_search_preview' }],
       input: PromptEngine.createSearchPrompt(businessDescription)
     });
