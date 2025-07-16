@@ -16,20 +16,20 @@ model User {
     image             String?
     sessions          Session[]
     accounts          Account[]
+    dailyUsageCount   Int             @default(0)
+    lastUsageDate     DateTime?
+    subscriptionTier  String          @default("free") // "free", "professional", "enterprise"
+    plan              String          @default("free") // "free", "professional", "enterprise"
     createdAt         DateTime        @default(now())
     updatedAt         DateTime        @updatedAt
 }
 
 model Session {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())  
-  updatedAt DateTime @updatedAt
-
-  @@index([token])
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {

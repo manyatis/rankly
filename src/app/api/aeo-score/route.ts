@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { PromptEngine } from '../../../engines/PromptEngine';
 import { AnalyticalEngine, QueryResult } from '../../../engines/AnalyticalEngine';
 import { RankingEngine, ScoringFactors, CompetitorInfo } from '../../../engines/RankingEngine';
+import { getUser, checkUsageLimit, incrementUsage } from '../../../lib/auth';
 
 interface AIProvider {
   name: string;
@@ -59,16 +60,43 @@ async function queryOpenAI(businessDescription: string): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     console.log(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
+    
+    // Check if user is authenticated
+    const user = await getUser();
+    if (!user?.email) {
+      console.log(`❌ User not authenticated`);
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // Check usage limits
+    const usageInfo = await checkUsageLimit(user.email);
+    if (!usageInfo.canUse) {
+      console.log(`❌ Usage limit exceeded for ${user.email}: ${usageInfo.usageCount}/${usageInfo.maxUsage}`);
+      return NextResponse.json({ 
+        error: `Daily limit reached. You've used ${usageInfo.usageCount}/${usageInfo.maxUsage} free analytics today.`,
+        usageInfo 
+      }, { status: 429 });
+    }
+
     const { businessName, keywords, providers } = await request.json();
 
     console.log(`🏢 Business Name: "${businessName}"`);
     console.log(`🔑 Keywords:`, keywords);
     console.log(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
+    console.log(`👤 User: ${user.email} (${usageInfo.usageCount}/${usageInfo.maxUsage} used)`);
 
     if (!businessName || !keywords || !providers) {
       console.log(`❌ Missing required fields`);
       return NextResponse.json({ error: 'Missing required fields: businessName, keywords, and providers' }, { status: 400 });
     }
+
+    // Increment usage count
+    const usageIncremented = await incrementUsage(user.email);
+    if (!usageIncremented) {
+      console.log(`❌ Failed to increment usage or limit exceeded`);
+      return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 429 });
+    }
+    console.log(`✅ Usage incremented for ${user.email}`);
 
     const results: ProviderScoringResult[] = [];
 

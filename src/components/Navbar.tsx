@@ -9,7 +9,7 @@ import LoginModal from './LoginModal';
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
@@ -33,17 +33,27 @@ export default function Navbar() {
             <span>SearchDogAI</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link>
-            <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link>
-            <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">AEO Score Tool</Link>
-            <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn AEO</Link>
-            <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
-            {user ? (
+            {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
+            {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
+            <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Free Analytics Tool</Link>
+            <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn</Link>
+            <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Why SearchDog</Link>
+            {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link> */}
+            {loading ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-600 text-sm">Welcome, {user.email}</span>
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-300 rounded w-20"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-8 bg-gray-300 rounded w-16"></div>
+                </div>
+              </div>
+            ) : user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-600 text-sm">Welcome, {user.email.split("@")[0]}</span>
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium cursor-pointer"
                 >
                   Logout
                 </button>
@@ -52,11 +62,10 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setLoginModalOpen(true)}
-                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium cursor-pointer"
                 >
                   Login
                 </button>
-                <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Join Waitlist</Link>
               </div>
             )}
           </div>
@@ -73,14 +82,24 @@ export default function Navbar() {
             <div className="absolute inset-0 bg-black opacity-50" onClick={closeMobileMenu} />
             <div className={`absolute right-0 top-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
               <div className="flex flex-col p-6 space-y-6 mt-16">
-                <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link>
-                <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link>
-                <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>AEO Score Tool</Link>
-                <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn AEO</Link>
-                <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
-                {user ? (
+                {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
+                {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
+                <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Free AEO/GEO Tooling</Link>
+                <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn</Link>
+                <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Why SearchDog</Link>
+                {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link> */}
+                {loading ? (
                   <div className="space-y-4">
-                    <div className="text-gray-600 text-sm">Welcome, {user.email}</div>
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-gray-300 rounded w-32"></div>
+                    </div>
+                    <div className="animate-pulse">
+                      <div className="h-10 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+                ) : user ? (
+                  <div className="space-y-4">
+                    <div className="text-gray-600 text-sm">Welcome, {user.email.split("@")[0]}</div>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg"
@@ -99,7 +118,15 @@ export default function Navbar() {
                     >
                       Login
                     </button>
-                    <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center block" onClick={closeMobileMenu}>Join Waitlist</Link>
+                    <button 
+                      onClick={() => {
+                        setLoginModalOpen(true);
+                        closeMobileMenu();
+                      }}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center block cursor-pointer"
+                    >
+                      Create Account
+                    </button>
                   </div>
                 )}
               </div>

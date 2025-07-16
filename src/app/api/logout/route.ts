@@ -1,35 +1,14 @@
-import { deleteSession, getSessionToken } from '../../../lib/auth';
-import { serialize } from 'cookie';
+import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const token = await getSessionToken(req.headers.get('cookie'));
+    // For NextAuth, we need to redirect to the signout endpoint
+    // But since this is called from client-side, we'll just return success
+    // The actual logout will be handled by NextAuth signOut() function
     
-    if (token) {
-      await deleteSession(token);
-    }
-
-    const cookie = serialize('sessionToken', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/'
-    });
-
-    return Response.json(
-      { message: 'Logged out successfully' },
-      { 
-        status: 200,
-        headers: {
-          'Set-Cookie': cookie
-        }
-      }
-    );
+    return NextResponse.json({ message: 'Logout successful' }, { status: 200 });
   } catch (error) {
     console.error('Logout error:', error);
-    return Response.json({ error: 'Logout failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Logout failed' }, { status: 500 });
   }
 }

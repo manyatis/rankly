@@ -1,4 +1,4 @@
-import { serialize, parse } from 'cookie';
+import { serialize } from 'cookie';
 
 export async function POST(req: Request) {
   const body = await req.json();

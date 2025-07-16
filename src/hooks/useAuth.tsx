@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { signOut } from 'next-auth/react';
 
 interface User {
   id: number;
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await signOut({ redirect: false });
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);

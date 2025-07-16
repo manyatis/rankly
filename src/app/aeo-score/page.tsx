@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
-import Waitlist from '@/components/Waitlist';
+import LoginModal from '@/components/LoginModal';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AIProvider {
   name: string;
@@ -51,20 +51,63 @@ export default function AEOScorePage() {
   const [keyword, setKeyword] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [usageInfo, setUsageInfo] = useState<{canUse: boolean; usageCount: number; maxUsage: number | string; tier: string} | null>(null);
+  
+  const { user } = useAuth();
+
+  const handleCreateAccount = () => {
+    setLoginModalOpen(true);
+  };
+
+  const handleLogin = () => {
+    setLoginModalOpen(false);
+  };
+  const checkUsageLimits = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const response = await fetch('/api/usage-check', {
+        headers: { 'Authorization': `Bearer ${user.email}` }
+      });
+      const data = await response.json();
+      setUsageInfo(data);
+    } catch (error) {
+      console.error('Error checking usage limits:', error);
+    }
+  };
+
+  // Check usage limits when user changes
+  useEffect(() => {
+    if (user?.email) {
+      checkUsageLimits();
+    } else {
+      setUsageInfo(null);
+    }
+  }, [user, checkUsageLimits]);
+
 
   const aiProviders: AIProvider[] = [
     { name: 'OpenAI GPT-4o', model: 'gpt-4o', color: 'bg-green-100 text-green-800' },
   ];
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
 
   const handleAnalyze = async () => {
     if (!businessName.trim() || !keyword.trim()) return;
+    
+    // Check if user is logged in
+    if (!user?.email) {
+      setLoginModalOpen(true);
+      return;
+    }
+
+    // Check usage limits
+    if (usageInfo && !usageInfo.canUse) {
+      alert(`Daily limit reached. You've used ${usageInfo.usageCount}/${usageInfo.maxUsage} free analytics today. Please upgrade for unlimited access.`);
+      return;
+    }
 
     // Use single keyword
     const keywordArray = [keyword.trim()];
@@ -169,6 +212,8 @@ export default function AEOScorePage() {
           setIsAnalyzing(false);
           setCurrentStep('');
           setProgress(0);
+          // Refresh usage info after successful analysis
+          checkUsageLimits();
         }, 1000);
       }, 500);
 
@@ -204,11 +249,11 @@ export default function AEOScorePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              AEO Analytics & Visibility Scoring
+              AEO/GEO Analytics & Visibility Scoring
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive AI Engine Optimization analytics to measure your business visibility across AI platforms.
-              Get detailed scoring, performance insights, and actionable optimization recommendations.
+              Comprehensive Answers Engine Optimization analytics to measure your business visibility across AI platforms.
+              Get detailed scoring, performance insights, and actionable optimization recommendations. Account required.
             </p>
           </div>
         </div>
@@ -219,6 +264,15 @@ export default function AEOScorePage() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-gray-50 rounded-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-blue-800 font-medium">Account Required:</span>
+                <span className="text-blue-700 ml-2">You must create an account to use this free tool.</span>
+              </div>
+            </div>
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
@@ -237,22 +291,34 @@ export default function AEOScorePage() {
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Enter your primary keyword or phrase (e.g., 'AEO', 'Answers Engine Optimization', 'digital marketing')"
+                placeholder="Enter your primary keyword or phrase (e.g., 'AEO', 'GEO', 'Answers Engine Optimization', 'digital marketing')"
                 className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
               <div className="mt-2 text-sm text-gray-500">
-                <strong>Examples:</strong> AEO, Answers Engine Optimization, digital marketing, restaurant delivery, software development, healthcare consulting
+                <strong>Examples:</strong> AEO, GEO, Answers Engine Optimization, digital marketing, restaurant delivery, software development, healthcare consulting
               </div>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">
-                {keyword.trim().length > 0 ? 'Keyword ready' : 'Enter a keyword or phrase'}
-              </span>
+              <div className="text-sm text-gray-500">
+                {!user ? (
+                  <span className="text-red-600 font-medium">⚠️ Login required</span>
+                ) : usageInfo && !usageInfo.canUse ? (
+                  <span className="text-red-600 font-medium">❌ Daily limit reached ({usageInfo.usageCount}/{usageInfo.maxUsage})</span>
+                ) : usageInfo && usageInfo.maxUsage === 'unlimited' ? (
+                  <span className="text-blue-600 font-medium">🚀 Unlimited usage ({usageInfo.tier} plan)</span>
+                ) : usageInfo ? (
+                  <span className="text-green-600 font-medium">✅ {typeof usageInfo.maxUsage === 'number' ? usageInfo.maxUsage - usageInfo.usageCount : 'unlimited'} uses remaining today</span>
+                ) : keyword.trim().length > 0 ? (
+                  <span>Keyword ready</span>
+                ) : (
+                  <span>Enter a keyword or phrase</span>
+                )}
+              </div>
               <button
                 onClick={handleAnalyze}
-                disabled={!businessName.trim() || !keyword.trim() || isAnalyzing}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+                disabled={isAnalyzing || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
               >
                 {isAnalyzing ? (
                   <span className="flex items-center space-x-2">
@@ -262,7 +328,13 @@ export default function AEOScorePage() {
                     </svg>
                     <span>Analyzing...</span>
                   </span>
-                ) : 'Generate Analytics Report'}
+                ) : !user ? (
+                  'Login to Generate Report'
+                ) : (usageInfo && !usageInfo.canUse) ? (
+                  'Daily Limit Reached'
+                ) : (
+                  'Generate Analytics Report'
+                )}
               </button>
             </div>
           </div>
@@ -318,7 +390,7 @@ export default function AEOScorePage() {
                 </div>
               </div>
 
-              <div className="text-sm text-gray-500 mb-6">{progress}% complete</div>
+              <div className="text-sm text-gray-500 mb-6">{Math.round(progress)}% complete</div>
 
               {/* Fun Loading Messages */}
               <div className="text-gray-600 mb-4">
@@ -372,12 +444,12 @@ export default function AEOScorePage() {
       {results.length > 0 && (
         <div className="bg-white py-16">
           <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO Score Results</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO/GEO Score Results</h2>
 
             {/* Overall Summary */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8 mb-8">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-6">Overall AEO Rankings for {businessName}</h3>
+                <h3 className="text-2xl font-bold mb-6">Overall AEO/GEO Rankings for {businessName}</h3>
 
                 {/* Average Score Circle */}
                 <div className="flex justify-center mb-8">
@@ -504,7 +576,7 @@ export default function AEOScorePage() {
                           <span className={`text-2xl font-bold ${getScoreColor(result.aeoScore)}`}>
                             {result.aeoScore}
                           </span>
-                          <span className="text-xs text-gray-500">AEO Score</span>
+                          <span className="text-xs text-gray-500">AEO/GEO Score</span>
                         </div>
                       </div>
                     </div>
@@ -660,7 +732,22 @@ export default function AEOScorePage() {
       )}
 
       {/* CTA Section */}
-      <Waitlist />
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Optimize for AI Search?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of businesses preparing for the AI-first search future. Create your account now to access our free tool and lock in pre-release discounts.
+          </p>
+          <button 
+            onClick={handleCreateAccount}
+            className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
+          >
+            Create Account - Get Discount
+          </button>
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="bg-gray-50 border-t border-gray-100 py-12 px-6">
@@ -671,12 +758,18 @@ export default function AEOScorePage() {
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">One-click AEO & SEO optimization</span>
+              <span className="text-gray-600">One-click AEO & GEO optimization</span>
               <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
             </div>
           </div>
         </div>
       </footer>
+      
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={handleLogin}
+      />
     </div>
   );
 }

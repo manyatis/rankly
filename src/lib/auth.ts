@@ -1,83 +1,121 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from './nextauth';
 import { PrismaClient } from '../generated/prisma';
-import { parse } from 'cookie';
-import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();
 
-export async function getSessionToken(cookieHeader: string | null): Promise<string | null> {
-  if (!cookieHeader) {
-    return null;
-  }
-
-  const cookies = parse(cookieHeader);
-  return cookies.sessionToken || null;
+export async function getUser() {
+  const session = await getServerSession(authOptions);
+  return session?.user || null;
 }
 
-export async function validateSession(token: string) {
-  if (!token) {
-    return null;
+export async function checkUsageLimit(email: string): Promise<{ canUse: boolean; usageCount: number; maxUsage: number | string; tier: string }> {
+  const user = await prisma.user.findFirst({
+    where: { email }
+  });
+
+  if (!user) {
+    return { canUse: false, usageCount: 0, maxUsage: 2, tier: 'free' };
   }
 
-  try {
-    const session = await prisma.session.findUnique({
-      where: { 
-        token,
-        expiresAt: {
-          gt: new Date()
-        }
-      },
-      include: {
-        user: true
+  // Professional and Enterprise users get unlimited usage
+  if (user.plan === 'professional' || user.plan === 'enterprise') {
+    return { canUse: true, usageCount: user.dailyUsageCount, maxUsage: 'unlimited', tier: user.plan };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Check if last usage was today
+  const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
+  const lastUsageToday = lastUsageDate && lastUsageDate >= today;
+
+  // Reset count if it's a new day
+  if (!lastUsageToday) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        dailyUsageCount: 0,
+        lastUsageDate: new Date()
       }
     });
-
-    if (!session) {
-      return null;
-    }
-
-    return session.user;
-  } catch (error) {
-    console.error('Session validation error:', error);
-    return null;
+    return { canUse: true, usageCount: 0, maxUsage: 2, tier: user.plan };
   }
+
+  const canUse = user.dailyUsageCount < 2;
+  return { canUse, usageCount: user.dailyUsageCount, maxUsage: 2, tier: user.plan };
 }
 
-export async function createSession(email: string) {
+export async function incrementUsage(email: string): Promise<boolean> {
   try {
-    let user = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: { email }
     });
 
     if (!user) {
-      user = await prisma.user.create({
-        data: { email }
-      });
+      return false;
     }
 
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    // Professional and Enterprise users get unlimited usage
+    if (user.plan === 'professional' || user.plan === 'enterprise') {
+      // Still increment for tracking, but always allow usage
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          dailyUsageCount: user.dailyUsageCount + 1,
+          lastUsageDate: new Date()
+        }
+      });
+      return true;
+    }
 
-    await prisma.session.create({
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if last usage was today
+    const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
+    const lastUsageToday = lastUsageDate && lastUsageDate >= today;
+
+    // Reset or increment count
+    const newCount = lastUsageToday ? user.dailyUsageCount + 1 : 1;
+
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
-        token,
-        userId: user.id,
-        expiresAt
+        dailyUsageCount: newCount,
+        lastUsageDate: new Date()
       }
     });
 
-    return { token, user };
+    return newCount <= 2;
   } catch (error) {
-    console.error('Session creation error:', error);
-    throw error;
+    console.error('Error incrementing usage:', error);
+    return false;
   }
 }
 
-export async function deleteSession(token: string) {
-  try {
-    await prisma.session.delete({
-      where: { token }
-    });
-  } catch (error) {
-    console.error('Session deletion error:', error);
-  }
+export async function createSession(email: string) {
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: {
+      email,
+      dailyUsageCount: 0,
+      plan: 'free'
+    }
+  });
+
+  const sessionToken = crypto.randomUUID();
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 30); // 30 days
+
+  await prisma.session.create({
+    data: {
+      sessionToken,
+      userId: user.id,
+      expires
+    }
+  });
+
+  return { token: sessionToken, user };
 }
