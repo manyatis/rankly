@@ -1,41 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
+import Waitlist from '@/components/Waitlist';
 
 export default function AEOPage() {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const res = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        setIsSubmitted(true);
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Something went wrong.');
-      }
-    } catch (err) {
-      console.error('Error submitting email:', err);
-      alert('Failed to join waitlist.');
-    }
-  };
 
   const companies = [
     {

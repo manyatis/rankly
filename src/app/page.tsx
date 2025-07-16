@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { sendWaitlistEmail } from '../api/send-email';
 import Navbar from '../components/Navbar';
+import Waitlist from '../components/Waitlist';
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const analyticsFeatures = [
     {
@@ -61,17 +58,6 @@ export default function Home() {
     }
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      sendWaitlistEmail(email);
-      setIsSubmitted(true);
-    } catch (err) {
-      console.error('Error submitting email:', err);
-      alert('Failed to join waitlist.');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
@@ -332,40 +318,7 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      <div id="waitlist" className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Join the Waitlist & Save 50%
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Be among the first to access our comprehensive AEO and SEO analytics platform. Early members get 50% off their first year.
-          </p>
-          
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-blue-300 focus:outline-none"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-              >
-                Join Waitlist
-              </button>
-            </form>
-          ) : (
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 max-w-md mx-auto">
-              <div className="text-white text-lg font-medium mb-2">Welcome to the waitlist!</div>
-              <p className="text-blue-100">You&apos;re secured for 50% off when we launch. We&apos;ll be in touch soon with early access!</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <Waitlist />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
+import Waitlist from '@/components/Waitlist';
 
 interface AIProvider {
   name: string;
@@ -659,17 +660,7 @@ export default function AEOScorePage() {
       )}
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-16">
-        <div className="max-w-4xl mx-auto px-6 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Improve Your AEO Score with SearchDogAI</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Get automated AEO optimization through our AI-powered GitHub integration. One-click setup, professional results.
-          </p>
-          <Link href="/#waitlist" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block">
-            Join Waitlist - Get 50% Off
-          </Link>
-        </div>
-      </div>
+      <Waitlist />
 
       {/* Footer */}
       <footer className="bg-gray-50 border-t border-gray-100 py-12 px-6">
