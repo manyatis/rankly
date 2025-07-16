@@ -36,8 +36,8 @@ export default function Navbar() {
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
             <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics Tool</Link>
-            <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn AGEO</Link>
-            <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link>
+            <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO?</Link>
+            {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
             {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link> */}
             {loading ? (
               <div className="flex items-center space-x-4">
@@ -85,8 +85,8 @@ export default function Navbar() {
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
                 <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics Tool</Link>
-                <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn AGEO</Link>
-                <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link>
+                <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO?</Link>
+                {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}
                 {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link> */}
                 {loading ? (
                   <div className="space-y-4">
