@@ -4,27 +4,60 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { sendWaitlistEmail } from '../api/send-email';
+import Navbar from '../components/Navbar';
 
 export default function Home() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  }
-
-  const steps = [
+  const analyticsFeatures = [
     {
-      number: 1,
-      title: "Connect Your GitHub",
-      description: "Provide our GitHub app with access & allow us to perform the analysis and grade for your project. None of your IP will be stored."
+      icon: "📊",
+      title: "AEO Analytics",
+      description: "Comprehensive analysis of your website's AI Engine Optimization performance with detailed visibility scoring across multiple AI platforms."
     },
     {
-      number: 2,
-      title: "AI Agent Optimization",
-      description: "Wait for our agent to automatically introduce your SEO optimizations, test them, ensure compatibility, and then open a PR for review."
+      icon: "🔍",
+      title: "SEO Insights",
+      description: "Deep SEO analysis with keyword tracking, competitor research, and performance monitoring to optimize your traditional search presence."
+    },
+    {
+      icon: "🎯",
+      title: "Visibility Tracking",
+      description: "Real-time monitoring of your brand mentions across AI search results and traditional search engines with trend analysis."
+    },
+    {
+      icon: "📈",
+      title: "Performance Reports",
+      description: "Detailed reports on your AEO/SEO performance with actionable recommendations and improvement tracking over time."
+    },
+    {
+      icon: "🤖",
+      title: "AI Search Monitoring",
+      description: "Track how your business appears in ChatGPT, Claude, Perplexity, and other AI search platforms with automated alerts."
+    },
+    {
+      icon: "⚡",
+      title: "Optimization Solutions",
+      description: "Automated recommendations and implementation strategies to improve your visibility in both AI and traditional search results."
+    }
+  ];
+
+  const solutions = [
+    {
+      title: "Enterprise Analytics Suite",
+      description: "Complete AEO and SEO analytics platform with custom dashboards, API access, and dedicated support.",
+      features: ["Custom dashboards", "API integration", "White-label reports", "Dedicated support"]
+    },
+    {
+      title: "SMB Growth Package",
+      description: "Essential analytics and optimization tools designed for small to medium businesses looking to improve their search presence.",
+      features: ["Weekly reports", "Competitor analysis", "Keyword tracking", "Basic optimization"]
+    },
+    {
+      title: "Agency Partner Program",
+      description: "Comprehensive analytics platform with client management tools and reseller capabilities for digital agencies.",
+      features: ["Multi-client dashboard", "Reseller pricing", "White-label branding", "Agency tools"]
     }
   ];
 
@@ -42,131 +75,91 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
-      {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
-              <span>SearchDogAI</span>
-            </Link>
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
-              <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</a>
-              <a href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">AEO Score Tool</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
-              <a href="#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
-            </div>
-            <button className='md:hidden p-2 text-gray-600 hover:text-gray-900' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-            <div className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <div className="absolute inset-0 bg-black opacity-50" onClick={closeMobileMenu} />
-              <div className={`absolute right-0 top-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex flex-col p-6 space-y-6 mt-16">
-                  <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Features</a>
-                  <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO</a>
-                  <a href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>AEO Score Tool</a>
-                  <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</a>
-                  <a href="#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center" onClick={closeMobileMenu}>Get Started</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-      {/* AI Search Statistics Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              AI Search Is Reshaping SEO & Introducing AEO
-            </h2>
-            <p className="text-base sm:text-lg text-gray-700 max-w-3xl mx-auto mb-8">
-              The search landscape is rapidly evolving. AI Engine Optimization (AEO) is now essential alongside traditional SEO to ensure visibility in AI-powered search results.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-sm text-gray-600">of searches now complete without clicks thanks to AI Overviews</p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">86%</div>
-              <p className="text-sm text-gray-600">of SEO professionals have integrated AI into their strategy</p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">20-40%</div>
-              <p className="text-sm text-gray-600">reduction in organic click-through rates due to AI Overviews</p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">82%</div>
-              <p className="text-sm text-gray-600">of users find AI-powered search more helpful than traditional search</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-sm max-w-4xl mx-auto">
-            <p className="text-gray-700 text-center leading-relaxed">
-              <strong>The reality:</strong> Google&apos;s AI Overviews now appear in 13.14% of all queries (up from 6.49% in just two months),
-              while 19% of search results now include AI-generated content. Companies using AI in their SEO strategies
-              see <strong className="text-blue-600">30% improvement in rankings within 6 months</strong>.
-              The future isn&apos;t about ranking #1 anymore — it&apos;s about being the answer AI engines choose through AEO optimization.
-            </p>
-          </div>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Hero Section */}
-      <div className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Strategic AI SEO & AEO Solutions
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              AEO & SEO Analytics Platform
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Professional SEO and AI Engine Optimization (AEO) through automated GitHub integration.
-              Comprehensive analysis, targeted improvements, and seamless implementation via pull request.
+            <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Comprehensive analytics and optimization solutions for AI Engine Optimization (AEO) and Search Engine Optimization (SEO). 
+              Monitor your visibility, track performance, and optimize for the future of search.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-              <a href="#waitlist" className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">
-                Get Started
-              </a>
-              <a href="#features" className="border border-gray-300 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-50 transition-colors font-medium">
-                Learn More
-              </a>
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+              <Link href="#waitlist" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-lg">
+                Join Waitlist - 50% Off
+              </Link>
+              <Link href="/aeo-score" className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-lg">
+                Try AEO Score Tool
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* How It Works Section */}
-      <div className="bg-gray-50 py-20">
+      {/* Statistics Section */}
+      <div className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Our AI-powered process makes SEO optimization effortless in just two simple steps.
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              The Search Revolution Is Here
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              AI-powered search is transforming how users find information. Stay ahead with comprehensive AEO and SEO analytics.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
-            {steps.map((step, index) => (
-              <div key={index} className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-lg text-xl font-bold mb-6">
-                  {step.number}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">60%</div>
+              <p className="text-gray-700 font-medium">of searches complete without clicks due to AI Overviews</p>
+            </div>
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-8 text-center">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
+              <p className="text-gray-700 font-medium">of Google queries now show AI Overviews</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-2">30%</div>
+              <p className="text-gray-700 font-medium">ranking improvement with AI-optimized SEO strategies</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">82%</div>
+              <p className="text-gray-700 font-medium">of users prefer AI-powered search results</p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 max-w-4xl mx-auto">
+            <p className="text-gray-700 text-lg text-center leading-relaxed">
+              <strong>The new reality:</strong> Traditional SEO alone isn&apos;t enough. Companies need comprehensive analytics 
+              to track their performance across both traditional search engines and AI platforms. 
+              <strong className="text-blue-600"> AEO optimization is becoming as critical as SEO</strong> for maintaining online visibility.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Analytics Features Section */}
+      <div id="features" className="bg-gray-50 py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Comprehensive Analytics Suite</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Everything you need to monitor, analyze, and optimize your search presence across traditional and AI-powered platforms.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {analyticsFeatures.map((feature, index) => (
+              <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                  <span className="text-3xl">{feature.icon}</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  {step.description}
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
                 </p>
               </div>
             ))}
@@ -174,52 +167,38 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div id="features" className="bg-white py-20">
+      {/* Solutions Section */}
+      <div id="solutions" className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Services</h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive SEO and AEO solutions designed to maximize your website&apos;s potential.
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Tailored Solutions</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Choose the perfect analytics and optimization package for your business needs.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">📊</span>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {solutions.map((solution, index) => (
+              <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-shadow">
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">{solution.title}</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {solution.description}
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {solution.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                  Learn More
+                </button>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">SEO Analysis</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Get instant AI-powered analysis of your website&apos;s search engine optimization with detailed grades and recommendations.
-              </p>
-            </div>
-            <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">🤖</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">AEO Optimization</h3>
-              <p className="text-gray-600 leading-relaxed">
-                AI Engine Optimization specifically designed to make your content visible and preferred by AI search engines like ChatGPT and Claude.
-              </p>
-            </div>
-            <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">🔧</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Automated Optimization</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Our specially trained models create targeted improvements and submit them via pull request - no manual work required.
-              </p>
-            </div>
-            <div className="p-8 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">🔒</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Privacy-First Approach</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Zero data storage. Your website data is analyzed in real-time and never saved to our servers.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -228,99 +207,182 @@ export default function Home() {
       <div id="pricing" className="bg-gray-50 py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Simple, One-Time Pricing</h2>
-            <p className="text-xl text-gray-600">Professional SEO optimization with transparent pricing</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Flexible Pricing</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Start with our free AEO Score tool, then join the waitlist for 50% off our comprehensive analytics platform.
+            </p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-8 max-w-md mx-auto">
-            <div className="text-center">
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900">$99</span>
-                <span className="text-gray-500 ml-2">one-time payment</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                <div className="text-4xl font-bold text-blue-600 mb-2">$0</div>
+                <p className="text-gray-600">Get started with basic AEO analysis</p>
               </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-                <p className="text-gray-800 font-semibold">
-                  🎉 Waitlist members get 75% OFF!
-                </p>
-                <p className="text-gray-700">
-                  Your price: <span className="font-bold text-2xl text-green-600">$24.75</span>
-                  <span className="ml-2 text-sm text-green-600 font-semibold">Save $74.25!</span>
-                </p>
-              </div>
-              <ul className="text-left space-y-3 mb-8">
-                <li className="flex items-center">
-                  <span className="text-gray-900 mr-3">✓</span>
-                  Complete SEO analysis and grading
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  AEO Score Tool
                 </li>
-                <li className="flex items-center">
-                  <span className="text-gray-900 mr-3">✓</span>
-                  AEO optimization for AI search engines
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Basic visibility analysis
                 </li>
-                <li className="flex items-center">
-                  <span className="text-gray-900 mr-3">✓</span>
-                  Automated optimization pull request
-                </li>
-                <li className="flex items-center">
-                  <span className="text-gray-900 mr-3">✓</span>
-                  AI-powered search engine improvements
-                </li>
-                <li className="flex items-center">
-                  <span className="text-gray-900 mr-3">✓</span>
-                  Zero data storage guarantee
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  5 queries per month
                 </li>
               </ul>
+              <Link href="/aeo-score" className="block w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium text-center">
+                Try Free Tool
+              </Link>
+            </div>
+            
+            <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-500 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">50% Off Waitlist</span>
+              </div>
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <div className="text-2xl text-gray-400 line-through">$49</div>
+                  <div className="text-4xl font-bold text-blue-600">$24.50</div>
+                </div>
+                <p className="text-gray-600">per month (first year with waitlist discount)</p>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Unlimited AEO analysis
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  SEO analytics dashboard
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Competitor tracking
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Weekly reports
+                </li>
+              </ul>
+              <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Join Waitlist - 50% Off
+              </button>
+            </div>
+            
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <div className="text-2xl text-gray-400 line-through">$149</div>
+                  <div className="text-4xl font-bold text-blue-600">$74.50</div>
+                </div>
+                <p className="text-gray-600">per month (first year with waitlist discount)</p>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Everything in Professional
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  API access
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Custom integrations
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Dedicated support
+                </li>
+              </ul>
+              <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Contact Sales
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Waitlist Section */}
-      <div id="waitlist" className="bg-white py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="bg-gray-50 rounded-lg p-6 sm:p-8 md:p-12 text-center max-w-2xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Join the Waitlist</h2>
-            <p className="text-base sm:text-lg text-gray-600 mb-8">
-              Be among the first to optimize your website with AI. Get notified when we launch and secure your 75% discount!
-            </p>
-
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  className="flex-1 px-4 py-3 rounded-md text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 focus:outline-none text-base"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors shadow-md"
-                >
-                  Join Wait List
-                </button>
-              </form>
-            ) : (
-              <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
-                <p className="font-semibold text-gray-900">🎉 You&apos;re on the list!</p>
-                <p className="text-gray-600">We&apos;ll notify you when SearchDogAI launches.</p>
-              </div>
-            )}
-          </div>
+      {/* CTA Section */}
+      <div id="waitlist" className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Join the Waitlist & Save 50%
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Be among the first to access our comprehensive AEO and SEO analytics platform. Early members get 50% off their first year.
+          </p>
+          
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+              >
+                Join Waitlist
+              </button>
+            </form>
+          ) : (
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-white text-lg font-medium mb-2">Welcome to the waitlist!</div>
+              <p className="text-blue-100">You&apos;re secured for 50% off when we launch. We&apos;ll be in touch soon with early access!</p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-12 px-6">
-        <div className="max-w-6xl mx-auto">
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Image src="/dog.png" alt="SearchDogAI" width={20} height={20} className="object-contain" />
-              <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
+              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
+              <span className="text-xl font-semibold">SearchDogAI</span>
             </div>
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">Privacy-first AI SEO & AEO optimization</span>
-              <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
+            <div className="flex space-x-6">
+              <Link href="/aeo" className="text-gray-400 hover:text-white transition-colors">Learn AEO</Link>
+              <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">AEO Score</Link>
+              <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
             </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 SearchDogAI. All rights reserved. Leading the future of AEO and SEO analytics.</p>
           </div>
         </div>
       </footer>

@@ -25,6 +25,14 @@ interface ScoringResult {
   analysis: string;
   queryVariations: QueryResult[];
   overallVisibility: number;
+  competitorAnalysis: CompetitorInfo[];
+  missedResponses: QueryResult[];
+}
+
+interface CompetitorInfo {
+  name: string;
+  mentions: number;
+  score: number;
 }
 
 interface QueryResult {
@@ -36,7 +44,7 @@ interface QueryResult {
 }
 
 // Configuration - easily adjustable
-const MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '5'); // Default 5, configurable via env var
+const MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '10'); // Default 10, configurable via env var
 
 function generateKeywordBasedQueries(businessName: string, keywords: string[], maxQueries: number = MAX_QUERIES): string[] {
   console.log(`🎯 Generating ${maxQueries} queries for business: "${businessName}" with keywords:`, keywords);
@@ -50,10 +58,10 @@ function generateKeywordBasedQueries(businessName: string, keywords: string[], m
   // Priority 1: Single keyword queries (most effective)
   keywords.forEach(keyword => {
     variations.push(
-      `List the top companies that provide ${keyword}`,
-      `What are the best ${keyword} companies?`,
-      `Who are the leading ${keyword} providers?`,
-      `Top ${keyword} specialists and experts`
+      `List the top companies and people that provide ${keyword}`,
+      `What are the best ${keyword} companies and experts?`,
+      `Who are the leading ${keyword} providers and specialists?`,
+      `Top ${keyword} companies, specialists and experts`
     );
   });
 
@@ -61,17 +69,17 @@ function generateKeywordBasedQueries(businessName: string, keywords: string[], m
   keywordCombinations.slice(0, 3).forEach(combo => {
     const keywordPhrase = combo.join(' ');
     variations.push(
-      `Best ${keywordPhrase} companies in the market`,
-      `Leading ${keywordPhrase} service providers`,
-      `Top ${keywordPhrase} firms and consultants`
+      `Best ${keywordPhrase} companies and experts in the market`,
+      `Leading ${keywordPhrase} service providers and specialists`,
+      `Top ${keywordPhrase} firms, consultants and experts`
     );
   });
 
   // Priority 3: Comparative queries (if we have space)
   if (keywords.length >= 2 && variations.length < maxQueries * 2) {
     variations.push(
-      `Companies that specialize in ${keywords[0]} and ${keywords[1]}`,
-      `${keywords[0]} plus ${keywords[1]} service providers`
+      `Companies and experts that specialize in ${keywords[0]} and ${keywords[1]}`,
+      `${keywords[0]} plus ${keywords[1]} service providers and specialists`
     );
   }
 
@@ -529,7 +537,7 @@ function calculateEnhancedAEOScore(
   queryResults: QueryResult[],
   businessName: string,
   keywords: string[]
-): { aeoScore: number; factors: ScoringFactors; analysis: string; overallVisibility: number } {
+): { aeoScore: number; factors: ScoringFactors; analysis: string; overallVisibility: number; competitorAnalysis: CompetitorInfo[]; missedResponses: QueryResult[] } {
   console.log(`\n📊 Calculating AEO score for "${businessName}"`);
   console.log(`📈 Query results summary: ${queryResults.length} total queries`);
 
@@ -624,7 +632,39 @@ function calculateEnhancedAEOScore(
     analysis += ` Your ${keywords.length} keywords provide comprehensive context for AI analysis.`;
   }
 
-  return { aeoScore, factors, analysis, overallVisibility };
+  // Competitor analysis
+  const competitorMentions = new Map<string, number>();
+  const allCompanies = new Set<string>();
+  
+  queryResults.forEach(result => {
+    if (!result.response.startsWith('Error')) {
+      // Extract company names from responses
+      const companies = result.response.match(/\b[A-Z][a-zA-Z\s&'-]+(?:\s(?:Inc|LLC|Corp|Corporation|Company|Co|Ltd|Limited|Solutions|Services|Group)\.?)?\b/g) || [];
+      companies.forEach(company => {
+        const cleanCompany = company.trim().replace(/[.,;:]$/, '');
+        if (cleanCompany.length > 2 && !cleanCompany.toLowerCase().includes(businessName.toLowerCase())) {
+          allCompanies.add(cleanCompany);
+          competitorMentions.set(cleanCompany, (competitorMentions.get(cleanCompany) || 0) + 1);
+        }
+      });
+    }
+  });
+
+  // Get top competitors (mentioned in multiple responses)
+  const competitorAnalysis: CompetitorInfo[] = Array.from(competitorMentions.entries())
+    .filter(([, mentions]) => mentions >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, mentions]) => ({
+      name,
+      mentions,
+      score: Math.round((mentions / queryResults.filter(r => !r.response.startsWith('Error')).length) * 100)
+    }));
+
+  // Get responses that didn't mention the business
+  const missedResponses = queryResults.filter(r => !r.mentioned && !r.response.startsWith('Error'));
+
+  return { aeoScore, factors, analysis, overallVisibility, competitorAnalysis, missedResponses };
 }
 
 export async function POST(request: NextRequest) {
@@ -662,7 +702,9 @@ export async function POST(request: NextRequest) {
         factors: scoring.factors,
         analysis: scoring.analysis,
         queryVariations: queryResults,
-        overallVisibility: scoring.overallVisibility
+        overallVisibility: scoring.overallVisibility,
+        competitorAnalysis: scoring.competitorAnalysis,
+        missedResponses: scoring.missedResponses
       });
 
       console.log(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);

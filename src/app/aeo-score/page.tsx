@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navbar from '@/components/Navbar';
 
 interface AIProvider {
   name: string;
@@ -26,6 +27,14 @@ interface ScoringResult {
   analysis: string;
   queryVariations: QueryResult[];
   overallVisibility: number;
+  competitorAnalysis: CompetitorInfo[];
+  missedResponses: QueryResult[];
+}
+
+interface CompetitorInfo {
+  name: string;
+  mentions: number;
+  score: number;
 }
 
 interface QueryResult {
@@ -55,14 +64,14 @@ export default function AEOScorePage() {
 
   const handleAnalyze = async () => {
     if (!businessName.trim() || !keywords.trim()) return;
-    
+
     // Parse keywords from comma-separated string
     const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
-    
+
     setIsAnalyzing(true);
     setProgress(0);
     setCurrentStep('🎪 The robots are getting excited...');
-    
+
     // Fun, non-specific loading messages
     const funMessages = [
       '🎪 The robots are getting excited...',
@@ -76,28 +85,28 @@ export default function AEOScorePage() {
       '🎲 Rolling the cyber dice...',
       '🎊 Almost ready to party...'
     ];
-    
+
     let messageIndex = 0;
     const messageInterval: NodeJS.Timeout = setInterval(() => {
       messageIndex = (messageIndex + 1) % funMessages.length;
       setCurrentStep(funMessages[messageIndex]);
     }, 3000); // Change message every 3 seconds
-    
+
     // Calculate total operations: 1 provider × 5 queries each = 5 total operations
     // const totalProviders = aiProviders.length;
     // const queriesPerProvider = 5; // This should match MAX_QUERIES from backend
     // const totalOperations = totalProviders * queriesPerProvider;
-    
+
     // Message rotation is set up above
-    
+
     try {
       const startTime = Date.now();
-      
+
       // More realistic time-based progress with better estimates
       let currentProgress = 0;
       const estimationInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        
+
         // More realistic estimates based on actual AI API call timing
         // Each query takes about 2-4 seconds, we have 2 providers × 5 queries = 10 total
         // So estimate 20-40 seconds total
@@ -115,10 +124,10 @@ export default function AEOScorePage() {
           estimatedDuration = 35000;
           currentProgress = 75 + ((elapsed - 20000) / 15000) * 15; // Final 15% slowly
         }
-        
+
         const clampedProgress = Math.min(85, Math.max(currentProgress, 0));
         setProgress(clampedProgress);
-        
+
         // Update message based on time elapsed and progress
         if (elapsed < 8000) {
           setCurrentStep(funMessages[Math.floor(Math.random() * 3)]); // Early messages
@@ -128,31 +137,31 @@ export default function AEOScorePage() {
           setCurrentStep(funMessages[Math.floor(Math.random() * 3) + 7]); // Late messages
         }
       }, 1000); // Update every second
-      
+
       const response = await fetch('/api/aeo-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ businessName, keywords: keywordArray, providers: aiProviders }),
       });
-      
+
       const duration = Date.now() - startTime;
       console.log(`API call took ${duration}ms`);
-      
+
       // Clear intervals
       clearInterval(estimationInterval);
       clearInterval(messageInterval);
-      
+
       // Final steps
       setProgress(90);
       setCurrentStep('🎉 Wrapping up the magic...');
-      
+
       const data = await response.json();
-      
+
       // Complete the progress
       setTimeout(() => {
         setProgress(100);
         setCurrentStep('✨ Ta-da! Your rankings are ready!');
-        
+
         // Show results after brief celebration
         setTimeout(() => {
           setResults(data.results);
@@ -161,7 +170,7 @@ export default function AEOScorePage() {
           setProgress(0);
         }, 1000);
       }, 500);
-      
+
     } catch (error) {
       if (messageInterval) clearInterval(messageInterval);
       console.error('Error analyzing AEO scores:', error);
@@ -187,55 +196,18 @@ export default function AEOScorePage() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
-      {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
-              <span>SearchDogAI</span>
-            </Link>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</Link>
-              <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</Link>
-              <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">AEO Score Tool</Link>
-              <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
-              <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</Link>
-            </div>
-            <button className='md:hidden p-2 text-gray-600 hover:text-gray-900' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-            <div className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <div className="absolute inset-0 bg-black opacity-50" onClick={closeMobileMenu} />
-              <div className={`absolute right-0 top-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex flex-col p-6 space-y-6 mt-16">
-                  <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Features</Link>
-                  <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO</Link>
-                  <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>AEO Score Tool</Link>
-                  <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
-                  <Link href="/#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center" onClick={closeMobileMenu}>Get Started</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              AI Engine Optimization Score Tool
+              AEO Analytics & Visibility Scoring
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Test how well your business appears when AI engines list companies for your keywords. Get detailed AEO scores measuring organic visibility in AI-generated company recommendations and market listings.
+              Comprehensive AI Engine Optimization analytics to measure your business visibility across AI platforms.
+              Get detailed scoring, performance insights, and actionable optimization recommendations.
             </p>
           </div>
         </div>
@@ -245,8 +217,8 @@ export default function AEOScorePage() {
       <div className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-gray-50 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Your Business Information</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
+
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
               <input
@@ -289,7 +261,7 @@ export default function AEOScorePage() {
                     </svg>
                     <span>Analyzing...</span>
                   </span>
-                ) : 'Analyze AEO Score'}
+                ) : 'Generate Analytics Report'}
               </button>
             </div>
           </div>
@@ -311,7 +283,7 @@ export default function AEOScorePage() {
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
                   </div>
                 </div>
-                
+
                 {/* Floating Keywords */}
                 <div className="absolute inset-0 pointer-events-none">
                   {keywords.split(',').slice(0, 3).map((keyword, index) => (
@@ -331,13 +303,13 @@ export default function AEOScorePage() {
                 </div>
               </div>
             </div>
-            
+
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Analyzing {businessName}</h3>
             <p className="text-gray-600 mb-4">{currentStep}</p>
-            
+
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-              <div 
+              <div
                 className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
                 style={{ width: `${progress}%` }}
               >
@@ -345,9 +317,9 @@ export default function AEOScorePage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
               </div>
             </div>
-            
+
             <div className="text-sm text-gray-500 mb-4">{progress}% complete</div>
-            
+
             {/* Fun Loading Messages */}
             <div className="text-sm text-gray-600">
               {progress < 30 && "🔍 Searching through AI knowledge bases..."}
@@ -355,7 +327,7 @@ export default function AEOScorePage() {
               {progress >= 70 && progress < 95 && "📊 Crunching the numbers..."}
               {progress >= 95 && "🎉 Almost done!"}
             </div>
-            
+
             {/* Dancing Dots */}
             <div className="flex justify-center space-x-1 mt-4">
               {[0, 1, 2].map((i) => (
@@ -374,7 +346,7 @@ export default function AEOScorePage() {
       {businessName && keywords && (
         <div className="bg-gray-50 py-12">
           <div className="max-w-6xl mx-auto px-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Testing Against 2 Major AI Engines with Smart Keyword Queries</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Testing Against {aiProviders.length} Major AI Engine{aiProviders.length !== 1 ? 's' : ''} with Smart Keyword Queries</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {aiProviders.map((provider, index) => (
                 <div key={index} className="bg-white rounded-lg p-4 text-center shadow-sm">
@@ -387,7 +359,7 @@ export default function AEOScorePage() {
             </div>
             <div className="text-center mt-6">
               <p className="text-sm text-gray-600 max-w-3xl mx-auto">
-                Each AI engine will be asked to list companies based on your keywords: <strong>{keywords.split(',').map(k => k.trim()).join(', ')}</strong>. 
+                Each AI engine will be asked to list companies based on your keywords: <strong>{keywords.split(',').map(k => k.trim()).join(', ')}</strong>.
                 We&apos;ll check if <strong>{businessName}</strong> appears in these AI-generated company lists to measure organic visibility.
               </p>
             </div>
@@ -400,12 +372,12 @@ export default function AEOScorePage() {
         <div className="bg-white py-16">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO Score Results</h2>
-            
+
             {/* Overall Summary */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8 mb-8">
               <div className="text-center">
                 <h3 className="text-2xl font-bold mb-6">Overall AEO Rankings for {businessName}</h3>
-                
+
                 {/* Average Score Circle */}
                 <div className="flex justify-center mb-8">
                   <div className="relative">
@@ -468,24 +440,24 @@ export default function AEOScorePage() {
                           <span className="text-gray-400">/100</span>
                         </div>
                       </div>
-                      
+
                       {/* Mini Progress Bar */}
                       <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                        <div 
+                        <div
                           className={`h-2 rounded-full transition-all duration-1000 ease-out ${result.aeoScore >= 80 ? 'bg-green-500' : result.aeoScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
                           style={{ width: `${result.aeoScore}%` }}
                         ></div>
                       </div>
-                      
+
                       <div className="text-sm text-gray-600">
-                        Found in {result.queryVariations.filter(q => q.mentioned).length} of {result.queryVariations.length} AI-generated company lists
+                        Found in {result.queryVariations.filter(q => q.mentioned).length} AI-generated company lists
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="mt-8 text-sm text-gray-600">
-                  <p>Rankings based on analysis across {results[0]?.queryVariations.length || 0} keyword-based queries to major AI engines.</p>
+                  <p>Rankings based on comprehensive analysis across major AI engines.</p>
                 </div>
               </div>
             </div>
@@ -540,7 +512,7 @@ export default function AEOScorePage() {
                         {getScoreLabel(result.aeoScore)} Performance
                       </div>
                       <div className="text-sm text-gray-600 mt-2">
-                        Appears in {result.queryVariations.filter(q => q.mentioned).length}/{result.queryVariations.length} AI-generated lists
+                        Appears in {result.queryVariations.filter(q => q.mentioned).length} AI-generated lists
                       </div>
                     </div>
                   </div>
@@ -555,18 +527,12 @@ export default function AEOScorePage() {
 
                   {/* Summary Stats */}
                   <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-2 gap-4 text-center">
                       <div>
                         <div className="text-2xl font-bold text-blue-600">
                           {result.queryVariations.filter(q => q.mentioned).length}
                         </div>
                         <div className="text-sm text-gray-600">Mentions Found</div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-purple-600">
-                          {result.queryVariations.length}
-                        </div>
-                        <div className="text-sm text-gray-600">Queries Tested</div>
                       </div>
                       <div>
                         <div className={`text-2xl font-bold ${result.overallVisibility >= 50 ? 'text-green-600' : result.overallVisibility >= 25 ? 'text-yellow-600' : 'text-red-600'}`}>
@@ -578,10 +544,51 @@ export default function AEOScorePage() {
                   </div>
 
                   {/* Analysis */}
-                  <div>
+                  <div className="mb-6">
                     <h4 className="font-semibold mb-2">Analysis:</h4>
                     <p className="text-gray-700">{result.analysis}</p>
                   </div>
+
+                  {/* Competitor Analysis */}
+                  {result.competitorAnalysis && result.competitorAnalysis.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold mb-4">Top Competitors Found:</h4>
+                      <div className="bg-white rounded-lg p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {result.competitorAnalysis.slice(0, 8).map((competitor, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <span className="font-medium text-gray-900">{competitor.name}</span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-600">{competitor.mentions}×</span>
+                                <span className={`text-sm font-medium ${competitor.score >= 60 ? 'text-green-600' : competitor.score >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                  {competitor.score}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missed Responses */}
+                  {result.missedResponses && result.missedResponses.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold mb-4">Responses Without Your Business:</h4>
+                      <div className="space-y-3">
+                        {result.missedResponses.slice(0, 3).map((missed, idx) => (
+                          <div key={idx} className="bg-red-50 rounded-lg p-4">
+                            <div className="text-sm font-medium text-red-800 mb-2">
+                              Query: {missed.query}
+                            </div>
+                            <div className="text-sm text-red-700 bg-white p-3 rounded border">
+                              {missed.response.substring(0, 200)}...
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -597,7 +604,7 @@ export default function AEOScorePage() {
             Get automated AEO optimization through our AI-powered GitHub integration. One-click setup, professional results.
           </p>
           <Link href="/#waitlist" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block">
-            Join Waitlist - Get 75% Off
+            Join Waitlist - Get 50% Off
           </Link>
         </div>
       </div>
