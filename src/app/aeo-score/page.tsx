@@ -47,7 +47,7 @@ interface QueryResult {
 
 export default function AEOScorePage() {
   const [businessName, setBusinessName] = useState('');
-  const [keywords, setKeywords] = useState('');
+  const [keyword, setKeyword] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -63,10 +63,10 @@ export default function AEOScorePage() {
   };
 
   const handleAnalyze = async () => {
-    if (!businessName.trim() || !keywords.trim()) return;
+    if (!businessName.trim() || !keyword.trim()) return;
 
-    // Parse keywords from comma-separated string
-    const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    // Use single keyword
+    const keywordArray = [keyword.trim()];
 
     setIsAnalyzing(true);
     setProgress(0);
@@ -231,26 +231,26 @@ export default function AEOScorePage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Keywords (comma-separated)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Primary Keyword or Phrase</label>
               <input
                 type="text"
-                value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
-                placeholder="Enter relevant keywords: SEO, AEO, AI optimization, website analysis, search ranking (separate with commas)"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Enter your primary keyword or phrase (e.g., 'AEO', 'Answers Engine Optimization', 'digital marketing')"
                 className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
               <div className="mt-2 text-sm text-gray-500">
-                <strong>Examples:</strong> SEO, digital marketing, web design | restaurant, pizza delivery, catering | software development, mobile apps, API integration
+                <strong>Examples:</strong> AEO, Answers Engine Optimization, digital marketing, restaurant delivery, software development, healthcare consulting
               </div>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">
-                {keywords.split(',').filter(k => k.trim().length > 0).length} keywords
+                {keyword.trim().length > 0 ? 'Keyword ready' : 'Enter a keyword or phrase'}
               </span>
               <button
                 onClick={handleAnalyze}
-                disabled={!businessName.trim() || !keywords.trim() || isAnalyzing}
+                disabled={!businessName.trim() || !keyword.trim() || isAnalyzing}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
               >
                 {isAnalyzing ? (
@@ -268,82 +268,82 @@ export default function AEOScorePage() {
         </div>
       </div>
 
-      {/* Loading Overlay */}
+      {/* Loading Section */}
       {isAnalyzing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-            <div className="mb-6">
-              <div className="relative">
-                {/* Animated Robot/Dog Icon */}
-                <div className="w-20 h-20 mx-auto mb-4">
-                  <div className="relative animate-bounce">
-                    <div className="w-16 h-16 bg-blue-500 rounded-lg mx-auto flex items-center justify-center text-white text-2xl">
-                      🤖
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+              <div className="mb-6">
+                <div className="relative">
+                  {/* Animated Robot/Dog Icon */}
+                  <div className="w-20 h-20 mx-auto mb-4">
+                    <div className="relative animate-bounce">
+                      <div className="w-16 h-16 bg-blue-500 rounded-lg mx-auto flex items-center justify-center text-white text-2xl">
+                        🤖
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+
+                  {/* Floating Keyword */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {keyword.trim() && (
+                      <div
+                        className="absolute text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full animate-ping"
+                        style={{
+                          top: '20%',
+                          left: '10%',
+                          animationDuration: '2s'
+                        }}
+                      >
+                        {keyword.trim()}
+                      </div>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                {/* Floating Keywords */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {keywords.split(',').slice(0, 3).map((keyword, index) => (
-                    <div
-                      key={index}
-                      className={`absolute text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full animate-ping`}
-                      style={{
-                        top: `${20 + index * 15}%`,
-                        left: `${10 + index * 25}%`,
-                        animationDelay: `${index * 0.5}s`,
-                        animationDuration: '2s'
-                      }}
-                    >
-                      {keyword.trim()}
-                    </div>
-                  ))}
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">Analyzing {businessName}</h3>
+              <p className="text-gray-600 mb-6">{currentStep}</p>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                  style={{ width: `${progress}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
                 </div>
               </div>
-            </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Analyzing {businessName}</h3>
-            <p className="text-gray-600 mb-4">{currentStep}</p>
+              <div className="text-sm text-gray-500 mb-6">{progress}% complete</div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                style={{ width: `${progress}%` }}
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+              {/* Fun Loading Messages */}
+              <div className="text-gray-600 mb-4">
+                {progress < 30 && "🔍 Searching through AI knowledge bases..."}
+                {progress >= 30 && progress < 70 && "🧠 AI engines are thinking hard..."}
+                {progress >= 70 && progress < 95 && "📊 Crunching the numbers..."}
+                {progress >= 95 && "🎉 Almost done!"}
               </div>
-            </div>
 
-            <div className="text-sm text-gray-500 mb-4">{progress}% complete</div>
-
-            {/* Fun Loading Messages */}
-            <div className="text-sm text-gray-600">
-              {progress < 30 && "🔍 Searching through AI knowledge bases..."}
-              {progress >= 30 && progress < 70 && "🧠 AI engines are thinking hard..."}
-              {progress >= 70 && progress < 95 && "📊 Crunching the numbers..."}
-              {progress >= 95 && "🎉 Almost done!"}
-            </div>
-
-            {/* Dancing Dots */}
-            <div className="flex justify-center space-x-1 mt-4">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                ></div>
-              ))}
+              {/* Dancing Dots */}
+              <div className="flex justify-center space-x-1">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  ></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* AI Providers Section */}
-      {businessName && keywords && (
+      {businessName && keyword && (
         <div className="bg-gray-50 py-12">
           <div className="max-w-6xl mx-auto px-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Testing Against {aiProviders.length} Major AI Engine{aiProviders.length !== 1 ? 's' : ''} with Smart Keyword Queries</h3>
@@ -359,7 +359,7 @@ export default function AEOScorePage() {
             </div>
             <div className="text-center mt-6">
               <p className="text-sm text-gray-600 max-w-3xl mx-auto">
-                Each AI engine will be asked to list companies based on your keywords: <strong>{keywords.split(',').map(k => k.trim()).join(', ')}</strong>.
+                Each AI engine will be asked to list companies based on your keyword: <strong>{keyword.trim()}</strong>.
                 We&apos;ll check if <strong>{businessName}</strong> appears in these AI-generated company lists to measure organic visibility.
               </p>
             </div>
@@ -543,6 +543,52 @@ export default function AEOScorePage() {
                     </div>
                   </div>
 
+                  {/* Query Details */}
+                  <div className="mb-6">
+                    <h4 className="font-semibold mb-4">Query Details:</h4>
+                    <div className="space-y-3">
+                      {result.queryVariations.map((query, qIdx) => (
+                        <div key={qIdx} className={`border rounded-lg p-4 ${query.mentioned ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className={`inline-block w-2 h-2 rounded-full ${query.mentioned ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                              <span className="text-sm font-medium text-gray-900">
+                                Query {qIdx + 1}
+                              </span>
+                              {query.mentioned && (
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                  Found • Rank {query.rankPosition} • Score {query.relevanceScore}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-700 mb-2 font-medium">
+                            &quot;{query.query}&quot;
+                          </div>
+                          <div className="relative group">
+                            <div className="text-sm text-gray-600 bg-white p-3 rounded border cursor-pointer hover:bg-gray-50 transition-colors">
+                              {query.response.length > 200 ? (
+                                <>
+                                  {query.response.substring(0, 200)}...
+                                  <span className="text-blue-600 font-medium ml-1">hover to see full response</span>
+                                </>
+                              ) : (
+                                query.response
+                              )}
+                            </div>
+                            {query.response.length > 200 && (
+                              <div className="absolute left-0 top-full mt-2 w-full max-w-2xl bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div className="text-sm text-gray-700 max-h-60 overflow-y-auto">
+                                  {query.response}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Analysis */}
                   <div className="mb-6">
                     <h4 className="font-semibold mb-2">Analysis:</h4>
@@ -581,8 +627,24 @@ export default function AEOScorePage() {
                             <div className="text-sm font-medium text-red-800 mb-2">
                               Query: {missed.query}
                             </div>
-                            <div className="text-sm text-red-700 bg-white p-3 rounded border">
-                              {missed.response.substring(0, 200)}...
+                            <div className="relative group">
+                              <div className="text-sm text-red-700 bg-white p-3 rounded border cursor-pointer hover:bg-gray-50 transition-colors">
+                                {missed.response.length > 200 ? (
+                                  <>
+                                    {missed.response.substring(0, 200)}...
+                                    <span className="text-blue-600 font-medium ml-1">hover to see full response</span>
+                                  </>
+                                ) : (
+                                  missed.response
+                                )}
+                              </div>
+                              {missed.response.length > 200 && (
+                                <div className="absolute left-0 top-full mt-2 w-full max-w-2xl bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                  <div className="text-sm text-gray-700 max-h-60 overflow-y-auto">
+                                    {missed.response}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}

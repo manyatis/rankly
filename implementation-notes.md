@@ -7,6 +7,7 @@ Tools they might use:
 SEMrush / Ahrefs / Moz / SimilarWeb
 Google Search Console
 Custom scripts to scrape SERP features (like PAA boxes, featured snippets, etc.)
+
 2. Web Search + SERP Feature Scraping
 To emulate an answer engine, they:
 
