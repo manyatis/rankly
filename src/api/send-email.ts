@@ -27,7 +27,7 @@ export async function sendWaitlistEmail(email: string) {
 
   try {
     await transporter.sendMail(mailOptions);
-  } catch (error) {
+  } catch {
     throw new Error('Failed to send email');
   }
 }

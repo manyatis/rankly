@@ -53,6 +53,7 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
               <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO</a>
+              <a href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">AEO Score Tool</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</a>
               <a href="#waitlist" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md">Get Started</a>
             </div>
@@ -71,6 +72,7 @@ export default function Home() {
                 <div className="flex flex-col p-6 space-y-6 mt-16">
                   <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Features</a>
                   <a href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO</a>
+                  <a href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>AEO Score Tool</a>
                   <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</a>
                   <a href="#waitlist" className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md text-center" onClick={closeMobileMenu}>Get Started</a>
                 </div>
