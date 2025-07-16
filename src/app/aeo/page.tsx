@@ -220,29 +220,7 @@ export default function AEOPage() {
               Join thousands of businesses preparing for the AI-first search future. Get notified when SearchDogAI launches with your exclusive 75% discount.
             </p>
 
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  className="flex-1 px-4 py-3 rounded-md text-gray-900 bg-white border border-gray-300 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-8 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors shadow-md"
-                >
-                  Join Waitlist
-                </button>
-              </form>
-            ) : (
-              <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
-                <p className="font-semibold text-gray-900">🎉 You&apos;re on the list!</p>
-                <p className="text-gray-600">We&apos;ll notify you when SearchDogAI launches.</p>
-              </div>
-            )}
+            <Waitlis /t>
           </div>
         </div>
       </div>
