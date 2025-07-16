@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { sendWaitlistEmail } from '../app/api/send-email/send-email';
 
 interface WaitlistProps {
   variant?: 'default' | 'aeo';
@@ -25,7 +24,6 @@ export default function Waitlist({
     e.preventDefault();
 
     try {
-      sendWaitlistEmail(email);
       setIsSubmitted(true);
     } catch (err) {
       console.error('Error submitting email:', err);
