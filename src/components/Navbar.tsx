@@ -35,9 +35,9 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
-            <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Free Analytics Tool</Link>
-            <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn</Link>
-            <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Why SearchDog</Link>
+            <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics Tool</Link>
+            <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Learn AGEO</Link>
+            <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link>
             {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link> */}
             {loading ? (
               <div className="flex items-center space-x-4">
@@ -84,9 +84,9 @@ export default function Navbar() {
               <div className="flex flex-col p-6 space-y-6 mt-16">
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
-                <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Free AEO/GEO Tooling</Link>
-                <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn</Link>
-                <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Why SearchDog</Link>
+                <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics Tool</Link>
+                <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn AGEO</Link>
+                <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link>
                 {/* <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link> */}
                 {loading ? (
                   <div className="space-y-4">
