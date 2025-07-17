@@ -71,7 +71,7 @@ export default function AEOScorePage() {
     
     try {
       const response = await fetch('/api/usage-check', {
-        headers: { 'Authorization': `Bearer ${user.email}` }
+        credentials: 'include'
       });
       const data = await response.json();
       setUsageInfo(data);
@@ -188,6 +188,7 @@ export default function AEOScorePage() {
       const response = await fetch('/api/aeo-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ businessName, keywords: keywordArray, providers: aiProviders }),
       });
 
@@ -257,7 +258,7 @@ export default function AEOScorePage() {
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Comprehensive Answers Engine Optimization analytics to measure your business visibility across AI platforms.
-              Free tool limited to 3 models and weakest analytic engines. Professional has complete coverage of models.
+              Free tool limited to 3 models. Professional has complete coverage of models.
             </p>
           </div>
         </div>
@@ -277,7 +278,7 @@ export default function AEOScorePage() {
                   <span className="text-blue-800 font-medium">Free Tool Limitations:</span>
                 </div>
                 <div className="ml-7 text-sm text-blue-700 space-y-1">
-                  <div>• Limited to 3 models and weakest analytic engines</div>
+                  <div>• Limited to 3 models</div>
                   <div>• <strong>Professional:</strong> Complete coverage of all AI models</div>
                   <div>• <strong>Enterprise:</strong> Includes consultation, AI-insights, action plans, and development support</div>
                 </div>

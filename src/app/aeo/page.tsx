@@ -37,7 +37,7 @@ export default function AEOPage() {
                 onClick={handleCreateAccount}
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg cursor-pointer"
               >
-                Start Free Trial
+                Start Free
               </button>
               <Link href="/aeo-score" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-medium text-lg border-2 border-blue-600">
                 Check Your AEO/GEO Score
@@ -289,7 +289,7 @@ export default function AEOPage() {
                 onClick={handleCreateAccount}
                 className="bg-white text-green-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block cursor-pointer"
               >
-                Start Free Trial
+                Start Free
               </button>
               <Link href="/aeo-score" className="bg-green-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-green-400 transition-colors shadow-md inline-block">
                 Get Free AEO Score

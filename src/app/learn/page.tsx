@@ -388,7 +388,7 @@ export default function LearnPage() {
               onClick={handleCreateAccount}
               className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
             >
-              Start Free Trial
+              Start Free
             </button>
             <Link href="/aeo-score" className="bg-blue-500 text-white px-8 py-4 rounded-lg hover:bg-blue-400 transition-colors font-medium text-lg border-2 border-white">
               Test Your AEO Score

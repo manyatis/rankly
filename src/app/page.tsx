@@ -3,11 +3,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import LoginModal from '../components/LoginModal';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const router = useRouter();
+  const { user, loading } = useAuth();
 
   const handleCreateAccount = () => {
     setLoginModalOpen(true);
@@ -17,6 +21,19 @@ export default function Home() {
     setLoginModalOpen(false);
   };
 
+  const handlePlanSelection = (planId: string) => {
+    if (loading) return;
+
+    if (!user) {
+      // If user is not logged in, open login modal
+      setLoginModalOpen(true);
+      return;
+    }
+
+    // If user is logged in, redirect to payment page
+    router.push(`/payment?plan=${planId}`);
+  };
+
   const analyticsFeatures = [
     {
       icon: (
@@ -24,17 +41,8 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
-      title: "AEO & GEO Analytics",
-      description: "Comprehensive analysis of your website's Answers Engine Optimization performance with detailed visibility scoring across multiple AI platforms."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      ),
-      title: "Search Insights",
-      description: "Deep search analysis with keyword tracking, competitor research, and performance monitoring to optimize your traditional search presence."
+      title: "Analyze Response Quality",
+      description: "Analyze responses which included or didn't include your business - understand how AI engines respond about your brand with detailed visibility scoring."
     },
     {
       icon: (
@@ -43,8 +51,17 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
       ),
-      title: "Visibility Tracking",
-      description: "Real-time monitoring of your brand mentions across AI search results and traditional search engines with trend analysis."
+      title: "Brand Visibility Analysis",
+      description: "See how engines respond about your brand with comprehensive monthly views of visibility across the top engines."
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      ),
+      title: "Competitive Intelligence",
+      description: "See how you stack up against your competition with detailed competitor analysis and benchmarking across all AI platforms."
     },
     {
       icon: (
@@ -52,8 +69,8 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
         </svg>
       ),
-      title: "Performance Reports",
-      description: "Detailed reports on your AEO & GEO performance with actionable recommendations and improvement tracking over time."
+      title: "AI Search Insights & Plans",
+      description: "Get insights and plans to improve your AI search presence with automated recommendations and implementation strategies."
     },
     {
       icon: (
@@ -61,8 +78,8 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-      title: "AI Search Monitoring",
-      description: "Track how your business appears in ChatGPT, Claude, Perplexity, and other AI search platforms with automated alerts."
+      title: "Dedicated Support",
+      description: "Get dedicated support from our team to help you optimize your AI search presence and maximize your visibility."
     },
     {
       icon: (
@@ -70,8 +87,8 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
-      title: "Optimization Solutions",
-      description: "Automated recommendations and implementation strategies to improve your visibility in both AI and traditional search results."
+      title: "Monthly Visibility Reports",
+      description: "Monthly view of visibility across the top engines with trend analysis and performance tracking over time."
     }
   ];
 
@@ -100,89 +117,232 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
               AEO & GEO Analytics Platform
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
               Comprehensive analytics and optimization solutions for Answers Engine Optimization (AEO) & Generative Engine Optimization (GEO).
-              Free tool limited to 3 models and weakest analytic engines. Professional has complete coverage of models.
+              Free tool limited to 3 models. Professional has complete coverage of models.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-              <button 
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
+              <button
                 onClick={handleCreateAccount}
-                className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-lg cursor-pointer"
+                className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-base sm:text-lg cursor-pointer"
               >
                 Create Account - Get Started
               </button>
-              <Link href="/aeo-score" className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-lg">
+              <Link href="/aeo-score" className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg">
                 Try Free AEO Tool
               </Link>
+            </div>
+
+            {/* Top Models Section */}
+            <div className="mt-12 sm:mt-16">
+              <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8 font-medium">
+                Track your performance across the top AI platforms:
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 lg:gap-8">
+                {/* ChatGPT */}
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">ChatGPT</span>
+                </div>
+
+                {/* Perplexity */}
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.169 1.958-.896 3.728-2.043 5.146-.706.866-1.544 1.59-2.465 2.079-.915.485-1.885.75-2.88.75s-1.965-.265-2.88-.75c-.921-.489-1.759-1.213-2.465-2.079-1.147-1.418-1.874-3.188-2.043-5.146C2.644 7.15 2.518 6.05 2.518 5s.126-2.15.274-3.16c.169-1.958.896-3.728 2.043-5.146C5.541-4.172 6.379-4.896 7.3-5.385 8.215-5.87 9.185-6.135 10.18-6.135s1.965.265 2.88.75c.921.489 1.759 1.213 2.465 2.079 1.147 1.418 1.874 3.188 2.043 5.146.148 1.01.274 2.11.274 3.16s-.126 2.15-.274 3.16z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Perplexity</span>
+                </div>
+
+                {/* Claude */}
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                  <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Claude</span>
+                </div>
+
+                {/* Google AI Overviews */}
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Google AI Overviews</span>
+                </div>
+
+                {/* Grok */}
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                  <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">Grok</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Statistics Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               The Search Revolution Is Here
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
               AI-powered search is transforming how users find information. Stay ahead with comprehensive AEO & GEO analytics.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-gray-700 font-medium">of searches complete without clicks due to AI Overviews</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-blue-600 mb-2">60%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of searches complete without clicks due to AI Overviews</p>
             </div>
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-8 text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
-              <p className="text-gray-700 font-medium">of Google queries now show AI Overviews</p>
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of Google queries now show AI Overviews</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 text-center">
-              <div className="text-4xl font-bold text-purple-600 mb-2">30%</div>
-              <p className="text-gray-700 font-medium">ranking improvement with AI-optimized search strategies</p>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">30%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">ranking improvement with AI-optimized search strategies</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">82%</div>
-              <p className="text-gray-700 font-medium">of users prefer AI-powered search results</p>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">82%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of users prefer AI-powered search results</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 max-w-4xl mx-auto">
-            <p className="text-gray-700 text-lg text-center leading-relaxed">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 sm:p-8 max-w-4xl mx-auto">
+            <p className="text-gray-700 text-base sm:text-lg text-center leading-relaxed">
               <strong>The new reality:</strong> Traditional search optimization alone isn&apos;t enough. Companies need comprehensive analytics
               to track their performance across both traditional search engines and AI platforms.
               <strong className="text-blue-600"> AEO & GEO optimization is becoming critical</strong> for maintaining online visibility.
             </p>
           </div>
+
+          {/* Charts Section */}
+          <div className="mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* SEO Effectiveness Chart */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">SEO Click-Through Rates</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Position #1 organic search result CTR over time</p>
+              </div>
+              <div className="relative h-48 sm:h-64 bg-gray-50 rounded-lg p-4">
+                <div className="h-full flex items-end justify-between gap-1">
+                  {/* Real CTR data for position #1 */}
+                  {[
+                    { year: '2019', value: 33.0, label: '33%' },
+                    { year: '2020', value: 32.1, label: '32%' },
+                    { year: '2021', value: 30.8, label: '31%' },
+                    { year: '2022', value: 29.5, label: '30%' },
+                    { year: '2023', value: 28.2, label: '28%' },
+                    { year: '2024', value: 27.6, label: '28%' },
+                    { year: '2025', value: 26.8, label: '27%' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center flex-1 relative">
+                      <div className="text-xs font-medium text-gray-600 mb-1 absolute -top-6">{item.label}</div>
+                      <div
+                        className="w-full bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-md transition-all duration-1000 ease-out min-h-[4px]"
+                        style={{ height: `${Math.max(4, (item.value / 35) * 160)}px` }}
+                      ></div>
+                      <div className="text-xs text-gray-500 mt-2">{item.year}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <div className="flex items-center justify-center text-orange-600 text-sm font-medium">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 14l5-5 5 5z" />
+                  </svg>
+                  <span>19% decline since 2019</span>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Search Growth Chart */}
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Search Tool Usage</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Monthly active users (millions) for AI search platforms</p>
+              </div>
+              <div className="relative h-48 sm:h-64 bg-gray-50 rounded-lg p-4">
+                <div className="h-full flex items-end justify-between gap-1">
+                  {/* Real usage data in millions of users */}
+                  {[
+                    { year: '2019', value: 0, label: '0M' },
+                    { year: '2020', value: 0, label: '0M' },
+                    { year: '2021', value: 0, label: '0M' },
+                    { year: '2022', value: 10, label: '10M' },
+                    { year: '2023', value: 180, label: '180M' },
+                    { year: '2024', value: 400, label: '400M' },
+                    { year: '2025', value: 600, label: '600M' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center flex-1 relative">
+                      <div className="text-xs font-medium text-gray-600 mb-1 absolute -top-6">{item.label}</div>
+                      <div
+                        className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-md transition-all duration-1000 ease-out min-h-[4px]"
+                        style={{ height: `${Math.max(4, (item.value / 600) * 160)}px` }}
+                      ></div>
+                      <div className="text-xs text-gray-500 mt-2">{item.year}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <div className="flex items-center justify-center text-green-600 text-sm font-medium">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 14l5-5 5 5z" transform="rotate(180 12 12)" />
+                  </svg>
+                  <span>From 0 to 600M users since 2022</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
       {/* Analytics Features Section */}
-      <div id="features" className="bg-gray-50 py-20">
+      <div id="features" className="bg-gray-50 py-12 sm:py-16 lg:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Comprehensive Analytics Suite</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Comprehensive Analytics Suite</h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
               Everything you need to monitor, analyze, and optimize your search presence across traditional and AI-powered platforms.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
             {analyticsFeatures.map((feature, index) => (
-              <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+              <div key={index} className="bg-white rounded-xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">
+                <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                   {feature.description}
                 </p>
               </div>
@@ -190,26 +350,26 @@ export default function Home() {
           </div>
 
           {/* AI Conversation Explorer Screenshot */}
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 shadow-2xl">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 lg:p-8 shadow-2xl">
             <div className="bg-gray-800 rounded-xl overflow-hidden">
-              <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+              <div className="bg-gray-800 border-b border-gray-700 px-4 lg:px-6 py-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Conversation Explorer</h3>
-                    <p className="text-gray-400 text-sm">Discover what people ask AI about your industry</p>
+                    <h3 className="text-lg lg:text-xl font-bold text-white">Conversation Explorer</h3>
+                    <p className="text-gray-400 text-xs lg:text-sm">Discover what people ask AI about your industry</p>
                   </div>
                 </div>
-                
-                <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-                  <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
-                  <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Conversations</div>
-                  <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Analytics</div>
-                  <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Insights</div>
+
+                <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
+                  <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Overview</div>
+                  <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Conversations</div>
+                  <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
+                  <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Insights</div>
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="p-4 lg:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                   {/* Top Queries */}
                   <div className="bg-gray-700 rounded-lg p-6">
                     <h4 className="text-white font-semibold mb-4">Top AI Queries About Your Industry</h4>
@@ -253,12 +413,11 @@ export default function Home() {
                               <span className="text-gray-300 text-xs">{item.score}%</span>
                             </div>
                           </div>
-                          <div className={`text-xs px-2 py-1 rounded-full ${
-                            item.status === 'Hot' ? 'bg-red-500 text-white' :
-                            item.status === 'Rising' ? 'bg-orange-500 text-white' :
-                            item.status === 'Growing' ? 'bg-yellow-500 text-black' :
-                            'bg-blue-500 text-white'
-                          }`}>
+                          <div className={`text-xs px-2 py-1 rounded-full ${item.status === 'Hot' ? 'bg-red-500 text-white' :
+                              item.status === 'Rising' ? 'bg-orange-500 text-white' :
+                                item.status === 'Growing' ? 'bg-yellow-500 text-black' :
+                                  'bg-blue-500 text-white'
+                            }`}>
                             {item.status}
                           </div>
                         </div>
@@ -295,7 +454,7 @@ export default function Home() {
                 <Link href="/aeo-score" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
                   Start Free Analysis
                 </Link>
-                <button 
+                <button
                   onClick={handleCreateAccount}
                   className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-lg cursor-pointer"
                 >
@@ -329,7 +488,7 @@ export default function Home() {
                       <p className="text-gray-400 text-sm">Professional AEO Analytics Platform</p>
                     </div>
                   </div>
-                  
+
                   {/* Navigation Tabs */}
                   <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
                     <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Overview</div>
@@ -462,7 +621,7 @@ export default function Home() {
             <div className="text-center">
               <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z"/>
+                  <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Real-Time Monitoring</h3>
@@ -471,7 +630,7 @@ export default function Home() {
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Competitive Intelligence</h3>
@@ -480,7 +639,7 @@ export default function Home() {
             <div className="text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Actionable Insights</h3>
@@ -545,7 +704,7 @@ export default function Home() {
                     <p className="text-gray-400 text-sm">Monitor AI crawler activity and content optimization insights</p>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
                   <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
                   <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Conversations</div>
@@ -623,7 +782,7 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="p-3 bg-yellow-900 border border-yellow-700 rounded-lg">
                         <div className="flex items-start space-x-3">
                           <div className="w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -667,10 +826,9 @@ export default function Home() {
                       { time: "1 hour ago", agent: "ChatGPT", action: "Deep crawl of documentation", status: "success" }
                     ].map((item, idx) => (
                       <div key={idx} className="flex items-center space-x-3 p-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          item.status === 'success' ? 'bg-green-400' : 
-                          item.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
-                        }`}></div>
+                        <div className={`w-2 h-2 rounded-full ${item.status === 'success' ? 'bg-green-400' :
+                            item.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
+                          }`}></div>
                         <div className="flex-1">
                           <div className="text-white text-sm">{item.action}</div>
                           <div className="text-gray-400 text-xs">{item.agent} • {item.time}</div>
@@ -723,7 +881,7 @@ export default function Home() {
                     <p className="text-gray-400 text-sm">Deep dive into your competitive landscape across AI platforms</p>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
                   <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
                   <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Analytics</div>
@@ -746,14 +904,12 @@ export default function Home() {
                         { rank: 5, company: "Mailchimp", score: 71, change: "-2", trend: "down", highlight: false },
                         { rank: 6, company: "ActiveCampaign", score: 68, change: "+1", trend: "up", highlight: false }
                       ].map((item, idx) => (
-                        <div key={idx} className={`p-3 rounded-lg border ${
-                          item.highlight ? 'bg-blue-900 border-blue-600' : 'bg-gray-600 border-gray-500'
-                        }`}>
+                        <div key={idx} className={`p-3 rounded-lg border ${item.highlight ? 'bg-blue-900 border-blue-600' : 'bg-gray-600 border-gray-500'
+                          }`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                item.highlight ? 'bg-blue-600 text-white' : 'bg-gray-500 text-white'
-                              }`}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${item.highlight ? 'bg-blue-600 text-white' : 'bg-gray-500 text-white'
+                                }`}>
                                 {item.rank}
                               </div>
                               <span className={`font-medium ${item.highlight ? 'text-blue-200' : 'text-white'}`}>
@@ -764,9 +920,8 @@ export default function Home() {
                               <div className={`font-bold ${item.highlight ? 'text-blue-200' : 'text-white'}`}>
                                 {item.score}%
                               </div>
-                              <div className={`text-xs ${
-                                item.trend === 'up' ? 'text-green-400' : 'text-red-400'
-                              }`}>
+                              <div className={`text-xs ${item.trend === 'up' ? 'text-green-400' : 'text-red-400'
+                                }`}>
                                 {item.change}%
                               </div>
                             </div>
@@ -831,7 +986,7 @@ export default function Home() {
                   <div className="bg-green-900 border border-green-700 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"/>
+                        <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
                       </svg>
                       <div>
                         <h5 className="text-green-100 font-medium text-sm">Opportunity Found</h5>
@@ -839,11 +994,11 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
+                        <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
                       </svg>
                       <div>
                         <h5 className="text-yellow-100 font-medium text-sm">Gap Identified</h5>
@@ -855,7 +1010,7 @@ export default function Home() {
                   <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z"/>
+                        <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                       </svg>
                       <div>
                         <h5 className="text-blue-100 font-medium text-sm">Trend Analysis</h5>
@@ -879,7 +1034,7 @@ export default function Home() {
                 <Link href="/aeo-score" className="bg-indigo-600 text-white px-8 py-4 rounded-lg hover:bg-indigo-700 transition-colors font-medium text-lg shadow-sm inline-block">
                   Analyze Competition Free
                 </Link>
-                <button 
+                <button
                   onClick={handleCreateAccount}
                   className="bg-white text-indigo-600 border-2 border-indigo-600 px-8 py-4 rounded-lg hover:bg-indigo-50 transition-colors font-medium text-lg cursor-pointer"
                 >
@@ -889,14 +1044,14 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                <div className="text-4xl font-bold text-blue-600 mb-2">$0</div>
-                <p className="text-gray-600">Requires account creation</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto">
+            <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm flex flex-col h-full">
+              <div className="text-center mb-6 lg:mb-8">
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                <div className="text-3xl lg:text-4xl font-bold text-blue-600 mb-2">$0</div>
+                <p className="text-gray-600 text-sm lg:text-base">Requires account creation</p>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -907,7 +1062,7 @@ export default function Home() {
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Weakest analytic engines
+                  1 usage per day
                 </li>
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -916,27 +1071,67 @@ export default function Home() {
                   Basic visibility analysis
                 </li>
               </ul>
-              <button 
+              <button
                 onClick={handleCreateAccount}
-                className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
               >
                 Create Account
               </button>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-500 relative">
+            <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border-2 border-green-500 relative flex flex-col h-full">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">Pre-Release</span>
+                <span className="bg-green-500 text-white px-3 lg:px-4 py-1 lg:py-2 rounded-full text-xs lg:text-sm font-medium">On Sale</span>
               </div>
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <div className="text-2xl text-gray-400 line-through">$150</div>
-                  <div className="text-4xl font-bold text-blue-600">$75</div>
+              <div className="text-center mb-6 lg:mb-8">
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Indie</h3>
+                <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
+                  <div className="text-xl lg:text-2xl text-gray-400 line-through">$45</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-green-600">$20</div>
                 </div>
-                <p className="text-gray-600">per month (create account before release for discount)</p>
+                <p className="text-gray-600 text-sm lg:text-base">per month (limited time offer)</p>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Access to all models
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  5 usage per day
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Weekly/daily automatic email reports
+                </li>
+              </ul>
+              <button
+                onClick={() => handlePlanSelection('indie')}
+                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
+              >
+                Get Indie Plan
+              </button>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border-2 border-blue-500 relative flex flex-col h-full">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-500 text-white px-3 lg:px-4 py-1 lg:py-2 rounded-full text-xs lg:text-sm font-medium">Pre-Release</span>
+              </div>
+              <div className="text-center mb-6 lg:mb-8">
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+                <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
+                  <div className="text-xl lg:text-2xl text-gray-400 line-through">$150</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-blue-600">$75</div>
+                </div>
+                <p className="text-gray-600 text-sm lg:text-base">per month (create account before release for discount)</p>
+              </div>
+              <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -965,30 +1160,30 @@ export default function Home() {
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Weekly reports
+                  Weekly/daily automatic email reports
                 </li>
               </ul>
-              <button 
-                onClick={handleCreateAccount}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              <button
+                disabled
+                className="w-full bg-gray-400 text-white py-3 rounded-lg cursor-not-allowed font-medium opacity-60"
               >
-                Create Account - Get Discount
+                Coming Soon
               </button>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-sm border-2 border-blue-500 relative">
+            <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border-2 border-blue-500 relative flex flex-col h-full">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">Pre-Release</span>
+                <span className="bg-blue-500 text-white px-3 lg:px-4 py-1 lg:py-2 rounded-full text-xs lg:text-sm font-medium">Pre-Release</span>
               </div>
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <div className="text-2xl text-gray-400 line-through">$500</div>
-                  <div className="text-4xl font-bold text-blue-600">$250</div>
+              <div className="text-center mb-6 lg:mb-8">
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
+                  <div className="text-xl lg:text-2xl text-gray-400 line-through">$500</div>
+                  <div className="text-3xl lg:text-4xl font-bold text-blue-600">$250</div>
                 </div>
-                <p className="text-gray-600">per month (create account before release for discount)</p>
+                <p className="text-gray-600 text-sm lg:text-base">per month (create account before release for discount)</p>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -1020,11 +1215,11 @@ export default function Home() {
                   Development support
                 </li>
               </ul>
-              <button 
-                onClick={handleCreateAccount}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              <button
+                disabled
+                className="w-full bg-gray-400 text-white py-3 rounded-lg cursor-not-allowed font-medium opacity-60"
               >
-                Create Account - Get Discount
+                Coming Soon
               </button>
             </div>
           </div>
@@ -1040,7 +1235,7 @@ export default function Home() {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of businesses preparing for the AI-first search future. Create your account now to access our free tool and lock in pre-release discounts.
           </p>
-          <button 
+          <button
             onClick={handleCreateAccount}
             className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
           >
@@ -1068,7 +1263,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-      
+
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}

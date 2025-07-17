@@ -140,37 +140,65 @@ export class AEOAnalysisService {
 
   static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
     const { businessName, keywords, providers } = request;
-    const results: ProviderScoringResult[] = [];
 
     console.log(`🏢 Business Name: "${businessName}"`);
     console.log(`🔑 Keywords:`, keywords);
     console.log(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
+    console.log(`\n🚀 Starting parallel analysis of ${providers.length} providers...`);
 
-    for (let i = 0; i < providers.length; i++) {
-      const provider = providers[i];
-      console.log(`\n🔄 Processing provider ${i + 1}/${providers.length}: ${provider.name}`);
+    // Create analysis promises for all providers to run in parallel
+    const analysisPromises = providers.map(async (provider, index) => {
+      console.log(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
       
-      const queryFunction = (businessDescription: string) => this.queryAIModel(provider, businessDescription);
-      const queryResults = await AnalyticalEngine.analyzeWithVariations(queryFunction, businessName, keywords, this.MAX_QUERIES);
-      const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName, keywords);
-      const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
+      try {
+        const queryFunction = (businessDescription: string) => this.queryAIModel(provider, businessDescription);
+        const queryResults = await AnalyticalEngine.analyzeWithVariations(queryFunction, businessName, keywords, this.MAX_QUERIES);
+        const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName, keywords);
+        const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 
-      results.push({
-        provider,
-        response: mainResponse,
-        aeoScore: scoring.aeoScore,
-        factors: scoring.factors,
-        analysis: scoring.analysis,
-        queryVariations: queryResults,
-        overallVisibility: scoring.overallVisibility,
-        competitorAnalysis: scoring.competitorAnalysis,
-        missedResponses: scoring.missedResponses
-      });
+        const result: ProviderScoringResult = {
+          provider,
+          response: mainResponse,
+          aeoScore: scoring.aeoScore,
+          factors: scoring.factors,
+          analysis: scoring.analysis,
+          queryVariations: queryResults,
+          overallVisibility: scoring.overallVisibility,
+          competitorAnalysis: scoring.competitorAnalysis,
+          missedResponses: scoring.missedResponses
+        };
 
-      console.log(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);
-    }
+        console.log(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);
+        return result;
+      } catch (error) {
+        console.error(`❌ Error analyzing provider ${provider.name}:`, error);
+        
+        // Return a failed result rather than throwing to avoid breaking other providers
+        return {
+          provider,
+          response: `Error: Failed to analyze ${provider.name}`,
+          aeoScore: 0,
+          factors: {
+            mentionFrequency: 0,
+            contextualRelevance: 0,
+            competitiveLandscape: 0,
+            brandAuthority: 0,
+            queryVariationPerformance: 0
+          },
+          analysis: `Analysis failed for ${provider.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          queryVariations: [],
+          overallVisibility: 0,
+          competitorAnalysis: [],
+          missedResponses: []
+        };
+      }
+    });
 
-    console.log(`\n🏁 === ANALYSIS COMPLETE ===`);
+    // Wait for all analyses to complete in parallel
+    console.log(`⏳ Waiting for all ${providers.length} provider analyses to complete...`);
+    const results = await Promise.all(analysisPromises);
+
+    console.log(`\n🏁 === PARALLEL ANALYSIS COMPLETE ===`);
     console.log(`📊 Results summary:`);
     results.forEach((result, index) => {
       console.log(`   ${index + 1}. ${result.provider.name}: ${result.aeoScore}/100 (${result.overallVisibility}% visibility)`);

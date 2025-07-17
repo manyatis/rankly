@@ -16,7 +16,9 @@
     "next-auth": "^4.24.11",
     "openai": "^5.9.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-square-web-payments-sdk": "^3.2.4-beta.1",
+    "square": "^43.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
