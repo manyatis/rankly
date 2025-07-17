@@ -46,6 +46,29 @@ interface QueryResult {
   relevanceScore: number;
 }
 
+// Helper function to extract meaningful keywords from business description
+function extractKeywords(description: string, industry: string): string[] {
+  // Common stop words to filter out
+  const stopWords = new Set([
+    'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'a', 'an', 'as', 'if', 'then', 'than', 'so', 'very', 'also', 'too', 'much', 'more', 'most', 'many', 'some', 'any', 'all', 'both', 'each', 'few', 'other', 'another', 'such', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'now'
+  ]);
+
+  // Extract words from description
+  const words = description.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.has(word));
+
+  // Add industry as a primary keyword
+  const keywords = [industry.toLowerCase()];
+
+  // Add unique meaningful words
+  const uniqueWords = [...new Set(words)];
+  keywords.push(...uniqueWords.slice(0, 4)); // Take first 4 unique meaningful words
+
+  return keywords.filter(keyword => keyword.length > 0).slice(0, 5);
+}
+
 export default function AEOScorePage() {
   const [businessName, setBusinessName] = useState('');
   const [industry, setIndustry] = useState('');
@@ -56,11 +79,12 @@ export default function AEOScorePage() {
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [usageInfo, setUsageInfo] = useState<{canUse: boolean; usageCount: number; maxUsage: number | string; tier: string} | null>(null);
+  const [usageInfo, setUsageInfo] = useState<{ canUse: boolean; usageCount: number; maxUsage: number | string; tier: string } | null>(null);
   const [generatedPrompts, setGeneratedPrompts] = useState<string[]>([]);
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
-  
+  const [activeTab, setActiveTab] = useState<'input' | 'prompts'>('input');
+
   const { user } = useAuth();
 
   const handleCreateAccount = () => {
@@ -72,7 +96,7 @@ export default function AEOScorePage() {
   };
   const checkUsageLimits = useCallback(async () => {
     if (!user?.email) return;
-    
+
     try {
       const response = await fetch('/api/usage-check', {
         credentials: 'include'
@@ -103,7 +127,7 @@ export default function AEOScorePage() {
 
   const handleGeneratePrompts = async () => {
     if (!businessName.trim() || !industry.trim() || !businessDescription.trim()) return;
-    
+
     // Check if user is logged in
     if (!user?.email) {
       setLoginModalOpen(true);
@@ -125,10 +149,11 @@ export default function AEOScorePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ 
-          businessName, 
-          industry, 
-          businessDescription
+        body: JSON.stringify({
+          businessName,
+          industry,
+          marketDescription: businessDescription, // Map businessDescription to marketDescription
+          keywords: extractKeywords(businessDescription, industry) // Extract meaningful keywords
         }),
       });
 
@@ -136,6 +161,7 @@ export default function AEOScorePage() {
       setGeneratedPrompts(data.prompts);
       setEditablePrompts([...data.prompts]);
       setShowPromptEditor(true);
+      setActiveTab('prompts'); // Switch to prompts tab
       setIsAnalyzing(false);
       setCurrentStep('');
       setProgress(0);
@@ -224,10 +250,11 @@ export default function AEOScorePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ 
-          businessName, 
-          industry, 
-          businessDescription, 
+        body: JSON.stringify({
+          businessName,
+          industry,
+          marketDescription: businessDescription, // Map businessDescription to marketDescription
+          keywords: extractKeywords(businessDescription, industry), // Extract keywords
           providers: aiProviders,
           customPrompts: editablePrompts
         }),
@@ -305,142 +332,145 @@ export default function AEOScorePage() {
         </div>
       </div>
 
-      {/* Input Section */}
-      <div className="bg-white py-16">
+      {/* Tab Navigation */}
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-gray-50 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-blue-800 font-medium">Free Tool Limitations:</span>
-                </div>
-                <div className="ml-7 text-sm text-blue-700 space-y-1">
-                  <div>• Limited to 3 models</div>
-                  <div>• <strong>Professional:</strong> Complete coverage of all AI models</div>
-                  <div>• <strong>Enterprise:</strong> Includes consultation, AI-insights, action plans, and development support</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
-              <input
-                type="text"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Enter your business name (e.g., 'Acme Corp', 'SearchDogAI')"
-                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
-              <input
-                type="text"
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                placeholder="Enter your industry (e.g., 'Software Development', 'Healthcare', 'E-commerce', 'Marketing')"
-                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-              <div className="mt-2 text-sm text-gray-500">
-                <strong>Examples:</strong> Software Development, Healthcare, E-commerce, Marketing, Finance, Education, Real Estate
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Business Description & Keywords</label>
-              <textarea
-                value={businessDescription}
-                onChange={(e) => setBusinessDescription(e.target.value)}
-                placeholder="Describe your business, target market, customers, and include your primary keywords. For example: 'We help small businesses with AEO and Answers Engine Optimization. Our customers are marketing agencies and SMB owners who want to improve their digital marketing visibility in AI search engines. Primary focus: SEO optimization, AI search, digital marketing tools.'"
-                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-32 resize-none"
-              />
-              <div className="mt-2 text-sm text-gray-500">
-                <strong>Include:</strong> What your business does, target customers, main problems you solve, and your primary keywords/phrases for AI search optimization.
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500">
-                {!user ? (
-                  <span className="text-red-600 font-medium">⚠️ Login required</span>
-                ) : usageInfo && !usageInfo.canUse ? (
-                  <span className="text-red-600 font-medium">❌ Daily limit reached ({usageInfo.usageCount}/{usageInfo.maxUsage})</span>
-                ) : usageInfo && usageInfo.maxUsage === 'unlimited' ? (
-                  <span className="text-blue-600 font-medium">🚀 Unlimited usage ({usageInfo.tier} plan)</span>
-                ) : usageInfo ? (
-                  <span className="text-green-600 font-medium">✅ {typeof usageInfo.maxUsage === 'number' ? usageInfo.maxUsage - usageInfo.usageCount : 'unlimited'} uses remaining today</span>
-                ) : businessName.trim() && industry.trim() && businessDescription.trim() ? (
-                  <span>All fields ready</span>
-                ) : (
-                  <span>Fill in all required fields</span>
-                )}
-              </div>
-              <button
-                onClick={handleGeneratePrompts}
-                disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
-              >
-                {isAnalyzing ? (
-                  <span className="flex items-center space-x-2">
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Generating Prompts...</span>
-                  </span>
-                ) : !user ? (
-                  'Login to Generate Report'
-                ) : (usageInfo && !usageInfo.canUse) ? (
-                  'Daily Limit Reached'
-                ) : (
-                  'Generate Analysis Prompts'
-                )}
-              </button>
-            </div>
-          </div>
+          <nav className="flex space-x-8" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab('input')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'input'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              1. Business Information
+            </button>
+            <button
+              onClick={() => setActiveTab('prompts')}
+              disabled={!showPromptEditor}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'prompts'
+                  ? 'border-blue-500 text-blue-600'
+                  : showPromptEditor
+                    ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-300 cursor-not-allowed'
+                }`}
+            >
+              2. Review & Edit Prompts
+              {showPromptEditor && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Ready
+                </span>
+              )}
+            </button>
+          </nav>
         </div>
       </div>
 
-      {/* Loading Section */}
-      {isAnalyzing && (
-        <div className="bg-white py-8">
+      {/* Tab Content */}
+      {activeTab === 'input' && (
+        <div className="bg-white py-16">
           <div className="max-w-4xl mx-auto px-6">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 text-center">
-              <div className="flex items-center justify-center space-x-4 mb-4">
-                {/* Compact Robot Icon */}
-                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white animate-bounce">
-                  🤖
-                </div>
-                <div className="text-left">
-                  <h3 className="text-lg font-semibold text-gray-900">Analyzing {businessName}</h3>
-                  <p className="text-sm text-gray-600">{currentStep}</p>
+            <div className="bg-gray-50 rounded-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-blue-800 font-medium">Free Tool Limitations:</span>
+                  </div>
+                  <div className="ml-7 text-sm text-blue-700 space-y-1">
+                    <div>• Limited to 3 models</div>
+                    <div>• <strong>Professional:</strong> Complete coverage of all AI models</div>
+                    <div>• <strong>Enterprise:</strong> Includes consultation, AI-insights, action plans, and development support</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Compact Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                  style={{ width: `${progress}%` }}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="Enter your business name (e.g., 'Acme Corp', 'SearchDogAI')"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
+                <input
+                  type="text"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  placeholder="Enter your industry (e.g., 'Software Development', 'Healthcare', 'E-commerce', 'Marketing')"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                <div className="mt-2 text-sm text-gray-500">
+                  <strong>Examples:</strong> Software Development, Healthcare, E-commerce, Marketing, Finance, Education, Real Estate
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Business Description & Keywords</label>
+                <textarea
+                  value={businessDescription}
+                  onChange={(e) => setBusinessDescription(e.target.value)}
+                  placeholder="Describe your business, target market, customers, and include your primary keywords. For example: 'We help small businesses with AEO and Answers Engine Optimization. Our customers are marketing agencies and SMB owners who want to improve their digital marketing visibility in AI search engines. Primary focus: SEO optimization, AI search, digital marketing tools.'"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-32 resize-none"
+                />
+                <div className="mt-2 text-sm text-gray-500">
+                  <strong>Include:</strong> What your business does, target customers, main problems you solve, and your primary keywords/phrases for AI search optimization.
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-500">
+                  {!user ? (
+                    <span className="text-red-600 font-medium">⚠️ Login required</span>
+                  ) : usageInfo && !usageInfo.canUse ? (
+                    <span className="text-red-600 font-medium">❌ Daily limit reached ({usageInfo.usageCount}/{usageInfo.maxUsage})</span>
+                  ) : usageInfo && usageInfo.maxUsage === 'unlimited' ? (
+                    <span className="text-blue-600 font-medium">🚀 Unlimited usage ({usageInfo.tier} plan)</span>
+                  ) : usageInfo ? (
+                    <span className="text-green-600 font-medium">✅ {typeof usageInfo.maxUsage === 'number' ? usageInfo.maxUsage - usageInfo.usageCount : 'unlimited'} uses remaining today</span>
+                  ) : businessName.trim() && industry.trim() && businessDescription.trim() ? (
+                    <span>All fields ready</span>
+                  ) : (
+                    <span>Fill in all required fields</span>
+                  )}
+                </div>
+                <button
+                  onClick={handleGeneratePrompts}
+                  disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
                 >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
-                </div>
+                  {isAnalyzing ? (
+                    <span className="flex items-center space-x-2">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Generating Prompts...</span>
+                    </span>
+                  ) : !user ? (
+                    'Login to Generate Report'
+                  ) : (usageInfo && !usageInfo.canUse) ? (
+                    'Daily Limit Reached'
+                  ) : (
+                    'Generate Analysis Prompts'
+                  )}
+                </button>
               </div>
-
-              <div className="text-xs text-gray-500">{Math.round(progress)}% complete</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Prompt Editor Section */}
-      {showPromptEditor && (
+      {/* Prompts Tab */}
+      {activeTab === 'prompts' && showPromptEditor && (
         <div className="bg-white py-16">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8">
@@ -454,7 +484,7 @@ export default function AEOScorePage() {
                     <span className="text-blue-800 font-medium">✨ AI-Generated Prompts + Proprietary Optimization</span>
                   </div>
                   <p className="text-sm text-blue-700 text-center">
-                    These prompts were generated using our proprietary AI algorithms for maximum accuracy in AEO scoring. 
+                    These prompts were generated using our proprietary AI algorithms for maximum accuracy in AEO scoring.
                     You can edit them below or proceed with the optimized versions.
                   </p>
                 </div>
@@ -497,7 +527,7 @@ export default function AEOScorePage() {
                           </button>
                         </div>
                       </div>
-                      
+
                       {/* Content Area */}
                       <div className="p-6">
                         <div className="relative">
@@ -513,13 +543,13 @@ export default function AEOScorePage() {
                             rows={4}
                             placeholder="Enter your custom analysis prompt to optimize AI search visibility..."
                           />
-                          
+
                           {/* Character Counter */}
                           <div className="absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded shadow">
                             {prompt.length} chars
                           </div>
                         </div>
-                        
+
                         {/* Status Indicator */}
                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                           <div className="flex items-center space-x-2">
@@ -528,7 +558,7 @@ export default function AEOScorePage() {
                               {prompt.trim() ? 'Ready for analysis' : 'Prompt required'}
                             </span>
                           </div>
-                          
+
                           {/* Quick Actions */}
                           <div className="flex items-center space-x-2">
                             <button
@@ -552,12 +582,12 @@ export default function AEOScorePage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => {
-                    setShowPromptEditor(false);
+                    setActiveTab('input'); // Go back to input tab
                     setEditablePrompts([...generatedPrompts]);
                   }}
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
-                  Cancel & Reset
+                  ← Back to Business Info
                 </button>
                 <button
                   onClick={handleAnalyze}
@@ -581,6 +611,40 @@ export default function AEOScorePage() {
           </div>
         </div>
       )}
+
+      {/* Loading Section */}
+      {isAnalyzing && (
+        <div className="bg-white py-8">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 text-center">
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                {/* Compact Robot Icon */}
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white animate-bounce">
+                  🤖
+                </div>
+                <div className="text-left">
+                  <h3 className="text-lg font-semibold text-gray-900">Analyzing {businessName}</h3>
+                  <p className="text-sm text-gray-600">{currentStep}</p>
+                </div>
+              </div>
+
+              {/* Compact Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                  style={{ width: `${progress}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+                </div>
+              </div>
+
+              <div className="text-xs text-gray-500">{Math.round(progress)}% complete</div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* AI Providers Section */}
       <div className="bg-gray-50 py-12">
@@ -725,18 +789,17 @@ export default function AEOScorePage() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className={`text-sm font-bold px-3 py-1 rounded-full ${
-                            competitor.score >= 60 ? 'bg-red-100 text-red-800' : 
-                            competitor.score >= 40 ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-gray-100 text-gray-600'
-                          }`}>
+                          <div className={`text-sm font-bold px-3 py-1 rounded-full ${competitor.score >= 60 ? 'bg-red-100 text-red-800' :
+                              competitor.score >= 40 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-600'
+                            }`}>
                             {competitor.score}%
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  
+
                   {overallCompetitors.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <div className="text-4xl mb-4">🎉</div>
@@ -744,7 +807,7 @@ export default function AEOScorePage() {
                       <p className="text-sm mt-2">This could indicate a unique market position or niche focus.</p>
                     </div>
                   )}
-                  
+
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600">
                       Competitor scores represent frequency of mentions across all AI model responses.
@@ -960,7 +1023,7 @@ export default function AEOScorePage() {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of businesses preparing for the AI-first search future. Create your account now to access our free tool and lock in pre-release discounts.
           </p>
-          <button 
+          <button
             onClick={handleCreateAccount}
             className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
           >
@@ -984,12 +1047,13 @@ export default function AEOScorePage() {
           </div>
         </div>
       </footer>
-      
+
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
         onSuccess={handleLogin}
       />
     </div>
-  );
+
+  )
 }

@@ -67,10 +67,16 @@ export class PromptFormationService {
     } catch (templateError) {
       console.error('Error loading prompt templates:', templateError);
       
-      // Final fallback to default query generation
-      return {
-        queries: await this.generateFallbackQueriesLegacy(context, queryCount)
-      };
+      // Try fallback queries first, then legacy if that fails too
+      try {
+        const fallbackQueries = await this.generateFallbackQueries(context, queryCount);
+        return { queries: fallbackQueries };
+      } catch (fallbackError) {
+        console.error('Error loading fallback queries, using legacy:', fallbackError);
+        return {
+          queries: this.generateFallbackQueriesLegacy(context, queryCount)
+        };
+      }
     }
   }
 

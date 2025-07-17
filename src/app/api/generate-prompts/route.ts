@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PromptFormationService } from '../../../services/PromptFormationService';
 import { AEOAnalysisService } from '../../../services/AEOAnalysisService';
-import { PromptEngineV2 } from '../../../engines/PromptEngineV2';
 
 interface GeneratePromptsRequest {
   businessName: string;
@@ -24,9 +23,17 @@ export async function POST(request: NextRequest) {
     const requestData: GeneratePromptsRequest = await request.json();
     
     // Validate required fields
-    if (!requestData.businessName || !requestData.industry || !requestData.marketDescription || !requestData.keywords) {
+    const missingFields = [];
+    if (!requestData.businessName) missingFields.push('businessName');
+    if (!requestData.industry) missingFields.push('industry');
+    if (!requestData.marketDescription) missingFields.push('marketDescription');
+    if (!requestData.keywords) missingFields.push('keywords');
+    else if (!Array.isArray(requestData.keywords)) missingFields.push('keywords (must be array)');
+    else if (requestData.keywords.length === 0) missingFields.push('keywords (must be non-empty)');
+    
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: 'Missing required fields: businessName, industry, marketDescription, keywords' },
+        { error: `Missing or invalid fields: ${missingFields.join(', ')}` },
         { status: 400 }
       );
     }

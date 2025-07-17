@@ -118,11 +118,22 @@ export class AEOAnalysisService {
   static validateRequest(request: AnalysisRequest): { isValid: boolean; error?: string } {
     const { businessName, industry, marketDescription, keywords, providers } = request;
 
-    if (!businessName || !industry || !marketDescription || !keywords || !providers) {
-      console.log(`❌ Missing required fields`);
+    const missingFields = [];
+    if (!businessName) missingFields.push('businessName');
+    if (!industry) missingFields.push('industry');
+    if (!marketDescription) missingFields.push('marketDescription');
+    if (!keywords) missingFields.push('keywords');
+    else if (!Array.isArray(keywords)) missingFields.push('keywords (must be array)');
+    else if (keywords.length === 0) missingFields.push('keywords (must be non-empty)');
+    if (!providers) missingFields.push('providers');
+    else if (!Array.isArray(providers)) missingFields.push('providers (must be array)');
+    else if (providers.length === 0) missingFields.push('providers (must be non-empty)');
+
+    if (missingFields.length > 0) {
+      console.log(`❌ Missing required fields: ${missingFields.join(', ')}`);
       return {
         isValid: false,
-        error: 'Missing required fields: businessName, industry, marketDescription, keywords, and providers'
+        error: `Missing required fields: ${missingFields.join(', ')}`
       };
     }
 
