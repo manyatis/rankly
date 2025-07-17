@@ -7,12 +7,12 @@ interface HeroSectionProps {
 export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
   return (
     <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
             AEO Analytics Platform
           </h1>
-          <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
             Comprehensive analytics and optimization solutions for Answers Engine Optimization (AEO).
             Free tool limited to 3 models. Professional has complete coverage of models.
           </p>

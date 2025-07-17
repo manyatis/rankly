@@ -23,13 +23,13 @@ export default function AEOPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-20">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-12">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
               AEO Simplified
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
               Get superior Answer Engine Optimization with AI-powered insights, built-in WordPress support, and privacy-first analytics - all at a fraction of enterprise platform costs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
