@@ -59,7 +59,9 @@ export default function LearnPage() {
           <div className="grid md:grid-cols-2 gap-12 mb-16">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
               <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
-                <span className="text-3xl text-white">🔍</span>
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Answer Engine Optimization (AEO)</h3>
               <p className="text-gray-700 mb-4 leading-relaxed">
@@ -87,7 +89,9 @@ export default function LearnPage() {
 
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8">
               <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-                <span className="text-3xl text-white">🤖</span>
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7v1a7 7 0 01-7 7H10a7 7 0 01-7-7v-1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2zM8 10a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
+                </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Generative Engine Optimization (GEO)</h3>
               <p className="text-gray-700 mb-4 leading-relaxed">
@@ -129,7 +133,9 @@ export default function LearnPage() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">📊</span>
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z"/>
+                </svg>
               </div>
               <h3 className="text-xl font-semibold mb-4 text-gray-900">Changing User Behavior</h3>
               <p className="text-gray-600 leading-relaxed">
@@ -139,7 +145,9 @@ export default function LearnPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">🔍</span>
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                </svg>
               </div>
               <h3 className="text-xl font-semibold mb-4 text-gray-900">Direct Answer Preference</h3>
               <p className="text-gray-600 leading-relaxed">
@@ -149,7 +157,9 @@ export default function LearnPage() {
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <span className="text-2xl">💬</span>
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902 1.168.188 2.352.327 3.55.414.28.02.521.18.642.413l1.713 3.293a.75.75 0 001.33 0l1.713-3.293a.75.75 0 01.642-.413 24.5 24.5 0 003.55-.414c1.437-.231 2.43-1.49 2.43-2.902V5.426c0-1.412-.993-2.67-2.43-2.902A24.394 24.394 0 0010 2z" clipRule="evenodd" />
+                </svg>
               </div>
               <h3 className="text-xl font-semibold mb-4 text-gray-900">Conversational Search</h3>
               <p className="text-gray-600 leading-relaxed">
