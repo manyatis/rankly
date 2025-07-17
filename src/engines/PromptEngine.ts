@@ -55,7 +55,7 @@ export class PromptEngine {
         variations.push(
           `Top ${keywordPhrase} companies in 2025`,
           `I need ${keywordPhrase} service providers`,
-          `Best ${keywordPhrase} firms and consultants`,
+          `Best ${keywordPhrase} business or firms or consultants`,
           `Leading ${keywordPhrase} businesses to consider`
         );
       });
