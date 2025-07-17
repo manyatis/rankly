@@ -48,6 +48,8 @@ interface QueryResult {
 
 export default function AEOScorePage() {
   const [businessName, setBusinessName] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [marketDescription, setMarketDescription] = useState('');
   const [keyword, setKeyword] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
@@ -98,7 +100,7 @@ export default function AEOScorePage() {
 
 
   const handleAnalyze = async () => {
-    if (!businessName.trim() || !keyword.trim()) return;
+    if (!businessName.trim() || !industry.trim() || !marketDescription.trim() || !keyword.trim()) return;
     
     // Check if user is logged in
     if (!user?.email) {
@@ -189,7 +191,7 @@ export default function AEOScorePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ businessName, keywords: keywordArray, providers: aiProviders }),
+        body: JSON.stringify({ businessName, industry, marketDescription, keywords: keywordArray, providers: aiProviders }),
       });
 
       const duration = Date.now() - startTime;
@@ -297,6 +299,33 @@ export default function AEOScorePage() {
             </div>
 
             <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
+              <input
+                type="text"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                placeholder="Enter your industry (e.g., 'Software Development', 'Healthcare', 'E-commerce', 'Marketing')"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                <strong>Examples:</strong> Software Development, Healthcare, E-commerce, Marketing, Finance, Education, Real Estate
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Market & Customer Description</label>
+              <textarea
+                value={marketDescription}
+                onChange={(e) => setMarketDescription(e.target.value)}
+                placeholder="Describe your target market, customers, and what your business does (e.g., 'We help small businesses optimize their websites for AI search engines. Our customers are marketing agencies and SMB owners who want to improve their visibility.')"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-24 resize-none"
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                <strong>Tips:</strong> Include who uses your product/service, what problems you solve, and your target audience demographics.
+              </div>
+            </div>
+
+            <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Primary Keyword or Phrase</label>
               <input
                 type="text"
@@ -320,15 +349,15 @@ export default function AEOScorePage() {
                   <span className="text-blue-600 font-medium">🚀 Unlimited usage ({usageInfo.tier} plan)</span>
                 ) : usageInfo ? (
                   <span className="text-green-600 font-medium">✅ {typeof usageInfo.maxUsage === 'number' ? usageInfo.maxUsage - usageInfo.usageCount : 'unlimited'} uses remaining today</span>
-                ) : keyword.trim().length > 0 ? (
-                  <span>Keyword ready</span>
+                ) : businessName.trim() && industry.trim() && marketDescription.trim() && keyword.trim() ? (
+                  <span>All fields ready</span>
                 ) : (
-                  <span>Enter a keyword or phrase</span>
+                  <span>Fill in all required fields</span>
                 )}
               </div>
               <button
                 onClick={handleAnalyze}
-                disabled={isAnalyzing || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
+                disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !marketDescription.trim() || !keyword.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
               >
                 {isAnalyzing ? (

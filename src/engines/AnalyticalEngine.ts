@@ -123,6 +123,119 @@ export class AnalyticalEngine {
     return Math.min(1.0, score);
   }
 
+  static async analyzeWithCustomQueries(
+    queryFunction: (query: string) => Promise<string>,
+    businessName: string,
+    customQueries: string[]
+  ): Promise<QueryResult[]> {
+    console.log(`🚀 Starting AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
+
+    const businessNameVariations = PromptEngine.generateBusinessNameVariations(businessName);
+    console.log(`🔍 Business name variations to search for:`, businessNameVariations);
+
+    const results: QueryResult[] = [];
+
+    for (let i = 0; i < customQueries.length; i++) {
+      const query = customQueries[i];
+      console.log(`\n📤 Query ${i + 1}/${customQueries.length}: "${query}"`);
+
+      try {
+        const response = await queryFunction(query);
+        console.log(`📥 Response length: ${response.length} characters`);
+        console.log(`📄 Response preview: "${response.substring(0, 200)}..."`);
+
+        const responseLower = response.toLowerCase();
+
+        // Check if any variation of the business name appears in the response
+        let mentioned = false;
+        let bestMatch = '';
+        let bestIndex = -1;
+        let matchType = 'none';
+
+        console.log(`🔎 Searching for business name variations in response...`);
+
+        // First try exact matches
+        for (const nameVariation of businessNameVariations) {
+          const nameIndex = responseLower.indexOf(nameVariation.toLowerCase());
+          if (nameIndex !== -1) {
+            console.log(`✅ EXACT MATCH "${nameVariation}" at position ${nameIndex}`);
+            mentioned = true;
+            if (bestIndex === -1 || nameIndex < bestIndex) {
+              bestIndex = nameIndex;
+              bestMatch = nameVariation;
+              matchType = 'exact';
+            }
+          }
+        }
+
+        // If no exact match, try fuzzy matching with regex
+        if (!mentioned) {
+          console.log(`🔍 No exact matches found, trying fuzzy matching...`);
+          for (const nameVariation of businessNameVariations) {
+            const fuzzyMatches = this.findFuzzyMatches(nameVariation.toLowerCase(), responseLower);
+            if (fuzzyMatches.length > 0) {
+              const match = fuzzyMatches[0];
+              console.log(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index}`);
+              mentioned = true;
+              if (bestIndex === -1 || match.index < bestIndex) {
+                bestIndex = match.index;
+                bestMatch = match.match;
+                matchType = 'fuzzy';
+              }
+              break; // Use first fuzzy match found
+            }
+          }
+        }
+
+        if (!mentioned) {
+          console.log(`❌ Business name NOT found in this response`);
+        } else {
+          console.log(`🎯 Best match: "${bestMatch}" at position ${bestIndex}`);
+        }
+
+        let rankPosition = 0;
+        let relevanceScore = 0;
+
+        if (mentioned) {
+          // Calculate rank position based on where business appears in response
+          if (bestIndex < 50) rankPosition = 1;
+          else if (bestIndex < 150) rankPosition = 2;
+          else if (bestIndex < 300) rankPosition = 3;
+          else if (bestIndex < 500) rankPosition = 4;
+          else rankPosition = 5;
+
+          console.log(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
+
+          // Calculate relevance score using extracted method
+          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessNameVariations, matchType);
+        }
+
+        results.push({
+          query,
+          response,
+          mentioned,
+          rankPosition,
+          relevanceScore
+        });
+
+        console.log(`✅ Query ${i + 1} completed: mentioned=${mentioned}, rank=${rankPosition}, score=${relevanceScore}`);
+
+      } catch (error) {
+        console.error(`❌ Error with query ${i + 1}: "${query}":`, error);
+        results.push({
+          query,
+          response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          mentioned: false,
+          rankPosition: 0,
+          relevanceScore: 0
+        });
+      }
+    }
+
+    console.log(`🏁 Analysis complete. Processed ${results.length} queries.`);
+    return results;
+  }
+
   static async analyzeWithVariations(
     queryFunction: (query: string) => Promise<string>,
     businessName: string,

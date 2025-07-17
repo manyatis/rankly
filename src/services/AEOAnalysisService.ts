@@ -2,6 +2,7 @@ import { ModelFactory, type ModelType } from '../lib/ai-models';
 import { AnalyticalEngine, QueryResult } from '../engines/AnalyticalEngine';
 import { RankingEngine, ScoringFactors, CompetitorInfo } from '../engines/RankingEngine';
 import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
+import { PromptFormationService } from './PromptFormationService';
 
 export interface AIProvider {
   name: string;
@@ -24,6 +25,8 @@ export interface ProviderScoringResult {
 
 export interface AnalysisRequest {
   businessName: string;
+  industry: string;
+  marketDescription: string;
   keywords: string[];
   providers: AIProvider[];
 }
@@ -112,13 +115,13 @@ export class AEOAnalysisService {
   }
 
   static validateRequest(request: AnalysisRequest): { isValid: boolean; error?: string } {
-    const { businessName, keywords, providers } = request;
+    const { businessName, industry, marketDescription, keywords, providers } = request;
 
-    if (!businessName || !keywords || !providers) {
+    if (!businessName || !industry || !marketDescription || !keywords || !providers) {
       console.log(`❌ Missing required fields`);
       return {
         isValid: false,
-        error: 'Missing required fields: businessName, keywords, and providers'
+        error: 'Missing required fields: businessName, industry, marketDescription, keywords, and providers'
       };
     }
 
@@ -139,12 +142,38 @@ export class AEOAnalysisService {
   }
 
   static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
-    const { businessName, keywords, providers } = request;
+    const { businessName, industry, marketDescription, keywords, providers } = request;
 
     console.log(`🏢 Business Name: "${businessName}"`);
+    console.log(`🏭 Industry: "${industry}"`);
+    console.log(`📄 Market Description: "${marketDescription}"`);
     console.log(`🔑 Keywords:`, keywords);
     console.log(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
-    console.log(`\n🚀 Starting parallel analysis of ${providers.length} providers...`);
+
+    // Generate optimized prompts using OpenAI
+    console.log(`\n🧠 Generating optimized prompts using OpenAI...`);
+    const promptFormationService = new PromptFormationService();
+    let optimizedQueries: string[];
+    
+    try {
+      const promptResult = await promptFormationService.generateOptimizedPrompts({
+        businessName,
+        industry,
+        marketDescription,
+        keywords
+      }, 2); // Start with 2 queries to save costs
+      optimizedQueries = promptResult.queries;
+      console.log(`✅ Generated ${optimizedQueries.length} optimized queries`);
+    } catch (error) {
+      console.warn(`⚠️ Failed to generate optimized prompts, using fallback:`, error);
+      // Fallback to default query generation (2 queries to match)
+      optimizedQueries = [
+        `What are the best ${industry.toLowerCase()} companies?`,
+        `Top ${industry.toLowerCase()} solutions for businesses`
+      ];
+    }
+
+    console.log(`\n🚀 Starting parallel analysis of ${providers.length} providers with optimized queries...`);
 
     // Create analysis promises for all providers to run in parallel
     const analysisPromises = providers.map(async (provider, index) => {
@@ -152,7 +181,7 @@ export class AEOAnalysisService {
 
       try {
         const queryFunction = (businessDescription: string) => this.queryAIModel(provider, businessDescription);
-        const queryResults = await AnalyticalEngine.analyzeWithVariations(queryFunction, businessName, keywords, this.MAX_QUERIES);
+        const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, businessName, optimizedQueries);
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName, keywords);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 
