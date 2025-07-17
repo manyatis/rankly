@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
+// import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 import { useAuth } from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
 
@@ -161,7 +161,7 @@ export default function PaymentPage() {
               </div>
             )}
 
-            <PaymentForm
+            {/* <PaymentForm
               applicationId={process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID!}
               locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!}
               cardTokenizeResponseReceived={async (token) => {
@@ -211,7 +211,7 @@ export default function PaymentPage() {
                   }
                 }}
               />
-            </PaymentForm>
+            </PaymentForm> */}
 
             {paymentProcessing && (
               <div className="mt-4 text-center">

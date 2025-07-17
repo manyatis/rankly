@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SquareClient } from 'square';
+// import { SquareClient } from 'square';
 import { randomUUID } from 'crypto';
 import { getUser } from '../../../../lib/auth';
 
