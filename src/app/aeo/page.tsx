@@ -27,7 +27,7 @@ export default function AEOPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              AEO/GEO Simplified
+              AEO Simplified
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Get superior Answer Engine Optimization with AI-powered insights, built-in WordPress support, and privacy-first analytics - all at a fraction of enterprise platform costs.
@@ -40,7 +40,7 @@ export default function AEOPage() {
                 Start Free
               </button>
               <Link href="/aeo-score" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-medium text-lg border-2 border-blue-600">
-                Check Your AEO/GEO Score
+                Check Your AEO Score
               </Link>
             </div>
           </div>
@@ -367,7 +367,7 @@ export default function AEOPage() {
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">One-click AEO & GEO optimization</span>
+              <span className="text-gray-600">One-click AEO optimization</span>
               <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
             </div>
           </div>

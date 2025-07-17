@@ -152,6 +152,7 @@ export class AnalyticalEngine {
         let mentioned = false;
         let bestMatch = '';
         let bestIndex = -1;
+        let matchType = 'none';
 
         console.log(`🔎 Searching for business name variations in response...`);
 
@@ -164,6 +165,7 @@ export class AnalyticalEngine {
             if (bestIndex === -1 || nameIndex < bestIndex) {
               bestIndex = nameIndex;
               bestMatch = nameVariation;
+              matchType = 'exact';
             }
           }
         }
@@ -180,6 +182,7 @@ export class AnalyticalEngine {
               if (bestIndex === -1 || match.index < bestIndex) {
                 bestIndex = match.index;
                 bestMatch = match.match;
+                matchType = 'fuzzy';
               }
               break; // Use first fuzzy match found
             }
@@ -206,7 +209,7 @@ export class AnalyticalEngine {
           console.log(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
 
           // Calculate relevance score using extracted method
-          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessNameVariations);
+          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessNameVariations, matchType);
         }
 
         results.push({
@@ -237,12 +240,33 @@ export class AnalyticalEngine {
     return results;
   }
 
-  private static calculateRelevanceScore(response: string, responseLower: string, bestMatch: string, bestIndex: number, businessNameVariations: string[]): number {
+  private static calculateRelevanceScore(response: string, responseLower: string, bestMatch: string, bestIndex: number, businessNameVariations: string[], matchType: string = 'exact'): number {
     let score = 0;
 
-    // Base score for being mentioned
-    score += 20;
-    console.log(`📊 Base score: +20 = ${score}`);
+    // Base score for being mentioned (adjust based on match type)
+    if (matchType === 'exact') {
+      score += 20;
+      console.log(`📊 Base score (exact match): +20 = ${score}`);
+    } else if (matchType === 'fuzzy') {
+      score += 15;
+      console.log(`📊 Base score (fuzzy match): +15 = ${score}`);
+    }
+
+    // Check for individual word matches to boost compound company names
+    const originalWords = businessNameVariations[0].toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    if (originalWords.length > 1) {
+      let individualWordMatches = 0;
+      for (const word of originalWords) {
+        if (responseLower.includes(word)) {
+          individualWordMatches++;
+        }
+      }
+      if (individualWordMatches > 0) {
+        const wordMatchBonus = Math.min(10, individualWordMatches * 5);
+        score += wordMatchBonus;
+        console.log(`📊 Individual word matches (${individualWordMatches}/${originalWords.length}): +${wordMatchBonus} = ${score}`);
+      }
+    }
 
     // Bonus for early mention
     if (bestIndex < 50) {

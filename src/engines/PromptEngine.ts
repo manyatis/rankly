@@ -100,6 +100,14 @@ export class PromptEngine {
     // Generate word permutations for multi-word names
     const words = businessName.toLowerCase().split(/\s+/).filter(w => w.length > 0);
     if (words.length > 1) {
+      // Add individual word parts (e.g., "Wells" and "Fargo" from "Wells Fargo")
+      words.forEach(word => {
+        if (word.length > 2) { // Only add meaningful words
+          variations.push(word);
+          variations.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+        }
+      });
+
       // All possible spacing combinations
       this.generateSpacingPermutations(words).forEach(variation => {
         variations.push(variation);

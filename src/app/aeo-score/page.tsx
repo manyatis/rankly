@@ -254,7 +254,7 @@ export default function AEOScorePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              AEO/GEO Analytics & Visibility Scoring
+              AEO Analytics & Visibility Scoring
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Comprehensive Answers Engine Optimization analytics to measure your business visibility across AI platforms.
@@ -302,11 +302,11 @@ export default function AEOScorePage() {
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Enter your primary keyword or phrase (e.g., 'AEO', 'GEO', 'Answers Engine Optimization', 'digital marketing')"
+                placeholder="Enter your primary keyword or phrase (e.g., 'AEO', 'Answers Engine Optimization', 'digital marketing')"
                 className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
               <div className="mt-2 text-sm text-gray-500">
-                <strong>Examples:</strong> AEO, GEO, Answers Engine Optimization, digital marketing, restaurant delivery, software development, healthcare consulting
+                <strong>Examples:</strong> AEO, Answers Engine Optimization, digital marketing, restaurant delivery, software development, healthcare consulting
               </div>
             </div>
 
@@ -455,12 +455,12 @@ export default function AEOScorePage() {
       {results.length > 0 && (
         <div className="bg-white py-16">
           <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO/GEO Score Results</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO Score Results</h2>
 
             {/* Overall Summary */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8 mb-8">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-6">Overall AEO/GEO Rankings for {businessName}</h3>
+                <h3 className="text-2xl font-bold mb-6">Overall AEO Rankings for {businessName}</h3>
 
                 {/* Average Score Circle */}
                 <div className="flex justify-center mb-8">
@@ -638,7 +638,7 @@ export default function AEOScorePage() {
                           <span className={`text-2xl font-bold ${getScoreColor(result.aeoScore)}`}>
                             {result.aeoScore}
                           </span>
-                          <span className="text-xs text-gray-500">AEO/GEO Score</span>
+                          <span className="text-xs text-gray-500">AEO Score</span>
                         </div>
                       </div>
                     </div>
@@ -820,7 +820,7 @@ export default function AEOScorePage() {
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">One-click AEO & GEO optimization</span>
+              <span className="text-gray-600">One-click AEO optimization</span>
               <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
             </div>
           </div>

@@ -1,7 +1,7 @@
 # AEO Score Refactoring Instructions
 
 ## Overview
-This app tracks analytics for AEO (AI Engine Optimization) & GEO (Generative Engine Optimization) for websites. Currently, all AI model logic is contained in `aeo-score/route.ts`, which needs to be refactored to support multiple AI providers.
+This app tracks analytics for AEO (AI Engine Optimization) for websites. Currently, all AI model logic is contained in `aeo-score/route.ts`, which needs to be refactored to support multiple AI providers.
 
 ## Current State
 - **OpenAI Implementation**: Currently implemented in `queryOpenAI()` function within route.ts

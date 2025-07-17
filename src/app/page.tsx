@@ -95,7 +95,7 @@ export default function Home() {
   const solutions = [
     {
       title: "Enterprise Analytics Suite",
-      description: "Complete AEO & GEO analytics platform with custom dashboards, API access, and dedicated support.",
+      description: "Complete AEO analytics platform with custom dashboards, API access, and dedicated support.",
       features: ["Custom dashboards", "API integration", "White-label reports", "Dedicated support"]
     },
     {
@@ -120,10 +120,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-              AEO & GEO Analytics Platform
+              AEO Analytics Platform
             </h1>
             <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
-              Comprehensive analytics and optimization solutions for Answers Engine Optimization (AEO) & Generative Engine Optimization (GEO).
+              Comprehensive analytics and optimization solutions for Answers Engine Optimization (AEO).
               Free tool limited to 3 models. Professional has complete coverage of models.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
@@ -210,7 +210,7 @@ export default function Home() {
               The Search Revolution Is Here
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              AI-powered search is transforming how users find information. Stay ahead with comprehensive AEO & GEO analytics.
+              AI-powered search is transforming how users find information. Stay ahead with comprehensive AEO analytics.
             </p>
           </div>
 
@@ -237,7 +237,7 @@ export default function Home() {
             <p className="text-gray-700 text-base sm:text-lg text-center leading-relaxed">
               <strong>The new reality:</strong> Traditional search optimization alone isn&apos;t enough. Companies need comprehensive analytics
               to track their performance across both traditional search engines and AI platforms.
-              <strong className="text-blue-600"> AEO & GEO optimization is becoming critical</strong> for maintaining online visibility.
+              <strong className="text-blue-600"> AEO optimization is becoming critical</strong> for maintaining online visibility.
             </p>
           </div>
 
@@ -1113,6 +1113,7 @@ export default function Home() {
               </ul>
               <button
                 onClick={() => handlePlanSelection('indie')}
+                disabled={true}
                 className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
               >
                 Get Indie Plan
@@ -1259,7 +1260,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 SearchDogAI. All rights reserved. Leading the future of AEO & GEO analytics.</p>
+            <p>&copy; 2025 SearchDogAI. All rights reserved. Leading the future of AEO analytics.</p>
           </div>
         </div>
       </footer>

@@ -26,7 +26,7 @@ export default function LearnPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Understanding AEO & GEO
+              Understanding AEO
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Learn how Answer Engine Optimization and Generative Engine Optimization are revolutionizing search, why traditional SEO is becoming obsolete, and how AI is changing consumer behavior forever.
@@ -46,11 +46,11 @@ export default function LearnPage() {
         </div>
       </div>
 
-      {/* What is AEO & GEO */}
+      {/* What is AEO */}
       <div className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What are AEO & GEO?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">What is AEO?</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               The next evolution of search optimization for an AI-first world
             </p>
@@ -87,35 +87,6 @@ export default function LearnPage() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8">
-              <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7v1a7 7 0 01-7 7H10a7 7 0 01-7-7v-1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2zM8 10a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Generative Engine Optimization (GEO)</h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                GEO focuses on optimizing content for AI systems that generate responses, ensuring your brand and information are included in AI-generated content across platforms.
-              </p>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
-                  <span>Optimizes for AI content generation</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
-                  <span>Ensures brand representation in AI responses</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
-                  <span>Targets large language models and AI tools</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
-                  <span>Focuses on training data optimization</span>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -336,7 +307,7 @@ export default function LearnPage() {
                 <tr className="bg-gray-50">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Aspect</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Traditional SEO</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">AEO/GEO</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">AEO</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -379,7 +350,7 @@ export default function LearnPage() {
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Master AEO & GEO?</h2>
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to Master AEO?</h2>
           <p className="text-xl text-blue-100 mb-8">
             Don&apos;t let your competitors dominate AI search results. Start optimizing for the future of search today.
           </p>
@@ -406,7 +377,7 @@ export default function LearnPage() {
               <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">Master AEO & GEO optimization</span>
+              <span className="text-gray-600">Master AEO optimization</span>
               <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
             </div>
           </div>
