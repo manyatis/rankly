@@ -51,7 +51,8 @@ Include queries that cover:
 - Comparison requests
 - "Best of" type questions
 - Specific use case inquiries
-- Local/geographic variations (if applicable)
+
+IMPORTANT: Avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
 
 Return ONLY a JSON object with this structure:
 {

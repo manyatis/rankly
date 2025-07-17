@@ -58,6 +58,9 @@ export default function AEOScorePage() {
   const [progress, setProgress] = useState(0);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [usageInfo, setUsageInfo] = useState<{canUse: boolean; usageCount: number; maxUsage: number | string; tier: string} | null>(null);
+  const [generatedPrompts, setGeneratedPrompts] = useState<string[]>([]);
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   
   const { user } = useAuth();
 
@@ -99,7 +102,7 @@ export default function AEOScorePage() {
   ];
 
 
-  const handleAnalyze = async () => {
+  const handleGeneratePrompts = async () => {
     if (!businessName.trim() || !industry.trim() || !marketDescription.trim() || !keyword.trim()) return;
     
     // Check if user is logged in
@@ -114,6 +117,40 @@ export default function AEOScorePage() {
       return;
     }
 
+    setIsAnalyzing(true);
+    setCurrentStep('🧠 Generating optimized prompts...');
+    setProgress(30);
+
+    try {
+      const response = await fetch('/api/generate-prompts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          businessName, 
+          industry, 
+          marketDescription, 
+          keywords: [keyword.trim()] 
+        }),
+      });
+
+      const data = await response.json();
+      setGeneratedPrompts(data.prompts);
+      setEditablePrompts([...data.prompts]);
+      setShowPromptEditor(true);
+      setIsAnalyzing(false);
+      setCurrentStep('');
+      setProgress(0);
+    } catch (error) {
+      console.error('Error generating prompts:', error);
+      alert('Failed to generate prompts. Please try again.');
+      setIsAnalyzing(false);
+      setCurrentStep('');
+      setProgress(0);
+    }
+  };
+
+  const handleAnalyze = async () => {
     // Use single keyword
     const keywordArray = [keyword.trim()];
 
@@ -191,7 +228,14 @@ export default function AEOScorePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ businessName, industry, marketDescription, keywords: keywordArray, providers: aiProviders }),
+        body: JSON.stringify({ 
+          businessName, 
+          industry, 
+          marketDescription, 
+          keywords: keywordArray, 
+          providers: aiProviders,
+          customPrompts: editablePrompts
+        }),
       });
 
       const duration = Date.now() - startTime;
@@ -356,7 +400,7 @@ export default function AEOScorePage() {
                 )}
               </div>
               <button
-                onClick={handleAnalyze}
+                onClick={handleGeneratePrompts}
                 disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !marketDescription.trim() || !keyword.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
               >
@@ -366,14 +410,14 @@ export default function AEOScorePage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Analyzing...</span>
+                    <span>Generating Prompts...</span>
                   </span>
                 ) : !user ? (
                   'Login to Generate Report'
                 ) : (usageInfo && !usageInfo.canUse) ? (
                   'Daily Limit Reached'
                 ) : (
-                  'Generate Analytics Report'
+                  'Generate Analysis Prompts'
                 )}
               </button>
             </div>
@@ -449,6 +493,81 @@ export default function AEOScorePage() {
                     style={{ animationDelay: `${i * 0.2}s` }}
                   ></div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prompt Editor Section */}
+      {showPromptEditor && (
+        <div className="bg-white py-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Review & Edit Analysis Prompts</h2>
+                <div className="bg-blue-100 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-center mb-2">
+                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <span className="text-blue-800 font-medium">✨ AI-Generated Prompts + Proprietary Optimization</span>
+                  </div>
+                  <p className="text-sm text-blue-700 text-center">
+                    These prompts were generated using our proprietary AI algorithms for maximum accuracy in AEO scoring. 
+                    You can edit them below or proceed with the optimized versions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                {editablePrompts.map((prompt, index) => (
+                  <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Analysis Prompt {index + 1}
+                    </label>
+                    <textarea
+                      value={prompt}
+                      onChange={(e) => {
+                        const newPrompts = [...editablePrompts];
+                        newPrompts[index] = e.target.value;
+                        setEditablePrompts(newPrompts);
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                      rows={3}
+                      placeholder="Enter your custom analysis prompt..."
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => {
+                    setShowPromptEditor(false);
+                    setEditablePrompts([...generatedPrompts]);
+                  }}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel & Reset
+                </button>
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || editablePrompts.some(p => !p.trim())}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAnalyzing ? (
+                    <span className="flex items-center space-x-2">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Analyzing...</span>
+                    </span>
+                  ) : (
+                    'Run Analysis with These Prompts'
+                  )}
+                </button>
               </div>
             </div>
           </div>

@@ -29,6 +29,7 @@ export interface AnalysisRequest {
   marketDescription: string;
   keywords: string[];
   providers: AIProvider[];
+  customPrompts?: string[];
 }
 
 export interface AnalysisResult {
@@ -142,7 +143,7 @@ export class AEOAnalysisService {
   }
 
   static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
-    const { businessName, industry, marketDescription, keywords, providers } = request;
+    const { businessName, industry, marketDescription, keywords, providers, customPrompts } = request;
 
     console.log(`🏢 Business Name: "${businessName}"`);
     console.log(`🏭 Industry: "${industry}"`);
@@ -150,27 +151,35 @@ export class AEOAnalysisService {
     console.log(`🔑 Keywords:`, keywords);
     console.log(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
 
-    // Generate optimized prompts using OpenAI
-    console.log(`\n🧠 Generating optimized prompts using OpenAI...`);
-    const promptFormationService = new PromptFormationService();
     let optimizedQueries: string[];
-    
-    try {
-      const promptResult = await promptFormationService.generateOptimizedPrompts({
-        businessName,
-        industry,
-        marketDescription,
-        keywords
-      }, 2); // Start with 2 queries to save costs
-      optimizedQueries = promptResult.queries;
-      console.log(`✅ Generated ${optimizedQueries.length} optimized queries`);
-    } catch (error) {
-      console.warn(`⚠️ Failed to generate optimized prompts, using fallback:`, error);
-      // Fallback to default query generation (2 queries to match)
-      optimizedQueries = [
-        `What are the best ${industry.toLowerCase()} companies?`,
-        `Top ${industry.toLowerCase()} solutions for businesses`
-      ];
+
+    if (customPrompts && customPrompts.length > 0) {
+      // Use custom prompts provided by the user
+      optimizedQueries = customPrompts.filter(prompt => prompt.trim().length > 0);
+      console.log(`\n📝 Using ${optimizedQueries.length} custom prompts provided by user`);
+    } else {
+      // Generate optimized prompts using OpenAI
+      console.log(`\n🧠 Generating optimized prompts using OpenAI...`);
+      const promptFormationService = new PromptFormationService();
+      
+      try {
+        const promptResult = await promptFormationService.generateOptimizedPrompts({
+          businessName,
+          industry,
+          marketDescription,
+          keywords
+        }, 3); // Generate 3 queries to match UI
+        optimizedQueries = promptResult.queries;
+        console.log(`✅ Generated ${optimizedQueries.length} optimized queries`);
+      } catch (error) {
+        console.warn(`⚠️ Failed to generate optimized prompts, using fallback:`, error);
+        // Fallback to default query generation (3 queries to match)
+        optimizedQueries = [
+          `What are the best ${industry.toLowerCase()} companies?`,
+          `Top ${industry.toLowerCase()} solutions for businesses`,
+          `How to choose a reliable ${industry.toLowerCase()} provider?`
+        ];
+      }
     }
 
     console.log(`\n🚀 Starting parallel analysis of ${providers.length} providers with optimized queries...`);
