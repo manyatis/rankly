@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
@@ -51,6 +51,7 @@ export default function AEOScorePage() {
   const [keyword, setKeyword] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
+  const [overallCompetitors, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -65,7 +66,7 @@ export default function AEOScorePage() {
   const handleLogin = () => {
     setLoginModalOpen(false);
   };
-  const checkUsageLimits = async () => {
+  const checkUsageLimits = useCallback(async () => {
     if (!user?.email) return;
     
     try {
@@ -77,7 +78,7 @@ export default function AEOScorePage() {
     } catch (error) {
       console.error('Error checking usage limits:', error);
     }
-  };
+  }, [user?.email]);
 
   // Check usage limits when user changes
   useEffect(() => {
@@ -86,11 +87,13 @@ export default function AEOScorePage() {
     } else {
       setUsageInfo(null);
     }
-  }, [user, checkUsageLimits]);
+  }, [user?.email, checkUsageLimits]);
 
 
   const aiProviders: AIProvider[] = [
-    { name: 'OpenAI GPT-4o', model: 'gpt-4o', color: 'bg-green-100 text-green-800' },
+    { name: 'OpenAI', model: '', color: 'bg-green-100 text-green-800' },
+    { name: 'Claude', model: '', color: 'bg-orange-100 text-orange-800' },
+    { name: 'Perplexity', model: '', color: 'bg-blue-100 text-blue-800' },
   ];
 
 
@@ -209,6 +212,7 @@ export default function AEOScorePage() {
         // Show results after brief celebration
         setTimeout(() => {
           setResults(data.results);
+          setOverallCompetitors(data.overallCompetitorAnalysis || []);
           setIsAnalyzing(false);
           setCurrentStep('');
           setProgress(0);
@@ -253,7 +257,7 @@ export default function AEOScorePage() {
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Comprehensive Answers Engine Optimization analytics to measure your business visibility across AI platforms.
-              Get detailed scoring, performance insights, and actionable optimization recommendations. Account required.
+              Free tool limited to 3 models and weakest analytic engines. Professional has complete coverage of models.
             </p>
           </div>
         </div>
@@ -265,12 +269,18 @@ export default function AEOScorePage() {
           <div className="bg-gray-50 rounded-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-blue-800 font-medium">Account Required:</span>
-                <span className="text-blue-700 ml-2">You must create an account to use this free tool.</span>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-blue-800 font-medium">Free Tool Limitations:</span>
+                </div>
+                <div className="ml-7 text-sm text-blue-700 space-y-1">
+                  <div>• Limited to 3 models and weakest analytic engines</div>
+                  <div>• <strong>Professional:</strong> Complete coverage of all AI models</div>
+                  <div>• <strong>Enterprise:</strong> Includes consultation, AI-insights, action plans, and development support</div>
+                </div>
               </div>
             </div>
 
@@ -534,6 +544,57 @@ export default function AEOScorePage() {
                 </div>
               </div>
             </div>
+
+            {/* Overall Competitor Analysis */}
+            {overallCompetitors.length > 0 && (
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-100 rounded-lg p-8 mb-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-4">Overall Competitor Landscape</h3>
+                  <p className="text-gray-700">
+                    Competitors identified across all AI models during analysis of <strong>{businessName}</strong>
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {overallCompetitors.map((competitor, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border hover:shadow-md transition-shadow">
+                        <div className="flex-1">
+                          <span className="font-semibold text-gray-900">{competitor.name}</span>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {competitor.mentions} mention{competitor.mentions !== 1 ? 's' : ''} across models
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className={`text-sm font-bold px-3 py-1 rounded-full ${
+                            competitor.score >= 60 ? 'bg-red-100 text-red-800' : 
+                            competitor.score >= 40 ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {competitor.score}%
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {overallCompetitors.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <div className="text-4xl mb-4">🎉</div>
+                      <p>No significant competitors found across all AI models!</p>
+                      <p className="text-sm mt-2">This could indicate a unique market position or niche focus.</p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600">
+                      Competitor scores represent frequency of mentions across all AI model responses.
+                      Higher scores indicate stronger competitive presence in AI search results.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Detailed Results */}
             <div className="space-y-8">

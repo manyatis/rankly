@@ -1,5 +1,5 @@
 export class PromptEngine {
-  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '10');
+  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '2');
 
   static generateKeywordBasedQueries(businessName: string, keywords: string[], maxQueries: number = this.MAX_QUERIES): string[] {
     console.log(`🎯 Generating ${maxQueries} queries for business: "${businessName}" with keywords:`, keywords);
