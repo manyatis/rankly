@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { PromptTemplateLoader } from '../lib/PromptTemplateLoader';
 
 interface BusinessContext {
   businessName: string;
@@ -23,44 +24,16 @@ export class PromptFormationService {
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
     const { industry, marketDescription, keywords } = context;
 
-    const systemPrompt = `You are an expert in Answer Engine Optimization (AEO) and understand how AI systems respond to queries. Your task is to generate diverse, strategic search queries that would likely trigger AI responses where businesses in specific industries should appear.
-
-IMPORTANT: Do NOT include any specific business names in the queries. The goal is to create generic industry queries that would naturally mention businesses in that industry.
-
-Your goal is to create queries that:
-1. Are realistic questions people actually ask AI assistants
-2. Would naturally include mentions of businesses in the given industry
-3. Cover different types of searches (informational, comparison, recommendation, problem-solving)
-4. Include variations in query complexity and specificity
-5. Target different user intents and search scenarios
-
-Generate queries that would test visibility across various contexts where businesses should appear.`;
-
-    const userPrompt = `Business Context:
-- Industry: ${industry}
-- Market/Customers: ${marketDescription}
-- Primary Keywords: ${keywords.join(', ')}
-
-Generate ${queryCount} diverse search queries that would be relevant for testing businesses in this industry. These should be natural questions that potential customers or industry researchers might ask.
-
-IMPORTANT: Do NOT include any specific business names in the queries.
-
-Include queries that cover:
-- General industry recommendations
-- Problem-solving scenarios
-- Comparison requests
-- "Best of" type questions
-- Specific use case inquiries
-
-IMPORTANT: Avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
-
-Return ONLY a JSON object with this structure:
-{
-  "queries": ["query1", "query2", ...]
-}`;
-  
-// "reasoning": "Brief explanation of the strategy behind these query selections"
     try {
+      // Load prompts from template files
+      const systemPrompt = await PromptTemplateLoader.loadAEOSystemPrompt();
+      const userPrompt = await PromptTemplateLoader.loadGenerateQueriesPrompt({
+        industry,
+        marketDescription,
+        keywords: keywords.join(', '),
+        queryCount: queryCount.toString()
+      });
+
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -87,21 +60,42 @@ Return ONLY a JSON object with this structure:
       // Ensure we have the requested number of queries
       if (result.queries.length < queryCount) {
         // Fallback to default query generation if too few queries
-        result.queries = this.generateFallbackQueries(context, queryCount);
+        result.queries = await this.generateFallbackQueries(context, queryCount);
       }
 
       return result;
-    } catch (error) {
-      console.error('Error generating optimized prompts:', error);
+    } catch (templateError) {
+      console.error('Error loading prompt templates:', templateError);
       
-      // Fallback to default query generation
+      // Final fallback to default query generation
       return {
-        queries: this.generateFallbackQueries(context, queryCount)
+        queries: await this.generateFallbackQueriesLegacy(context, queryCount)
       };
     }
   }
 
-  private generateFallbackQueries(context: BusinessContext, queryCount: number = 2): string[] {
+  private async generateFallbackQueries(context: BusinessContext, queryCount: number = 2): Promise<string[]> {
+    const { industry, keywords } = context;
+    const primaryKeyword = keywords[0] || industry;
+
+    try {
+      // Load fallback queries from template
+      const patterns = await PromptTemplateLoader.loadFallbackQueries();
+      
+      const allQueries = patterns.map(pattern => 
+        pattern
+          .replace(/{{industry}}/g, industry.toLowerCase())
+          .replace(/{{primaryKeyword}}/g, primaryKeyword)
+      );
+
+      return allQueries.slice(0, queryCount);
+    } catch (error) {
+      console.error('Error loading fallback queries:', error);
+      return this.generateFallbackQueriesLegacy(context, queryCount);
+    }
+  }
+
+  private generateFallbackQueriesLegacy(context: BusinessContext, queryCount: number = 2): string[] {
     const { industry, keywords } = context;
     const primaryKeyword = keywords[0] || industry;
 

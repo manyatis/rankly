@@ -1,0 +1,22 @@
+Business Context:
+- Industry: {{industry}}
+- Market/Customers: {{marketDescription}}
+- Primary Keywords: {{keywords}}
+
+Generate {{queryCount}} diverse search queries that would be relevant for testing businesses in this industry. These should be natural questions that potential customers or industry researchers might ask.
+
+IMPORTANT: Do NOT include any specific business names in the queries.
+
+Include queries that cover:
+- General industry recommendations
+- Problem-solving scenarios
+- Comparison requests
+- "Best of" type questions
+- Specific use case inquiries
+
+IMPORTANT: Avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
+
+Return ONLY a JSON object with this structure:
+{
+  "queries": ["query1", "query2", ...]
+}

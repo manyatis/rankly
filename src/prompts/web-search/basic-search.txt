@@ -1,0 +1,5 @@
+Search the web and find current information as of {{currentDate}} for: {{businessDescription}}
+
+Please provide ONLY a concise list of company names, business names, website names, or people names that are currently active and relevant to this query. Include both established companies and newer market entrants. Do not include descriptions, explanations, or additional information. Format as a simple list with one name per line. Be brief and direct.
+
+Focus on companies that are currently operating and visible in the market today.

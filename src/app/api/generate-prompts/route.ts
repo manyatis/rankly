@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PromptFormationService } from '../../../services/PromptFormationService';
 import { AEOAnalysisService } from '../../../services/AEOAnalysisService';
+import { PromptEngineV2 } from '../../../engines/PromptEngineV2';
 
 interface GeneratePromptsRequest {
   businessName: string;
