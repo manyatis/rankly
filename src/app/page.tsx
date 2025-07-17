@@ -223,7 +223,7 @@ export default function Home() {
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
                           <div className="flex-1">
-                            <div className="text-white text-sm font-medium mb-1">"{item.query}"</div>
+                            <div className="text-white text-sm font-medium mb-1">&quot;{item.query}&quot;</div>
                             <div className="text-gray-300 text-xs">{item.mentions} mentions across AI platforms</div>
                           </div>
                           <div className="text-green-400 text-sm font-medium">{item.trend}</div>
@@ -835,7 +835,7 @@ export default function Home() {
                       </svg>
                       <div>
                         <h5 className="text-green-100 font-medium text-sm">Opportunity Found</h5>
-                        <p className="text-green-200 text-xs">You're leading on Perplexity - leverage this advantage!</p>
+                        <p className="text-green-200 text-xs">You&apos;re leading on Perplexity - leverage this advantage!</p>
                       </div>
                     </div>
                   </div>

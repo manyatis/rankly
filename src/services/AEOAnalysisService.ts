@@ -179,7 +179,7 @@ export class AEOAnalysisService {
     return results;
   }
 
-  static aggregateCompetitors(results: ProviderScoringResult[], businessName: string): CompetitorInfo[] {
+  static aggregateCompetitors(results: ProviderScoringResult[]): CompetitorInfo[] {
     console.log(`\n🏢 Aggregating competitors across all models`);
     
     const competitorMentions = new Map<string, { mentions: number, totalQueries: number, providers: Set<string> }>();
@@ -221,7 +221,7 @@ export class AEOAnalysisService {
         return b.mentions - a.mentions;
       })
       .slice(0, 15) // Top 15 competitors
-      .map(({ providers, providerCount, ...competitor }) => competitor); // Remove helper fields
+      .map(({ ...competitor }) => competitor); // Remove helper fields
 
     console.log(`✅ Aggregated competitors: ${aggregatedCompetitors.length} unique competitors found`);
     aggregatedCompetitors.forEach((competitor, index) => {
@@ -256,7 +256,7 @@ export class AEOAnalysisService {
     const results = await this.analyzeProviders(request);
 
     // Aggregate competitors from all models
-    const overallCompetitorAnalysis = this.aggregateCompetitors(results, request.businessName);
+    const overallCompetitorAnalysis = this.aggregateCompetitors(results);
 
     return {
       results,

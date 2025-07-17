@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 
 export default function DashboardPreview() {
@@ -176,10 +174,10 @@ export default function DashboardPreview() {
                 <div className="bg-gray-700 rounded-lg p-4">
                   <h4 className="font-medium text-white mb-2">Top Queries About Your Brand</h4>
                   <div className="space-y-2 text-sm">
-                    <div className="text-gray-300">• "Best marketing automation tools"</div>
-                    <div className="text-gray-300">• "CRM software comparison"</div>
-                    <div className="text-gray-300">• "Email marketing platforms"</div>
-                    <div className="text-gray-300">• "Lead generation tools"</div>
+                    <div className="text-gray-300">• &quot;Best marketing automation tools&quot;</div>
+                    <div className="text-gray-300">• &quot;CRM software comparison&quot;</div>
+                    <div className="text-gray-300">• &quot;Email marketing platforms&quot;</div>
+                    <div className="text-gray-300">• &quot;Lead generation tools&quot;</div>
                   </div>
                 </div>
                 <div className="bg-gray-700 rounded-lg p-4">
@@ -269,7 +267,7 @@ export default function DashboardPreview() {
                     </svg>
                     <div>
                       <h4 className="font-medium text-yellow-100 mb-1">Content Gap Alert</h4>
-                      <p className="text-sm text-yellow-200">Competitors are gaining ground on "AI marketing tools" queries. Action recommended.</p>
+                      <p className="text-sm text-yellow-200">Competitors are gaining ground on &quot;AI marketing tools&quot; queries. Action recommended.</p>
                     </div>
                   </div>
                 </div>

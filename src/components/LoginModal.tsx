@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { signIn } from 'next-auth/react';
 
 interface User {
@@ -15,10 +14,8 @@ interface LoginModalProps {
   onSuccess: (user: User) => void;
 }
 
-export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
-  const [email] = useState('');
+export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [error, setError] = useState('');
-  const { login } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
