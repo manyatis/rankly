@@ -149,7 +149,7 @@ export class AEOAnalysisService {
     // Create analysis promises for all providers to run in parallel
     const analysisPromises = providers.map(async (provider, index) => {
       console.log(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
-      
+
       try {
         const queryFunction = (businessDescription: string) => this.queryAIModel(provider, businessDescription);
         const queryResults = await AnalyticalEngine.analyzeWithVariations(queryFunction, businessName, keywords, this.MAX_QUERIES);
@@ -172,18 +172,20 @@ export class AEOAnalysisService {
         return result;
       } catch (error) {
         console.error(`❌ Error analyzing provider ${provider.name}:`, error);
-        
+
         // Return a failed result rather than throwing to avoid breaking other providers
         return {
           provider,
           response: `Error: Failed to analyze ${provider.name}`,
           aeoScore: 0,
           factors: {
-            mentionFrequency: 0,
-            contextualRelevance: 0,
-            competitiveLandscape: 0,
-            brandAuthority: 0,
-            queryVariationPerformance: 0
+            accuracy: 0,
+            relevance: 0,
+            completeness: 0,
+            brandMention: 0,
+            citations: 0,
+            visibility: 0,
+            ranking: 0
           },
           analysis: `Analysis failed for ${provider.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
           queryVariations: [],
@@ -209,24 +211,24 @@ export class AEOAnalysisService {
 
   static aggregateCompetitors(results: ProviderScoringResult[]): CompetitorInfo[] {
     console.log(`\n🏢 Aggregating competitors across all models`);
-    
+
     const competitorMentions = new Map<string, { mentions: number, totalQueries: number, providers: Set<string> }>();
-    
+
     // Collect all competitors from all providers
     results.forEach(result => {
       console.log(`📊 Processing competitors from ${result.provider.name}: ${result.competitorAnalysis.length} found`);
-      
+
       result.competitorAnalysis.forEach(competitor => {
-        const existing = competitorMentions.get(competitor.name) || { 
-          mentions: 0, 
-          totalQueries: 0, 
-          providers: new Set<string>() 
+        const existing = competitorMentions.get(competitor.name) || {
+          mentions: 0,
+          totalQueries: 0,
+          providers: new Set<string>()
         };
-        
+
         existing.mentions += competitor.mentions;
         existing.totalQueries += result.queryVariations.filter(q => !q.response.startsWith('Error')).length;
         existing.providers.add(result.provider.name);
-        
+
         competitorMentions.set(competitor.name, existing);
       });
     });

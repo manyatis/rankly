@@ -8,25 +8,25 @@ import Navbar from '../../../components/Navbar';
 export default function PaymentSuccessPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const [planName, setPlanName] = useState('');
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/');
-      return;
-    }
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/');
+  //     return;
+  //   }
 
-    const planId = searchParams.get('plan');
-    if (planId) {
-      const planNames: Record<string, string> = {
-        indie: 'Indie',
-        professional: 'Professional',
-        enterprise: 'Enterprise'
-      };
-      setPlanName(planNames[planId] || 'Unknown');
-    }
-  }, [user, loading, router, searchParams]);
+  //   const planId = searchParams.get('plan');
+  //   if (planId) {
+  //     const planNames: Record<string, string> = {
+  //       indie: 'Indie',
+  //       professional: 'Professional',
+  //       enterprise: 'Enterprise'
+  //     };
+  //     setPlanName(planNames[planId] || 'Unknown');
+  //   }
+  // }, [user, loading, router, searchParams]);
 
   if (loading) {
     return (

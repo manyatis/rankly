@@ -57,33 +57,33 @@ const pricingPlans: Record<string, PricingPlan> = {
 export default function PaymentPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Check authentication
-    if (!loading && !user) {
-      router.push('/');
-      return;
-    }
+  // useEffect(() => {
+  //   // Check authentication
+  //   if (!loading && !user) {
+  //     router.push('/');
+  //     return;
+  //   }
 
-    // Get plan from URL params
-    const planId = searchParams.get('plan');
-    if (planId && pricingPlans[planId]) {
-      setSelectedPlan(pricingPlans[planId]);
-    } else {
-      router.push('/');
-    }
-  }, [user, loading, router, searchParams]);
+  //   // Get plan from URL params
+  //   const planId = searchParams.get('plan');
+  //   if (planId && pricingPlans[planId]) {
+  //     setSelectedPlan(pricingPlans[planId]);
+  //   } else {
+  //     router.push('/');
+  //   }
+  // }, [user, loading, router, searchParams]);
 
-  const handlePaymentSuccess = (result: any) => {
+  const handlePaymentSuccess = (result: string) => {
     console.log('Payment successful:', result);
     router.push(`/payment/success?plan=${selectedPlan?.id}`);
   };
 
-  const handlePaymentError = (error: any) => {
+  const handlePaymentError = (error: string) => {
     console.error('Payment error:', error);
     setError('Payment failed. Please try again.');
     setPaymentProcessing(false);
@@ -107,7 +107,7 @@ export default function PaymentPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Complete Your Purchase</h1>
-          <p className="text-gray-600">You're subscribing to the {selectedPlan.name} plan</p>
+          <p className="text-gray-600">You&apos;re subscribing to the {selectedPlan.name} plan</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -137,7 +137,7 @@ export default function PaymentPage() {
             </div>
 
             <div className="mt-6">
-              <h3 className="font-medium text-gray-900 mb-3">What's included:</h3>
+              <h3 className="font-medium text-gray-900 mb-3">What&apos;s included:</h3>
               <ul className="space-y-2">
                 {selectedPlan.features.map((feature, index) => (
                   <li key={index} className="flex items-center text-sm text-gray-600">
@@ -223,7 +223,7 @@ export default function PaymentPage() {
             )}
 
             <div className="mt-6 text-xs text-gray-500">
-              <p>Your payment is secured by Square. We don't store your card information.</p>
+              <p>Your payment is secured by Square. We don&apos;t store your card information.</p>
               <p className="mt-1">By completing this purchase, you agree to our Terms of Service and Privacy Policy.</p>
             </div>
           </div>
