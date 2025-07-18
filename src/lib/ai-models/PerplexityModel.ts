@@ -1,5 +1,4 @@
 import { BaseAIModel } from './BaseAIModel';
-import { PromptEngine } from '../../engines/PromptEngine';
 
 interface PerplexityMessage {
   role: 'system' | 'user' | 'assistant';
@@ -82,16 +81,14 @@ export class PerplexityModel extends BaseAIModel {
     return response.json() as Promise<PerplexityResponse>;
   }
 
-  async query(businessDescription: string): Promise<string> {
+  async query(prompt: string): Promise<string> {
     try {
-      this.logQuery(businessDescription);
+      this.logQuery(prompt);
 
       if (!this.isConfigured()) {
         console.log(`❌ [${this.getName()}] API key not found`);
         return this.getMissingEnvVarError();
       }
-
-      const prompt = PromptEngine.createSearchPrompt(businessDescription);
       
       const requestData: PerplexityRequest = {
         model: 'sonar', 

@@ -590,6 +590,122 @@ export default function Home() {
             </p>
           </div>
 
+          {/* Research-Backed Methodology Section */}
+          <div className="mt-16 sm:mt-20">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                Research-Backed Ranking Methodology
+              </h3>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Our AEO scoring methodology incorporates established research principles and known ranking factors that influence AI search visibility.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Content Authority</h4>
+                </div>
+                <p className="text-gray-600">
+                  Based on established E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) principles and content quality signals that AI models use for source evaluation.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Semantic Relevance</h4>
+                </div>
+                <p className="text-gray-600">
+                  Leveraging natural language processing principles for semantic understanding and context matching in AI model information retrieval.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Citation Patterns</h4>
+                </div>
+                <p className="text-gray-600">
+                  Analyzing how AI models select and rank information sources based on established citation behavior patterns in information retrieval systems.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Structured Data</h4>
+                </div>
+                <p className="text-gray-600">
+                  Incorporating structured data principles and schema markup that enhance AI model information extraction and understanding.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Recency Signals</h4>
+                </div>
+                <p className="text-gray-600">
+                  Based on temporal relevance principles and how AI models weight information freshness and update frequency in their responses.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">User Engagement</h4>
+                </div>
+                <p className="text-gray-600">
+                  Incorporating user interaction patterns and engagement metrics that influence how AI systems rank and present information.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
+              <div className="text-center">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">
+                  Built on Established Research Principles
+                </h4>
+                <p className="text-gray-700 mb-6 max-w-3xl mx-auto">
+                  Our methodology draws from established research in natural language processing, information retrieval, and AI system behavior 
+                  to create a comprehensive AEO scoring approach.
+                </p>
+                <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Natural Language Processing</span>
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Information Retrieval</span>
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">AI System Behavior</span>
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Search Quality Guidelines</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Charts Section */}
           <div className="mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* SEO Effectiveness Chart */}

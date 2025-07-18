@@ -1,15 +1,15 @@
 export abstract class BaseAIModel {
   abstract getName(): string;
   abstract getRequiredEnvVars(): string[];
-  abstract query(businessDescription: string): Promise<string>;
+  abstract query(prompt: string): Promise<string>;
   
   isConfigured(): boolean {
     const requiredVars = this.getRequiredEnvVars();
     return requiredVars.every(varName => !!process.env[varName]);
   }
 
-  protected logQuery(businessDescription: string): void {
-    console.log(`🤖 [${this.getName()}] Querying with: "${businessDescription}"`);
+  protected logQuery(prompt: string): void {
+    console.log(`🤖 [${this.getName()}] Querying with: "${prompt}"`);
   }
 
   protected logSuccess(responseLength: number): void {

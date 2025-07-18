@@ -44,6 +44,20 @@ interface QueryResult {
   mentioned: boolean;
   rankPosition: number;
   relevanceScore: number;
+  wordPositionData?: {
+    matches: Array<{
+      matchedText: string;
+      position: number;
+      lineNumber: number;
+      confidence: number;
+      matchType: 'exact' | 'fuzzy' | 'partial';
+      context: string;
+    }>;
+    totalMatches: number;
+    averagePosition: number;
+    lineNumbers: number[];
+    businessMentionDensity: number;
+  };
 }
 
 // Helper function to extract meaningful keywords from business description
@@ -328,6 +342,18 @@ export default function AEOScorePage() {
               Comprehensive Answers Engine Optimization analytics to measure your business visibility across AI platforms.
               Free tool limited to 3 models. Professional has complete coverage of models.
             </p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mt-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-center mb-3">
+                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-blue-800 font-semibold">Research-Backed Methodology</span>
+              </div>
+              <p className="text-sm text-blue-700 text-center">
+                Our AEO scoring incorporates established research principles and known ranking factors 
+                to analyze 6 key areas that influence AI search visibility.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -650,6 +676,110 @@ export default function AEOScorePage() {
               )}
             </p>
           </div>
+
+          {/* Research Methodology Section */}
+          <div className="mt-12 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8">
+            <div className="text-center mb-8">
+              <h4 className="text-xl font-bold text-gray-900 mb-3">
+                6 Key Ranking Factors
+              </h4>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Our analysis evaluates your content against established factors that influence AI search visibility.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">Content Authority</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  E-E-A-T compliance and expertise signals that AI models use for source evaluation
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">Semantic Relevance</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  Context matching and topical alignment in AI information retrieval
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">Citation Patterns</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  Source selection and ranking behavior in AI model responses
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">Structured Data</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  Schema markup and data extraction optimization
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">Recency Signals</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  Freshness and update frequency considerations
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h5 className="text-sm font-semibold text-gray-900">User Engagement</h5>
+                </div>
+                <p className="text-xs text-gray-600">
+                  Interaction patterns and engagement metrics
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-600">
+                Based on established research principles in natural language processing and information retrieval
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -888,6 +1018,62 @@ export default function AEOScorePage() {
                           <div className="text-sm text-gray-700 mb-2 font-medium">
                             &quot;{query.query}&quot;
                           </div>
+                          
+                          {/* Word Position Analysis */}
+                          {query.wordPositionData && query.wordPositionData.totalMatches > 0 && (
+                            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                              <h5 className="text-sm font-semibold text-blue-900 mb-2">🔍 Word Position Analysis</h5>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                <div className="text-center">
+                                  <div className="font-bold text-blue-700">{query.wordPositionData.totalMatches}</div>
+                                  <div className="text-blue-600">Total Matches</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-blue-700">{Math.round(query.wordPositionData.averagePosition)}</div>
+                                  <div className="text-blue-600">Avg Position</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-blue-700">{query.wordPositionData.lineNumbers.length}</div>
+                                  <div className="text-blue-600">Lines Found</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-bold text-blue-700">{query.wordPositionData.businessMentionDensity.toFixed(1)}%</div>
+                                  <div className="text-blue-600">Mention Density</div>
+                                </div>
+                              </div>
+                              
+                              {/* Individual Matches */}
+                              <div className="mt-3">
+                                <h6 className="text-xs font-medium text-blue-800 mb-2">Found Matches:</h6>
+                                <div className="space-y-1">
+                                  {query.wordPositionData.matches.slice(0, 3).map((match, matchIdx) => (
+                                    <div key={matchIdx} className="flex items-center space-x-2 text-xs">
+                                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${
+                                        match.matchType === 'exact' ? 'bg-green-500' : 
+                                        match.matchType === 'fuzzy' ? 'bg-yellow-500' : 'bg-orange-500'
+                                      }`}></span>
+                                      <span className="font-medium text-gray-700">&quot;{match.matchedText}&quot;</span>
+                                      <span className="text-gray-500">Line {match.lineNumber}</span>
+                                      <span className="text-gray-500">Pos {match.position}</span>
+                                      <span className={`px-1 py-0.5 rounded text-xs ${
+                                        match.confidence >= 90 ? 'bg-green-100 text-green-700' :
+                                        match.confidence >= 70 ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-orange-100 text-orange-700'
+                                      }`}>
+                                        {match.confidence}%
+                                      </span>
+                                    </div>
+                                  ))}
+                                  {query.wordPositionData.matches.length > 3 && (
+                                    <div className="text-xs text-gray-500 italic">
+                                      +{query.wordPositionData.matches.length - 3} more matches
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="relative group">
                             <div className="text-sm text-gray-600 bg-white p-3 rounded border cursor-pointer hover:bg-gray-50 transition-colors">
                               {query.response.length > 200 ? (

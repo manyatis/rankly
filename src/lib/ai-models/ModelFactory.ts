@@ -49,9 +49,9 @@ export class ModelFactory {
     return this.models.has(type as ModelType);
   }
 
-  static async queryModel(type: ModelType, businessDescription: string): Promise<string> {
+  static async queryModel(type: ModelType, prompt: string): Promise<string> {
     const model = this.createModel(type);
-    return await model.query(businessDescription);
+    return await model.query(prompt);
   }
 
   static getSupportedModelTypes(): ModelType[] {

@@ -14,6 +14,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
           </h1>
           <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
             Comprehensive analytics and optimization solutions for Answers Engine Optimization (AEO).
+            Built on established research principles and known ranking factors.
             Free tool limited to 3 models. Professional has complete coverage of models.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">

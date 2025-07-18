@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { BaseAIModel } from './BaseAIModel';
-import { PromptEngine } from '../../engines/PromptEngine';
 
 export class AnthropicModel extends BaseAIModel {
   private client: Anthropic | null = null;
@@ -24,9 +23,9 @@ export class AnthropicModel extends BaseAIModel {
     return this.client;
   }
 
-  async query(businessDescription: string): Promise<string> {
+  async query(prompt: string): Promise<string> {
     try {
-      this.logQuery(businessDescription);
+      this.logQuery(prompt);
 
       if (!this.isConfigured()) {
         console.log(`❌ [${this.getName()}] API key not found`);
@@ -34,7 +33,6 @@ export class AnthropicModel extends BaseAIModel {
       }
 
       const client = this.getClient();
-      const prompt = PromptEngine.createSearchPrompt(businessDescription);
 
       const response = await client.messages.create({
         model: 'claude-3-5-haiku-latest',

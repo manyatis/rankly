@@ -1,6 +1,5 @@
 import OpenAI from 'openai';
 import { BaseAIModel } from './BaseAIModel';
-import { PromptEngine } from '../../engines/PromptEngine';
 
 export class OpenAIModel extends BaseAIModel {
   private client: OpenAI | null = null;
@@ -24,9 +23,9 @@ export class OpenAIModel extends BaseAIModel {
     return this.client;
   }
 
-  async query(businessDescription: string): Promise<string> {
+  async query(prompt: string): Promise<string> {
     try {
-      this.logQuery(businessDescription);
+      this.logQuery(prompt);
 
       if (!this.isConfigured()) {
         console.log(`❌ [${this.getName()}] API key not found`);
@@ -38,7 +37,7 @@ export class OpenAIModel extends BaseAIModel {
         model: 'gpt-4.1-mini',
         max_output_tokens: 500,
         tools: [{ type: 'web_search_preview' }],
-        input: PromptEngine.createSearchPrompt(businessDescription)
+        input: prompt
       });
 
       const result = response.output_text;

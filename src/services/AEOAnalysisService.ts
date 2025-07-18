@@ -78,9 +78,9 @@ export class AEOAnalysisService {
     return 'openai';
   }
 
-  private static async queryAIModel(provider: AIProvider, businessDescription: string): Promise<string> {
+  private static async queryAIModel(provider: AIProvider, prompt: string): Promise<string> {
     const modelType = this.getModelTypeFromProvider(provider);
-    return await ModelFactory.queryModel(modelType, businessDescription);
+    return await ModelFactory.queryModel(modelType, prompt);
   }
 
   static async validateAuthAndUsage(): Promise<AuthValidationResult> {
@@ -200,7 +200,7 @@ export class AEOAnalysisService {
       console.log(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
 
       try {
-        const queryFunction = (businessDescription: string) => this.queryAIModel(provider, businessDescription);
+        const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
         const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, businessName, optimizedQueries);
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName, keywords);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';

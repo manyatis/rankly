@@ -29,7 +29,7 @@ export class RankingEngine {
   static calculateEnhancedAEOScore(
     queryResults: QueryResult[],
     businessName: string,
-    _keywords: string[]
+    keywords: string[]
   ): ScoringResult {
     console.log(`\n📊 Calculating AEO score for "${businessName}" using position + word count algorithm`);
     console.log(`📈 Query results summary: ${queryResults.length} total queries`);
