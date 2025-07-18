@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       industry: requestData.industry,
       marketDescription: requestData.marketDescription,
       keywords: requestData.keywords
-    }, 3); // Generate 3 prompts for editing
+    }, 5); // Generate 5 prompts for editing
 
     console.log(`✅ Generated ${promptResult.queries.length} prompts`);
 
