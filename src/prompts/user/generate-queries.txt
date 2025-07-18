@@ -9,14 +9,13 @@ IMPORTANT: Do NOT include any specific business names in the queries.
 
 Include queries that cover:
 - General industry recommendations
-- Problem-solving scenarios
 - Comparison requests
 - "Best of" type questions
-- Specific use case inquiries
+- Questions that a consumer looking to make a purchase in the industry would ask
 
 IMPORTANT: Avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
 
-Return ONLY a JSON object with this structure:
+Return ONLY a JSON object with this structure and should only have {{queryCount}} queries inside the list:
 {
   "queries": ["query1", "query2", ...]
 }

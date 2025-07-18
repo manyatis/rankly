@@ -338,9 +338,9 @@ export default function AEOScorePage() {
           <nav className="flex space-x-8" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('input')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'input'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === 'input'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
             >
               1. Business Information
@@ -348,11 +348,11 @@ export default function AEOScorePage() {
             <button
               onClick={() => setActiveTab('prompts')}
               disabled={!showPromptEditor}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'prompts'
-                  ? 'border-blue-500 text-blue-600'
-                  : showPromptEditor
-                    ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    : 'border-transparent text-gray-300 cursor-not-allowed'
+              className={`py-4 px-1 border-b-2 font-medium text-sm cursor-pointer ${activeTab === 'prompts'
+                ? 'border-blue-500 text-blue-600'
+                : showPromptEditor
+                  ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-300 cursor-not-allowed'
                 }`}
             >
               2. Review & Edit Prompts
@@ -362,31 +362,29 @@ export default function AEOScorePage() {
                 </span>
               )}
             </button>
+
+            <button
+              onClick={() => {}}
+              disabled={true}
+              className='border-transparent text-gray-300 cursor-not-allowed'
+            >
+              3. Gain Insights to boost AEO
+              {showPromptEditor && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Professional+
+                </span>
+              )}
+            </button>
           </nav>
         </div>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'input' && (
-        <div className="bg-white py-16">
+        <div className="bg-white ">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-gray-50 rounded-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Start Your AEO Analytics Report</h2>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-blue-800 font-medium">Free Tool Limitations:</span>
-                  </div>
-                  <div className="ml-7 text-sm text-blue-700 space-y-1">
-                    <div>• Limited to 3 models</div>
-                    <div>• <strong>Professional:</strong> Complete coverage of all AI models</div>
-                    <div>• <strong>Enterprise:</strong> Includes consultation, AI-insights, action plans, and development support</div>
-                  </div>
-                </div>
-              </div>
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
@@ -471,7 +469,7 @@ export default function AEOScorePage() {
 
       {/* Prompts Tab */}
       {activeTab === 'prompts' && showPromptEditor && (
-        <div className="bg-white py-16">
+        <div className="bg-white">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8">
               <div className="text-center mb-6">
@@ -484,8 +482,7 @@ export default function AEOScorePage() {
                     <span className="text-blue-800 font-medium">✨ AI-Generated Prompts + Proprietary Optimization</span>
                   </div>
                   <p className="text-sm text-blue-700 text-center">
-                    These prompts were generated using our proprietary AI algorithms for maximum accuracy in AEO scoring.
-                    You can edit them below or proceed with the optimized versions.
+                    These prompts will run along side proprietary generated AEO prompts to guage the score.
                   </p>
                 </div>
               </div>
@@ -495,7 +492,6 @@ export default function AEOScorePage() {
                   <div key={index} className="relative group">
                     {/* Floating Professional Prompt Box */}
                     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                      {/* Header with Edit Button */}
                       <div className="relative bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -509,22 +505,7 @@ export default function AEOScorePage() {
                               <p className="text-sm text-gray-600">AI-optimized query for maximum accuracy</p>
                             </div>
                           </div>
-                          {/* Edit Button in Top Right */}
-                          <button
-                            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                            onClick={() => {
-                              const textarea = document.getElementById(`prompt-${index}`) as HTMLTextAreaElement;
-                              if (textarea) {
-                                textarea.focus();
-                                textarea.select();
-                              }
-                            }}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>Edit</span>
-                          </button>
+
                         </div>
                       </div>
 
@@ -567,7 +548,7 @@ export default function AEOScorePage() {
                                 newPrompts[index] = generatedPrompts[index] || '';
                                 setEditablePrompts(newPrompts);
                               }}
-                              className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                              className="cursor-pointer text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
                             >
                               Reset to Original
                             </button>
@@ -583,16 +564,15 @@ export default function AEOScorePage() {
                 <button
                   onClick={() => {
                     setActiveTab('input'); // Go back to input tab
-                    setEditablePrompts([...generatedPrompts]);
                   }}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  className="cursor-pointer px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                 >
                   ← Back to Business Info
                 </button>
                 <button
                   onClick={handleAnalyze}
-                  disabled={isAnalyzing || editablePrompts.some(p => !p.trim())}
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isAnalyzing}
+                  className="cursor-pointer bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? (
                     <span className="flex items-center space-x-2">
@@ -754,10 +734,6 @@ export default function AEOScorePage() {
                           style={{ width: `${result.aeoScore}%` }}
                         ></div>
                       </div>
-
-                      <div className="text-sm text-gray-600">
-                        Found in {result.queryVariations.filter(q => q.mentioned).length} AI-generated company lists
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -784,18 +760,9 @@ export default function AEOScorePage() {
                       <div key={idx} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border hover:shadow-md transition-shadow">
                         <div className="flex-1">
                           <span className="font-semibold text-gray-900">{competitor.name}</span>
-                          <div className="text-xs text-gray-600 mt-1">
-                            {competitor.mentions} mention{competitor.mentions !== 1 ? 's' : ''} across models
-                          </div>
+
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <div className={`text-sm font-bold px-3 py-1 rounded-full ${competitor.score >= 60 ? 'bg-red-100 text-red-800' :
-                              competitor.score >= 40 ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-600'
-                            }`}>
-                            {competitor.score}%
-                          </div>
-                        </div>
+
                       </div>
                     ))}
                   </div>

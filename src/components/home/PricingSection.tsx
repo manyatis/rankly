@@ -61,7 +61,7 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
                 <div className="text-xl lg:text-2xl text-gray-400 line-through">$45</div>
                 <div className="text-3xl lg:text-4xl font-bold text-green-600">$20</div>
               </div>
-              <p className="text-gray-600 text-sm lg:text-base">per month (limited time offer)</p>
+              <p className="text-gray-600 text-sm lg:text-base">per month (create account before release for discount)</p>
             </div>
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
               <li className="flex items-center text-gray-700">

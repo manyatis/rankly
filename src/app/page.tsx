@@ -847,7 +847,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 SearchDogAI. All rights reserved. Leading the future of AEO analytics.</p>
+            <p>&copy; 2025 American Code LLC. All rights reserved. Leading the future of AEO analytics.</p>
           </div>
         </div>
       </footer>

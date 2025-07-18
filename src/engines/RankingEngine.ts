@@ -29,9 +29,9 @@ export class RankingEngine {
   static calculateEnhancedAEOScore(
     queryResults: QueryResult[],
     businessName: string,
-    keywords: string[]
+    _keywords: string[]
   ): ScoringResult {
-    console.log(`\n📊 Calculating AEO score for "${businessName}"`);
+    console.log(`\n📊 Calculating AEO score for "${businessName}" using position + word count algorithm`);
     console.log(`📈 Query results summary: ${queryResults.length} total queries`);
 
     const factors: ScoringFactors = {
@@ -49,74 +49,82 @@ export class RankingEngine {
     const validResponses = queryResults.filter(r => !r.response.startsWith('Error')).length;
 
     console.log(`📊 Found ${mentionedQueries} mentions out of ${totalQueries} queries`);
-    console.log(`📊 ${validResponses} valid responses (non-error)`);
 
-    // Calculate visibility score
+    // Calculate visibility score (how often mentioned)
     factors.visibility = totalQueries > 0 ? Math.round((mentionedQueries / totalQueries) * 100) : 0;
-    console.log(`📊 Visibility score: ${factors.visibility}%`);
+    console.log(`📊 Visibility: ${factors.visibility}% (${mentionedQueries}/${totalQueries} queries)`);
 
-    // Calculate relevance and ranking scores
-    if (mentionedQueries > 0) {
-      const avgRelevance = queryResults
-        .filter(r => r.mentioned)
-        .reduce((sum, r) => sum + r.relevanceScore, 0) / mentionedQueries;
-      factors.relevance = Math.round(avgRelevance);
-      console.log(`📊 Average relevance score: ${factors.relevance}`);
-
-      const avgRankPosition = queryResults
-        .filter(r => r.mentioned && r.rankPosition > 0)
-        .reduce((sum, r) => sum + r.rankPosition, 0) / Math.max(mentionedQueries, 1);
-      factors.ranking = Math.round(Math.max(0, 100 - (avgRankPosition - 1) * 25));
-      console.log(`📊 Average rank position: ${avgRankPosition.toFixed(2)} → ranking score: ${factors.ranking}`);
-
-      factors.brandMention = factors.visibility;
+    if (mentionedQueries === 0) {
+      // No mentions found - return zero scores
+      const aeoScore = 0;
+      const analysis = `No mentions found for ${businessName} in any of the ${totalQueries} AI responses. Critical optimization needed.`;
+      
+      return {
+        aeoScore,
+        factors,
+        analysis,
+        overallVisibility: 0,
+        competitorAnalysis: this.analyzeCompetitors(queryResults, businessName),
+        missedResponses: queryResults.filter(r => !r.response.startsWith('Error'))
+      };
     }
 
-    // Calculate accuracy score
-    factors.accuracy = validResponses > 0 ? Math.round((validResponses / totalQueries) * 100) : 0;
-    console.log(`📊 Accuracy score: ${factors.accuracy}%`);
+    // Calculate position-based scores with exponential decay
+    let totalPositionScore = 0;
+    let totalWordCount = 0;
+    
+    queryResults.filter(r => r.mentioned).forEach(result => {
+      // Position Score: Heavy exponential decay for position
+      // Position 1 = 100, Position 2 = 75, Position 3 = 50, Position 4+ = 25-(position*2)
+      let positionScore = 0;
+      if (result.rankPosition === 1) positionScore = 100;
+      else if (result.rankPosition === 2) positionScore = 75;
+      else if (result.rankPosition === 3) positionScore = 50;
+      else if (result.rankPosition >= 4) positionScore = Math.max(0, 25 - (result.rankPosition * 2));
+      
+      totalPositionScore += positionScore;
+      
+      // Word Count Score: Count business name mentions
+      const businessNameLower = businessName.toLowerCase();
+      const responseLower = result.response.toLowerCase();
+      const mentions = (responseLower.match(new RegExp(businessNameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+      totalWordCount += mentions * 20; // 20 points per mention, max realistic ~100
+      
+      console.log(`   Query: Position ${result.rankPosition} = ${positionScore}pts, ${mentions} mentions = ${mentions * 20}pts`);
+    });
 
-    // Calculate completeness score
-    const responseLengths = queryResults
-      .filter(r => r.mentioned)
-      .map(r => r.response.length);
-    const avgLength = responseLengths.length > 0
-      ? responseLengths.reduce((sum, len) => sum + len, 0) / responseLengths.length
-      : 0;
-    factors.completeness = Math.min(100, Math.round((avgLength / 300) * 100));
+    // Calculate average scores
+    const avgPositionScore = Math.round(totalPositionScore / mentionedQueries);
+    const avgWordCountScore = Math.min(100, Math.round(totalWordCount / mentionedQueries));
+    
+    console.log(`📍 Average Position Score: ${avgPositionScore}/100`);
+    console.log(`🔢 Average Word Count Score: ${avgWordCountScore}/100`);
 
-    // Calculate citation score
-    const citationCount = queryResults.filter(r =>
-      r.response.includes('http') ||
-      r.response.includes('www.') ||
-      r.response.includes('source') ||
-      r.response.includes('according to')
-    ).length;
-    factors.citations = totalQueries > 0 ? Math.round((citationCount / totalQueries) * 100) : 0;
+    // Fill in factors for compatibility
+    factors.ranking = avgPositionScore;      // Position-based ranking
+    factors.relevance = avgWordCountScore;   // Word count-based relevance
+    factors.brandMention = factors.visibility;
+    factors.accuracy = Math.round((validResponses / totalQueries) * 100);
+    factors.completeness = Math.min(100, Math.round(avgWordCountScore * 0.8)); // Derived from word count
+    factors.citations = 50; // Neutral score for citations
 
-    // Calculate final AEO score
+    // Final AEO Score: HEAVILY weighted toward position/visibility
     const aeoScore = Math.round(
-      (factors.visibility * 0.3) +
-      (factors.relevance * 0.25) +
-      (factors.ranking * 0.2) +
-      (factors.brandMention * 0.15) +
-      (factors.completeness * 0.05) +
-      (factors.citations * 0.05)
+      (factors.ranking * 0.50) +        // Position: 50% weight
+      (factors.visibility * 0.30) +     // Visibility: 30% weight  
+      (factors.relevance * 0.20)        // Word count: 20% weight
     );
 
-    console.log(`🏆 Final AEO Score calculation:`);
-    console.log(`   Visibility (30%): ${factors.visibility} × 0.3 = ${(factors.visibility * 0.3).toFixed(1)}`);
-    console.log(`   Relevance (25%): ${factors.relevance} × 0.25 = ${(factors.relevance * 0.25).toFixed(1)}`);
-    console.log(`   Ranking (20%): ${factors.ranking} × 0.2 = ${(factors.ranking * 0.2).toFixed(1)}`);
-    console.log(`   Brand Mention (15%): ${factors.brandMention} × 0.15 = ${(factors.brandMention * 0.15).toFixed(1)}`);
-    console.log(`   Completeness (5%): ${factors.completeness} × 0.05 = ${(factors.completeness * 0.05).toFixed(1)}`);
-    console.log(`   Citations (5%): ${factors.citations} × 0.05 = ${(factors.citations * 0.05).toFixed(1)}`);
+    console.log(`🏆 Final AEO Score calculation (Position + Word Count Algorithm):`);
+    console.log(`   Position (50%): ${factors.ranking} × 0.50 = ${(factors.ranking * 0.50).toFixed(1)}`);
+    console.log(`   Visibility (30%): ${factors.visibility} × 0.30 = ${(factors.visibility * 0.30).toFixed(1)}`);
+    console.log(`   Word Count (20%): ${factors.relevance} × 0.20 = ${(factors.relevance * 0.20).toFixed(1)}`);
     console.log(`🎯 TOTAL AEO SCORE: ${aeoScore}/100`);
 
     const overallVisibility = factors.visibility;
 
     // Generate analysis
-    const analysis = this.generateAnalysis(aeoScore, businessName, mentionedQueries, totalQueries, keywords);
+    const analysis = this.generatePositionAnalysis(aeoScore, businessName, mentionedQueries, totalQueries, avgPositionScore, avgWordCountScore);
 
     // Perform competitor analysis
     const competitorAnalysis = this.analyzeCompetitors(queryResults, businessName);
@@ -132,6 +140,50 @@ export class RankingEngine {
       competitorAnalysis,
       missedResponses
     };
+  }
+
+  private static generatePositionAnalysis(
+    aeoScore: number, 
+    businessName: string, 
+    mentionedQueries: number, 
+    totalQueries: number, 
+    avgPositionScore: number, 
+    avgWordCountScore: number
+  ): string {
+    let analysis = '';
+    
+    // Overall performance assessment
+    if (aeoScore >= 80) {
+      analysis = `🏆 Excellent AEO performance! `;
+    } else if (aeoScore >= 60) {
+      analysis = `🥈 Good AEO performance. `;
+    } else if (aeoScore >= 40) {
+      analysis = `🥉 Fair AEO performance. `;
+    } else {
+      analysis = `❌ Poor AEO performance. `;
+    }
+
+    // Visibility analysis
+    const visibilityRate = Math.round((mentionedQueries / totalQueries) * 100);
+    analysis += `${businessName} appears in ${mentionedQueries}/${totalQueries} queries (${visibilityRate}% visibility). `;
+
+    // Position analysis
+    if (avgPositionScore >= 80) {
+      analysis += `Strong positioning with top-3 rankings. `;
+    } else if (avgPositionScore >= 50) {
+      analysis += `Moderate positioning, some improvement needed. `;
+    } else {
+      analysis += `Weak positioning, appears low in responses. `;
+    }
+
+    // Word count analysis
+    if (avgWordCountScore >= 60) {
+      analysis += `Good mention frequency indicates strong relevance.`;
+    } else {
+      analysis += `Low mention frequency suggests limited context relevance.`;
+    }
+
+    return analysis;
   }
 
   private static generateAnalysis(aeoScore: number, businessName: string, mentionedQueries: number, totalQueries: number, keywords: string[]): string {

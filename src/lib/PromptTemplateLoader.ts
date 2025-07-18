@@ -89,6 +89,27 @@ export class PromptTemplateLoader {
   }
 
   /**
+   * Generic prompt loader for new agentic analysis templates
+   */
+  static async loadPrompt(templatePath: string, variables: Record<string, string> = {}): Promise<string> {
+    const filePath = join(this.PROMPTS_BASE_PATH, templatePath);
+    
+    try {
+      let content = await readFile(filePath, 'utf-8');
+      
+      // Replace template variables
+      Object.entries(variables).forEach(([key, value]) => {
+        const placeholder = `{{${key}}}`;
+        content = content.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'), 'g'), value);
+      });
+      
+      return content;
+    } catch (error) {
+      throw new Error(`Failed to load prompt template: ${filePath}. ${error}`);
+    }
+  }
+
+  /**
    * Load all query variation types
    */
   static async loadAllQueryVariations(): Promise<{
