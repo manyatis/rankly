@@ -87,6 +87,36 @@ export default function LearnPage() {
               </ul>
             </div>
 
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8">
+              <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="m9.69 18.933.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 0 0 .281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 1 0 3 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 0 0 2.273 1.765 11.842 11.842 0 0 0 .976.566l.062.029.018.008.006.003ZM10 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Generative Engine Optimization (GEO)</h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                GEO is the strategic optimization of content to improve visibility and citation in AI-generated responses from large language models and generative AI systems.
+              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span>Optimizes for generative AI model training data</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span>Focuses on factual accuracy and source attribution</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span>Emphasizes comprehensive, well-structured information</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 mt-1">•</span>
+                  <span>Targets AI knowledge synthesis patterns</span>
+                </li>
+              </ul>
+            </div>
+
           </div>
         </div>
       </div>

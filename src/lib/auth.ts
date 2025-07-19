@@ -15,7 +15,7 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
   });
 
   if (!user) {
-    return { canUse: false, usageCount: 0, maxUsage: 5, tier: 'free' };
+    return { canUse: false, usageCount: 0, maxUsage: 3, tier: 'free' };
   }
 
   // Professional and Enterprise users get unlimited usage
@@ -39,11 +39,11 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
         lastUsageDate: new Date()
       }
     });
-    return { canUse: true, usageCount: 0, maxUsage: 5, tier: user.plan };
+    return { canUse: true, usageCount: 0, maxUsage: 3, tier: user.plan };
   }
 
-  const canUse = user.dailyUsageCount < 5;
-  return { canUse, usageCount: user.dailyUsageCount, maxUsage: 5, tier: user.plan };
+  const canUse = user.dailyUsageCount < 3;
+  return { canUse, usageCount: user.dailyUsageCount, maxUsage: 3, tier: user.plan };
 }
 
 export async function incrementUsage(email: string): Promise<boolean> {
@@ -87,7 +87,7 @@ export async function incrementUsage(email: string): Promise<boolean> {
       }
     });
 
-    return newCount <= 5;
+    return newCount <= 3;
   } catch (error) {
     console.error('Error incrementing usage:', error);
     return false;
