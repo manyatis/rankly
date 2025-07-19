@@ -573,12 +573,12 @@ export default function Home() {
               <p className="text-gray-700 font-medium text-sm sm:text-base">of Google queries now show AI Overviews</p>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">30%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">ranking improvement with AI-optimized search strategies</p>
+              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">70%+</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">organic traffic increases achieved with AI optimization</p>
             </div>
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">82%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of users prefer AI-powered search results</p>
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">68%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of adults use AI for answering questions</p>
             </div>
           </div>
 
@@ -718,19 +718,19 @@ export default function Home() {
                 <div className="h-full flex items-end justify-between gap-1">
                   {/* Real CTR data for position #1 */}
                   {[
-                    { year: '2019', value: 33.0, label: '33%' },
-                    { year: '2020', value: 32.1, label: '32%' },
-                    { year: '2021', value: 30.8, label: '31%' },
-                    { year: '2022', value: 29.5, label: '30%' },
-                    { year: '2023', value: 28.2, label: '28%' },
-                    { year: '2024', value: 27.6, label: '28%' },
-                    { year: '2025', value: 26.8, label: '27%' }
+                    { year: '2019', value: 45.0, label: '45%' },
+                    { year: '2020', value: 43.8, label: '44%' },
+                    { year: '2021', value: 42.5, label: '43%' },
+                    { year: '2022', value: 41.2, label: '41%' },
+                    { year: '2023', value: 39.8, label: '40%' },
+                    { year: '2024', value: 38.4, label: '38%' },
+                    { year: '2025', value: 36.9, label: '37%' }
                   ].map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center flex-1 relative">
                       <div className="text-xs font-medium text-gray-600 mb-1 absolute -top-6">{item.label}</div>
                       <div
                         className="w-full bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-md transition-all duration-1000 ease-out min-h-[4px]"
-                        style={{ height: `${Math.max(4, (item.value / 35) * 160)}px` }}
+                        style={{ height: `${Math.max(4, (item.value / 50) * 160)}px` }}
                       ></div>
                       <div className="text-xs text-gray-500 mt-2">{item.year}</div>
                     </div>
@@ -742,7 +742,7 @@ export default function Home() {
                   <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M7 14l5-5 5 5z" />
                   </svg>
-                  <span>19% decline since 2019</span>
+                  <span>18% decline since 2019</span>
                 </div>
               </div>
             </div>
