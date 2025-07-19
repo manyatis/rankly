@@ -1,116 +1,125 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { SquareClient } from 'square';
+import { SquareClient } from 'square';
 import { randomUUID } from 'crypto';
 import { getUser } from '../../../../lib/auth';
+import { PrismaClient } from '../../../../../src/generated/prisma';
 
-// // Handle BigInt serialization for Square API responses
-// BigInt.prototype.toJSON = function () {
-//   return this.toString();
-// };
+// Initialize Square client
+const client = new SquareClient({
+  token: process.env.SQUARE_ACCESS_TOKEN!,
+  environment: process.env.SQUARE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
+});
 
-// // Initialize Square client
-// const client = new SquareClient({
-//   token: process.env.SQUARE_ACCESS_TOKEN!,
-//   environment: process.env.SQUARE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
-// });
-
-// const { payments } = client;
+const { payments } = client;
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
-  // try {
-  //   // Verify authentication
-  //   const user = await getUser();
-  //   if (!user?.email) {
-  //     return NextResponse.json(
-  //       { error: 'Authentication required' },
-  //       { status: 401 }
-  //     );
-  //   }
+  try {
+    // Verify authentication
+    const user = await getUser();
+    if (!user?.email) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
 
-  //   const { sourceId, amount, planId, planName, userEmail } = await request.json();
+    const { sourceId, amount, planId, planName, userEmail } = await request.json();
 
-  //   // Validate required fields
-  //   if (!sourceId || !amount || !planId || !planName) {
-  //     return NextResponse.json(
-  //       { error: 'Missing required payment information' },
-  //       { status: 400 }
-  //     );
-  //   }
+    // Validate required fields
+    if (!sourceId || !amount || !planId || !planName) {
+      return NextResponse.json(
+        { error: 'Missing required payment information' },
+        { status: 400 }
+      );
+    }
 
-  //   // Validate amount is positive
-  //   if (amount <= 0) {
-  //     return NextResponse.json(
-  //       { error: 'Invalid payment amount' },
-  //       { status: 400 }
-  //     );
-  //   }
+    // Validate amount is positive
+    if (amount <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid payment amount' },
+        { status: 400 }
+      );
+    }
 
-  //   // Verify user email matches authenticated user
-  //   if (userEmail !== user.email) {
-  //     return NextResponse.json(
-  //       { error: 'User verification failed' },
-  //       { status: 403 }
-  //     );
-  //   }
+    // Verify user email matches authenticated user
+    if (userEmail !== user.email) {
+      return NextResponse.json(
+        { error: 'User verification failed' },
+        { status: 403 }
+      );
+    }
 
-  //   console.debug(`🔄 Processing payment for ${user.email}: ${planName} plan ($${amount / 100})`);
+    console.debug(`🔄 Processing payment for ${user.email}: ${planName} plan ($${amount / 100})`);
 
-  //   // Create payment request
-  //   const paymentRequest = {
-  //     idempotencyKey: randomUUID(),
-  //     sourceId,
-  //     amountMoney: {
-  //       amount: amount,
-  //       currency: 'USD',
-  //     },
-  //     note: `SearchDogAI ${planName} Plan - ${user.email}`,
-  //     buyerEmailAddress: user.email,
-  //   };
+    // Create payment request
+    const paymentRequest = {
+      idempotencyKey: randomUUID(),
+      sourceId,
+      amountMoney: {
+        amount: amount,
+        currency: 'USD' as const,
+      },
+      note: `SearchDogAI ${planName} Plan - ${user.email}`,
+      buyerEmailAddress: user.email,
+    };
 
-  //   console.debug('💳 Sending payment request to Square...');
+    console.debug('💳 Sending payment request to Square...');
     
-  //   // Process payment with Square
-  //   // const { result } = await payments.complete(paymentRequest);
+    // Process payment with Square
+    const response = await payments.create(paymentRequest);
 
-  //   console.debug('✅ Payment processed successfully:', result.payment?.id);
+    console.debug('✅ Payment processed successfully:', response.payment?.id);
 
-  //   // TODO: Update user's subscription status in database
-  //   // This would typically involve:
-  //   // 1. Updating user's plan in your database
-  //   // 2. Setting subscription start/end dates
-  //   // 3. Updating usage limits
-  //   // 4. Sending confirmation email
-
-  //   return NextResponse.json({
-  //     success: true,
-  //     paymentId: result.payment?.id,
-  //     status: result.payment?.status,
-  //     planId,
-  //     planName,
-  //     amount: amount / 100,
-  //     message: 'Payment processed successfully'
-  //   });
-
-  // } catch (error) {
-  //   console.error('❌ Square payment error:', error);
-    
-  //   // Handle Square API errors
-  //   if (error && typeof error === 'object' && 'errors' in error) {
-  //     const squareError = error as any;
-  //     const errorMessage = squareError.errors?.[0]?.detail || 'Payment processing failed';
+    // Update user's subscription status in database
+    if (response.payment?.status === 'COMPLETED') {
+      console.debug('💾 Updating user subscription in database...');
       
-  //     return NextResponse.json(
-  //       { error: errorMessage },
-  //       { status: 400 }
-  //     );
-  //   }
+      await prisma.user.update({
+        where: { email: user.email },
+        data: {
+          plan: planId,
+          subscriptionTier: planId,
+          dailyUsageCount: 0, // Reset usage count on plan upgrade
+          updatedAt: new Date()
+        }
+      });
+      
+      console.debug('✅ User subscription updated successfully');
+    }
 
-  //   // Handle other errors
-  //   return NextResponse.json(
-  //     { error: 'Payment processing failed. Please try again.' },
-  //     { status: 500 }
-  //   );
-  // }
+    return NextResponse.json({
+      success: true,
+      paymentId: response.payment?.id,
+      status: response.payment?.status,
+      planId,
+      planName,
+      amount: amount / 100,
+      message: 'Payment processed successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Square payment error:', error);
+    
+    // Handle Square API errors
+    if (error && typeof error === 'object' && 'errors' in error) {
+      const squareError = error as { errors?: Array<{ detail?: string }> };
+      const errorMessage = squareError.errors?.[0]?.detail || 'Payment processing failed';
+      
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 400 }
+      );
+    }
+
+    // Handle other errors
+    return NextResponse.json(
+      { error: 'Payment processing failed. Please try again.' },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
 // Handle unsupported methods

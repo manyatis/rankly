@@ -6,6 +6,9 @@ import { signOut } from 'next-auth/react';
 interface User {
   id: number;
   email: string;
+  name?: string | null;
+  image?: string | null;
+  plan: string;
 }
 
 interface AuthContextType {

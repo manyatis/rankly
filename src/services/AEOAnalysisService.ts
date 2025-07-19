@@ -3,6 +3,7 @@ import { AnalyticalEngine, QueryResult } from '../engines/AnalyticalEngine';
 import { RankingEngine, ScoringFactors, CompetitorInfo } from '../engines/RankingEngine';
 import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
 import { PromptFormationService } from './PromptFormationService';
+import { PrismaClient } from '../generated/prisma';
 
 export interface AIProvider {
   name: string;
@@ -58,6 +59,7 @@ export interface AuthValidationResult {
 
 export class AEOAnalysisService {
   private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '5');
+  private static readonly prisma = new PrismaClient();
 
   private static getModelTypeFromProvider(provider: AIProvider): ModelType {
     const providerNameToType: Record<string, ModelType> = {
@@ -202,7 +204,7 @@ export class AEOAnalysisService {
       try {
         const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
         const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, businessName, optimizedQueries);
-        const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName, keywords);
+        const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 
         const result: ProviderScoringResult = {
@@ -310,6 +312,53 @@ export class AEOAnalysisService {
     return aggregatedCompetitors;
   }
 
+  private static async saveAeoScore(
+    userId: number, 
+    businessName: string, 
+    keywords: string[], 
+    result: ProviderScoringResult
+  ): Promise<void> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      await this.prisma.aeoScore.upsert({
+        where: {
+          userId_date_businessName: {
+            userId,
+            date: today,
+            businessName
+          }
+        },
+        create: {
+          userId,
+          date: today,
+          score: result.aeoScore,
+          businessName,
+          keywords,
+          visibility: result.overallVisibility,
+          ranking: result.factors.ranking,
+          relevance: result.factors.relevance,
+          accuracy: result.factors.accuracy
+        },
+        update: {
+          score: result.aeoScore,
+          keywords,
+          visibility: result.overallVisibility,
+          ranking: result.factors.ranking,
+          relevance: result.factors.relevance,
+          accuracy: result.factors.accuracy,
+          updatedAt: new Date()
+        }
+      });
+
+      console.debug(`✅ Saved AEO score for ${businessName}: ${result.aeoScore}/100`);
+    } catch (error) {
+      console.error('❌ Failed to save AEO score:', error);
+      // Don't throw error - this shouldn't break the analysis
+    }
+  }
+
   static async runAnalysis(request: AnalysisRequest): Promise<AnalysisResult> {
     console.debug(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
 
@@ -336,6 +385,27 @@ export class AEOAnalysisService {
 
     // Aggregate competitors from all models
     const overallCompetitorAnalysis = this.aggregateCompetitors(results);
+
+    // Save AEO scores for professional+ users (using the best/first result)
+    const user = authResult.user!;
+    if (user.id && results.length > 0) {
+      // Get user's plan to check if they have professional+
+      try {
+        const userRecord = await this.prisma.user.findUnique({
+          where: { email: user.email },
+          select: { plan: true, id: true }
+        });
+
+        if (userRecord && (userRecord.plan === 'professional' || userRecord.plan === 'enterprise')) {
+          // Save the best score (first result, as they're typically sorted by performance)
+          const bestResult = results[0];
+          await this.saveAeoScore(userRecord.id, request.businessName, request.keywords, bestResult);
+        }
+      } catch (error) {
+        console.error('❌ Error checking user plan for score saving:', error);
+        // Continue without saving - don't break the analysis
+      }
+    }
 
     return {
       results,
