@@ -566,19 +566,42 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 sm:p-8 text-center">
               <div className="text-3xl sm:text-4xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of searches complete without clicks due to AI Overviews</p>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of searches complete without clicks</p>
+              <p className="text-gray-500 text-xs mt-2">Source: SparkToro/Datos Study (2024)</p>
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 sm:p-8 text-center">
               <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
               <p className="text-gray-700 font-medium text-sm sm:text-base">of Google queries now show AI Overviews</p>
+              <p className="text-gray-500 text-xs mt-2">Source: Semrush Study (March 2025)</p>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">70%+</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">organic traffic increases achieved with AI optimization</p>
+              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">525%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">revenue growth for AI search engines in 2024</p>
+              <p className="text-gray-500 text-xs mt-2">Source: Industry Analysis (2024)</p>
+            </div>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-orange-600 mb-2">78%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">of enterprises now use AI in business functions</p>
+              <p className="text-gray-500 text-xs mt-2">Source: McKinsey AI Survey (2024)</p>
+            </div>
+          </div>
+
+          {/* Additional Impact Statistics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-red-600 mb-2">25%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">predicted drop in traditional search volume by 2026</p>
+              <p className="text-gray-500 text-xs mt-2">Source: Gartner Research (2024)</p>
+            </div>
+            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 sm:p-8 text-center">
+              <div className="text-3xl sm:text-4xl font-bold text-teal-600 mb-2">$13.8B</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
+              <p className="text-gray-500 text-xs mt-2">Source: Enterprise AI Reports (2024)</p>
             </div>
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">68%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of adults use AI for answering questions</p>
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">34.5%</div>
+              <p className="text-gray-700 font-medium text-sm sm:text-base">drop in click-through rates when AI Overviews appear</p>
+              <p className="text-gray-500 text-xs mt-2">Source: Ahrefs Study (2024)</p>
             </div>
           </div>
 
@@ -752,6 +775,7 @@ export default function Home() {
               <div className="mb-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Search Tool Usage</h3>
                 <p className="text-gray-600 text-sm sm:text-base">Monthly active users (millions) for AI search platforms</p>
+                <p className="text-gray-500 text-xs mt-1">Source: Google court documents & public disclosures</p>
               </div>
               <div className="relative h-48 sm:h-64 bg-gray-50 rounded-lg p-4">
                 <div className="h-full flex items-end justify-between gap-1">
