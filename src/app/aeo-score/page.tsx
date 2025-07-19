@@ -394,7 +394,7 @@ export default function AEOScorePage() {
               disabled={true}
               className='border-transparent text-gray-300 cursor-not-allowed'
             >
-              3. Gain Insights to boost AEO
+              3. Gain Insights to boost visibility
               {showPromptEditor && (
                 <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   Professional+
