@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   //     );
   //   }
 
-  //   console.log(`🔄 Processing payment for ${user.email}: ${planName} plan ($${amount / 100})`);
+  //   console.debug(`🔄 Processing payment for ${user.email}: ${planName} plan ($${amount / 100})`);
 
   //   // Create payment request
   //   const paymentRequest = {
@@ -67,12 +67,12 @@ export async function POST(request: NextRequest) {
   //     buyerEmailAddress: user.email,
   //   };
 
-  //   console.log('💳 Sending payment request to Square...');
+  //   console.debug('💳 Sending payment request to Square...');
     
   //   // Process payment with Square
   //   // const { result } = await payments.complete(paymentRequest);
 
-  //   console.log('✅ Payment processed successfully:', result.payment?.id);
+  //   console.debug('✅ Payment processed successfully:', result.payment?.id);
 
   //   // TODO: Update user's subscription status in database
   //   // This would typically involve:

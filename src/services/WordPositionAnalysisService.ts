@@ -105,8 +105,8 @@ Be thorough and accurate. If no matches are found for a response, include an emp
    * Analyzes word positions using AI to identify business name mentions
    */
   static async analyzeWordPositions(request: WordPositionAnalysisRequest): Promise<WordPositionAnalysisResult> {
-    console.log(`🔍 Starting AI-powered word position analysis for "${request.businessName}"`);
-    console.log(`📊 Analyzing ${request.responses.length} responses`);
+    console.debug(`🔍 Starting AI-powered word position analysis for "${request.businessName}"`);
+    console.debug(`📊 Analyzing ${request.responses.length} responses`);
 
     try {
       // Create JSON structure for AI analysis
@@ -132,13 +132,13 @@ ${JSON.stringify(analysisData, null, 2)}
 
 Return only the JSON analysis, no other text.`;
 
-      console.log(`🤖 Sending analysis request to AI model`);
+      console.debug(`🤖 Sending analysis request to AI model`);
       
       // Use OpenAI GPT-4 for analysis
       const aiResponse = await ModelFactory.queryModel('openai', prompt);
       
-      console.log(`📥 Received AI analysis response`);
-      console.log(`📄 Response preview: ${aiResponse.substring(0, 200)}...`);
+      console.debug(`📥 Received AI analysis response`);
+      console.debug(`📄 Response preview: ${aiResponse.substring(0, 200)}...`);
 
       // Parse AI response
       let aiAnalysis;
@@ -152,7 +152,7 @@ Return only the JSON analysis, no other text.`;
         }
       } catch (parseError) {
         console.error(`❌ Failed to parse AI response as JSON:`, parseError);
-        console.log(`📄 Raw response:`, aiResponse);
+        console.debug(`📄 Raw response:`, aiResponse);
         
         // Fallback to manual analysis
         return this.fallbackAnalysis(request);
@@ -208,9 +208,9 @@ Return only the JSON analysis, no other text.`;
         }
       };
 
-      console.log(`✅ Word position analysis completed`);
-      console.log(`📊 Summary: ${totalMatches} matches across ${request.responses.length} responses`);
-      console.log(`📍 Average position: ${averagePosition.toFixed(1)}`);
+      console.debug(`✅ Word position analysis completed`);
+      console.debug(`📊 Summary: ${totalMatches} matches across ${request.responses.length} responses`);
+      console.debug(`📍 Average position: ${averagePosition.toFixed(1)}`);
 
       return result;
 
@@ -226,7 +226,7 @@ Return only the JSON analysis, no other text.`;
    * Fallback analysis using existing fuzzy matching logic
    */
   private static fallbackAnalysis(request: WordPositionAnalysisRequest): WordPositionAnalysisResult {
-    console.log(`🔧 Using fallback analysis method`);
+    console.debug(`🔧 Using fallback analysis method`);
     
     const responseAnalyses: ResponseAnalysis[] = [];
     let totalMatches = 0;

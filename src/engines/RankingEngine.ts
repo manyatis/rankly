@@ -31,8 +31,8 @@ export class RankingEngine {
     businessName: string,
     keywords: string[]
   ): ScoringResult {
-    console.log(`\n📊 Calculating AEO score for "${businessName}" using position + word count algorithm`);
-    console.log(`📈 Query results summary: ${queryResults.length} total queries`);
+    console.debug(`\n📊 Calculating AEO score for "${businessName}" using position + word count algorithm`);
+    console.debug(`📈 Query results summary: ${queryResults.length} total queries`);
 
     const factors: ScoringFactors = {
       accuracy: 0,
@@ -48,11 +48,11 @@ export class RankingEngine {
     const mentionedQueries = queryResults.filter(r => r.mentioned).length;
     const validResponses = queryResults.filter(r => !r.response.startsWith('Error')).length;
 
-    console.log(`📊 Found ${mentionedQueries} mentions out of ${totalQueries} queries`);
+    console.debug(`📊 Found ${mentionedQueries} mentions out of ${totalQueries} queries`);
 
     // Calculate visibility score (how often mentioned)
     factors.visibility = totalQueries > 0 ? Math.round((mentionedQueries / totalQueries) * 100) : 0;
-    console.log(`📊 Visibility: ${factors.visibility}% (${mentionedQueries}/${totalQueries} queries)`);
+    console.debug(`📊 Visibility: ${factors.visibility}% (${mentionedQueries}/${totalQueries} queries)`);
 
     if (mentionedQueries === 0) {
       // No mentions found - return zero scores
@@ -90,15 +90,15 @@ export class RankingEngine {
       const mentions = (responseLower.match(new RegExp(businessNameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
       totalWordCount += mentions * 20; // 20 points per mention, max realistic ~100
       
-      console.log(`   Query: Position ${result.rankPosition} = ${positionScore}pts, ${mentions} mentions = ${mentions * 20}pts`);
+      console.debug(`   Query: Position ${result.rankPosition} = ${positionScore}pts, ${mentions} mentions = ${mentions * 20}pts`);
     });
 
     // Calculate average scores
     const avgPositionScore = Math.round(totalPositionScore / mentionedQueries);
     const avgWordCountScore = Math.min(100, Math.round(totalWordCount / mentionedQueries));
     
-    console.log(`📍 Average Position Score: ${avgPositionScore}/100`);
-    console.log(`🔢 Average Word Count Score: ${avgWordCountScore}/100`);
+    console.debug(`📍 Average Position Score: ${avgPositionScore}/100`);
+    console.debug(`🔢 Average Word Count Score: ${avgWordCountScore}/100`);
 
     // Fill in factors for compatibility
     factors.ranking = avgPositionScore;      // Position-based ranking
@@ -115,11 +115,11 @@ export class RankingEngine {
       (factors.relevance * 0.20)        // Word count: 20% weight
     );
 
-    console.log(`🏆 Final AEO Score calculation (Position + Word Count Algorithm):`);
-    console.log(`   Position (50%): ${factors.ranking} × 0.50 = ${(factors.ranking * 0.50).toFixed(1)}`);
-    console.log(`   Visibility (30%): ${factors.visibility} × 0.30 = ${(factors.visibility * 0.30).toFixed(1)}`);
-    console.log(`   Word Count (20%): ${factors.relevance} × 0.20 = ${(factors.relevance * 0.20).toFixed(1)}`);
-    console.log(`🎯 TOTAL AEO SCORE: ${aeoScore}/100`);
+    console.debug(`🏆 Final AEO Score calculation (Position + Word Count Algorithm):`);
+    console.debug(`   Position (50%): ${factors.ranking} × 0.50 = ${(factors.ranking * 0.50).toFixed(1)}`);
+    console.debug(`   Visibility (30%): ${factors.visibility} × 0.30 = ${(factors.visibility * 0.30).toFixed(1)}`);
+    console.debug(`   Word Count (20%): ${factors.relevance} × 0.20 = ${(factors.relevance * 0.20).toFixed(1)}`);
+    console.debug(`🎯 TOTAL AEO SCORE: ${aeoScore}/100`);
 
     const overallVisibility = factors.visibility;
 

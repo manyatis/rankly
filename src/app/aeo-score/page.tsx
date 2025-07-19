@@ -275,7 +275,7 @@ export default function AEOScorePage() {
       });
 
       const duration = Date.now() - startTime;
-      console.log(`API call took ${duration}ms`);
+      console.debug(`API call took ${duration}ms`);
 
       // Clear intervals
       clearInterval(estimationInterval);

@@ -4,19 +4,19 @@ import { getUser } from '../../../lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📊 Word Position Analysis API - Starting request');
+    console.debug('📊 Word Position Analysis API - Starting request');
 
     // Check authentication
     const user = await getUser();
     if (!user?.email) {
-      console.log('❌ User not authenticated');
+      console.debug('❌ User not authenticated');
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    console.log(`✅ User authenticated: ${user.email}`);
+    console.debug(`✅ User authenticated: ${user.email}`);
 
     // Parse request body
     let body: WordPositionAnalysisRequest;
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!body.businessName || !body.responses || !Array.isArray(body.responses)) {
-      console.log('❌ Missing required fields');
+      console.debug('❌ Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields: businessName and responses array' },
         { status: 400 }
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (body.responses.length === 0) {
-      console.log('❌ Empty responses array');
+      console.debug('❌ Empty responses array');
       return NextResponse.json(
         { error: 'Responses array cannot be empty' },
         { status: 400 }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     // Validate response objects
     for (const response of body.responses) {
       if (!response.id || !response.modelName || !response.responseText) {
-        console.log('❌ Invalid response object structure');
+        console.debug('❌ Invalid response object structure');
         return NextResponse.json(
           { error: 'Each response must have id, modelName, and responseText' },
           { status: 400 }
@@ -58,13 +58,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`🔍 Analyzing ${body.responses.length} responses for business: "${body.businessName}"`);
+    console.debug(`🔍 Analyzing ${body.responses.length} responses for business: "${body.businessName}"`);
 
     // Perform word position analysis
     const result = await WordPositionAnalysisService.analyzeWordPositions(body);
 
-    console.log(`✅ Word position analysis completed successfully`);
-    console.log(`📊 Results: ${result.totalMatches} matches across ${result.totalResponses} responses`);
+    console.debug(`✅ Word position analysis completed successfully`);
+    console.debug(`📊 Results: ${result.totalMatches} matches across ${result.totalResponses} responses`);
 
     return NextResponse.json(result, { status: 200 });
 

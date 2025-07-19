@@ -9,11 +9,11 @@ export abstract class BaseAIModel {
   }
 
   protected logQuery(prompt: string): void {
-    console.log(`🤖 [${this.getName()}] Querying with: "${prompt}"`);
+    console.debug(`🤖 [${this.getName()}] Querying with: "${prompt}"`);
   }
 
   protected logSuccess(responseLength: number): void {
-    console.log(`✅ [${this.getName()}] Response received: ${responseLength} characters`);
+    console.debug(`✅ [${this.getName()}] Response received: ${responseLength} characters`);
   }
 
   protected logError(error: unknown): void {

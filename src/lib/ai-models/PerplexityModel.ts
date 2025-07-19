@@ -86,7 +86,7 @@ export class PerplexityModel extends BaseAIModel {
       this.logQuery(prompt);
 
       if (!this.isConfigured()) {
-        console.log(`❌ [${this.getName()}] API key not found`);
+        console.debug(`❌ [${this.getName()}] API key not found`);
         return this.getMissingEnvVarError();
       }
       
@@ -126,7 +126,7 @@ export class PerplexityModel extends BaseAIModel {
       }
 
       this.logSuccess(result.length);
-      console.log(`🔍 [${this.getName()}] Tokens used: ${response.usage.total_tokens} (prompt: ${response.usage.prompt_tokens}, completion: ${response.usage.completion_tokens})`);
+      console.debug(`🔍 [${this.getName()}] Tokens used: ${response.usage.total_tokens} (prompt: ${response.usage.prompt_tokens}, completion: ${response.usage.completion_tokens})`);
       
       return result;
     } catch (error) {

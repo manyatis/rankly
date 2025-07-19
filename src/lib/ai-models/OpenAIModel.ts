@@ -28,7 +28,7 @@ export class OpenAIModel extends BaseAIModel {
       this.logQuery(prompt);
 
       if (!this.isConfigured()) {
-        console.log(`❌ [${this.getName()}] API key not found`);
+        console.debug(`❌ [${this.getName()}] API key not found`);
         return this.getMissingEnvVarError();
       }
 

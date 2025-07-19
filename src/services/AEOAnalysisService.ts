@@ -84,11 +84,11 @@ export class AEOAnalysisService {
   }
 
   static async validateAuthAndUsage(): Promise<AuthValidationResult> {
-    console.log(`🔐 Validating authentication and usage limits`);
+    console.debug(`🔐 Validating authentication and usage limits`);
 
     const user = await getUser();
     if (!user?.email) {
-      console.log(`❌ User not authenticated`);
+      console.debug(`❌ User not authenticated`);
       return {
         isValid: false,
         error: 'Authentication required',
@@ -98,7 +98,7 @@ export class AEOAnalysisService {
 
     const usageInfo = await checkUsageLimit(user.email);
     if (!usageInfo.canUse) {
-      console.log(`❌ Usage limit exceeded for ${user.email}: ${usageInfo.usageCount}/${usageInfo.maxUsage}`);
+      console.debug(`❌ Usage limit exceeded for ${user.email}: ${usageInfo.usageCount}/${usageInfo.maxUsage}`);
       return {
         isValid: false,
         error: `Daily limit reached. You've used ${usageInfo.usageCount}/${usageInfo.maxUsage} free analytics today.`,
@@ -107,7 +107,7 @@ export class AEOAnalysisService {
       };
     }
 
-    console.log(`✅ Authentication and usage validation passed for ${user.email} (${usageInfo.usageCount}/${usageInfo.maxUsage} used)`);
+    console.debug(`✅ Authentication and usage validation passed for ${user.email} (${usageInfo.usageCount}/${usageInfo.maxUsage} used)`);
     return {
       isValid: true,
       user: { email: user.email!, id: user.id, name: user.name, image: user.image },
@@ -130,7 +130,7 @@ export class AEOAnalysisService {
     else if (providers.length === 0) missingFields.push('providers (must be non-empty)');
 
     if (missingFields.length > 0) {
-      console.log(`❌ Missing required fields: ${missingFields.join(', ')}`);
+      console.debug(`❌ Missing required fields: ${missingFields.join(', ')}`);
       return {
         isValid: false,
         error: `Missing required fields: ${missingFields.join(', ')}`
@@ -143,34 +143,34 @@ export class AEOAnalysisService {
   static async incrementUserUsage(userEmail: string): Promise<{ success: boolean; error?: string }> {
     const usageIncremented = await incrementUsage(userEmail);
     if (!usageIncremented) {
-      console.log(`❌ Failed to increment usage or limit exceeded`);
+      console.debug(`❌ Failed to increment usage or limit exceeded`);
       return {
         success: false,
         error: 'Usage limit exceeded'
       };
     }
-    console.log(`✅ Usage incremented for ${userEmail}`);
+    console.debug(`✅ Usage incremented for ${userEmail}`);
     return { success: true };
   }
 
   static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
     const { businessName, industry, marketDescription, keywords, providers, customPrompts } = request;
 
-    console.log(`🏢 Business Name: "${businessName}"`);
-    console.log(`🏭 Industry: "${industry}"`);
-    console.log(`📄 Market Description: "${marketDescription}"`);
-    console.log(`🔑 Keywords:`, keywords);
-    console.log(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
+    console.debug(`🏢 Business Name: "${businessName}"`);
+    console.debug(`🏭 Industry: "${industry}"`);
+    console.debug(`📄 Market Description: "${marketDescription}"`);
+    console.debug(`🔑 Keywords:`, keywords);
+    console.debug(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
 
     let optimizedQueries: string[];
 
     if (customPrompts && customPrompts.length > 0) {
       // Use custom prompts provided by the user
       optimizedQueries = customPrompts.filter(prompt => prompt.trim().length > 0);
-      console.log(`\n📝 Using ${optimizedQueries.length} custom prompts provided by user`);
+      console.debug(`\n📝 Using ${optimizedQueries.length} custom prompts provided by user`);
     } else {
       // Generate optimized prompts using OpenAI
-      console.log(`\n🧠 Generating optimized prompts using OpenAI...`);
+      console.debug(`\n🧠 Generating optimized prompts using OpenAI...`);
       const promptFormationService = new PromptFormationService();
       
       try {
@@ -181,7 +181,7 @@ export class AEOAnalysisService {
           keywords
         }, 3); // Generate 3 queries to match UI
         optimizedQueries = promptResult.queries;
-        console.log(`✅ Generated ${optimizedQueries.length} optimized queries`);
+        console.debug(`✅ Generated ${optimizedQueries.length} optimized queries`);
       } catch (error) {
         console.warn(`⚠️ Failed to generate optimized prompts, using fallback:`, error);
         // Fallback to default query generation (3 queries to match)
@@ -193,11 +193,11 @@ export class AEOAnalysisService {
       }
     }
 
-    console.log(`\n🚀 Starting parallel analysis of ${providers.length} providers with optimized queries...`);
+    console.debug(`\n🚀 Starting parallel analysis of ${providers.length} providers with optimized queries...`);
 
     // Create analysis promises for all providers to run in parallel
     const analysisPromises = providers.map(async (provider, index) => {
-      console.log(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
+      console.debug(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
 
       try {
         const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
@@ -217,7 +217,7 @@ export class AEOAnalysisService {
           missedResponses: scoring.missedResponses
         };
 
-        console.log(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);
+        console.debug(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);
         return result;
       } catch (error) {
         console.error(`❌ Error analyzing provider ${provider.name}:`, error);
@@ -246,26 +246,26 @@ export class AEOAnalysisService {
     });
 
     // Wait for all analyses to complete in parallel
-    console.log(`⏳ Waiting for all ${providers.length} provider analyses to complete...`);
+    console.debug(`⏳ Waiting for all ${providers.length} provider analyses to complete...`);
     const results = await Promise.all(analysisPromises);
 
-    console.log(`\n🏁 === PARALLEL ANALYSIS COMPLETE ===`);
-    console.log(`📊 Results summary:`);
+    console.debug(`\n🏁 === PARALLEL ANALYSIS COMPLETE ===`);
+    console.debug(`📊 Results summary:`);
     results.forEach((result, index) => {
-      console.log(`   ${index + 1}. ${result.provider.name}: ${result.aeoScore}/100 (${result.overallVisibility}% visibility)`);
+      console.debug(`   ${index + 1}. ${result.provider.name}: ${result.aeoScore}/100 (${result.overallVisibility}% visibility)`);
     });
 
     return results;
   }
 
   static aggregateCompetitors(results: ProviderScoringResult[]): CompetitorInfo[] {
-    console.log(`\n🏢 Aggregating competitors across all models`);
+    console.debug(`\n🏢 Aggregating competitors across all models`);
 
     const competitorMentions = new Map<string, { mentions: number, totalQueries: number, providers: Set<string> }>();
 
     // Collect all competitors from all providers
     results.forEach(result => {
-      console.log(`📊 Processing competitors from ${result.provider.name}: ${result.competitorAnalysis.length} found`);
+      console.debug(`📊 Processing competitors from ${result.provider.name}: ${result.competitorAnalysis.length} found`);
 
       result.competitorAnalysis.forEach(competitor => {
         const existing = competitorMentions.get(competitor.name) || {
@@ -302,16 +302,16 @@ export class AEOAnalysisService {
       .slice(0, 15) // Top 15 competitors
       .map(({ ...competitor }) => competitor); // Remove helper fields
 
-    console.log(`✅ Aggregated competitors: ${aggregatedCompetitors.length} unique competitors found`);
+    console.debug(`✅ Aggregated competitors: ${aggregatedCompetitors.length} unique competitors found`);
     aggregatedCompetitors.forEach((competitor, index) => {
-      console.log(`   ${index + 1}. ${competitor.name}: ${competitor.mentions} mentions (${competitor.score}%)`);
+      console.debug(`   ${index + 1}. ${competitor.name}: ${competitor.mentions} mentions (${competitor.score}%)`);
     });
 
     return aggregatedCompetitors;
   }
 
   static async runAnalysis(request: AnalysisRequest): Promise<AnalysisResult> {
-    console.log(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
+    console.debug(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
 
     // Validate authentication and usage
     const authResult = await this.validateAuthAndUsage();

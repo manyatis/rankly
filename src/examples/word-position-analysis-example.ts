@@ -8,8 +8,8 @@ import { WordPositionAnalysisService } from '../services/WordPositionAnalysisSer
 
 // Example usage of the Word Position Analysis System
 export async function demonstrateWordPositionAnalysis() {
-  console.log('🔍 Word Position Analysis System Demo');
-  console.log('=====================================');
+  console.debug('🔍 Word Position Analysis System Demo');
+  console.debug('=====================================');
 
   // Sample AI responses for testing
   const sampleResponses = [
@@ -73,8 +73,8 @@ These platforms offer various features for tracking customer engagement, campaig
   ];
 
   // Example 1: Basic word position analysis
-  console.log('\n📊 Example 1: Basic Word Position Analysis');
-  console.log('==========================================');
+  console.debug('\n📊 Example 1: Basic Word Position Analysis');
+  console.debug('==========================================');
   
   const basicAnalysis = await WordPositionAnalysisService.analyzeWordPositions({
     businessName: 'SearchDogAI',
@@ -82,47 +82,47 @@ These platforms offer various features for tracking customer engagement, campaig
     variations: ['SearchDog AI', 'Search Dog AI', 'SearchDogAI']
   });
 
-  console.log(`Business: ${basicAnalysis.businessName}`);
-  console.log(`Total Responses: ${basicAnalysis.totalResponses}`);
-  console.log(`Total Matches: ${basicAnalysis.totalMatches}`);
-  console.log(`Average Position: ${basicAnalysis.averagePosition.toFixed(1)}`);
+  console.debug(`Business: ${basicAnalysis.businessName}`);
+  console.debug(`Total Responses: ${basicAnalysis.totalResponses}`);
+  console.debug(`Total Matches: ${basicAnalysis.totalMatches}`);
+  console.debug(`Average Position: ${basicAnalysis.averagePosition.toFixed(1)}`);
 
   // Display model performance
-  console.log('\n🎯 Model Performance:');
+  console.debug('\n🎯 Model Performance:');
   basicAnalysis.summary.modelPerformance.forEach(perf => {
-    console.log(`  ${perf.modelName}: ${perf.matchCount} matches, avg pos: ${perf.averagePosition.toFixed(1)}, confidence: ${perf.averageConfidence.toFixed(1)}%`);
+    console.debug(`  ${perf.modelName}: ${perf.matchCount} matches, avg pos: ${perf.averagePosition.toFixed(1)}, confidence: ${perf.averageConfidence.toFixed(1)}%`);
   });
 
   // Display position distribution
-  console.log('\n📍 Position Distribution:');
+  console.debug('\n📍 Position Distribution:');
   basicAnalysis.summary.positionDistribution.forEach(dist => {
-    console.log(`  ${dist.range}: ${dist.count} matches (${dist.percentage.toFixed(1)}%)`);
+    console.debug(`  ${dist.range}: ${dist.count} matches (${dist.percentage.toFixed(1)}%)`);
   });
 
   // Example 2: Detailed response analysis
-  console.log('\n🔍 Example 2: Detailed Response Analysis');
-  console.log('=======================================');
+  console.debug('\n🔍 Example 2: Detailed Response Analysis');
+  console.debug('=======================================');
   
   basicAnalysis.responseAnalyses.forEach((analysis, idx) => {
-    console.log(`\nResponse ${idx + 1} (${analysis.modelName}):`);
-    console.log(`  Total Matches: ${analysis.totalMatches}`);
-    console.log(`  Word Count: ${analysis.wordCount}`);
-    console.log(`  Mention Density: ${analysis.businessMentionDensity.toFixed(2)}%`);
+    console.debug(`\nResponse ${idx + 1} (${analysis.modelName}):`);
+    console.debug(`  Total Matches: ${analysis.totalMatches}`);
+    console.debug(`  Word Count: ${analysis.wordCount}`);
+    console.debug(`  Mention Density: ${analysis.businessMentionDensity.toFixed(2)}%`);
     
     if (analysis.matches.length > 0) {
-      console.log(`  Matches:`);
+      console.debug(`  Matches:`);
       analysis.matches.forEach((match, matchIdx) => {
-        console.log(`    ${matchIdx + 1}. "${match.matchedText}" (Line ${match.lineNumber}, Pos ${match.position}, ${match.confidence}% confidence, ${match.matchType})`);
-        console.log(`       Context: ${match.context}`);
+        console.debug(`    ${matchIdx + 1}. "${match.matchedText}" (Line ${match.lineNumber}, Pos ${match.position}, ${match.confidence}% confidence, ${match.matchType})`);
+        console.debug(`       Context: ${match.context}`);
       });
     } else {
-      console.log(`  No matches found`);
+      console.debug(`  No matches found`);
     }
   });
 
   // Example 3: Integration with existing AEO scoring
-  console.log('\n🔗 Example 3: Integration with AEO Scoring');
-  console.log('==========================================');
+  console.debug('\n🔗 Example 3: Integration with AEO Scoring');
+  console.debug('==========================================');
   
   // This shows how the word position data can be used to enhance AEO scoring
   const enhancedScoringData = basicAnalysis.responseAnalyses.map(analysis => {
@@ -152,17 +152,17 @@ These platforms offer various features for tracking customer engagement, campaig
   });
 
   enhancedScoringData.forEach(score => {
-    console.log(`\n${score.modelName}:`);
-    console.log(`  Base Score: ${score.baseScore}`);
-    console.log(`  Position Bonus: +${score.positionBonus}`);
-    console.log(`  Confidence Bonus: +${score.confidenceBonus}`);
-    console.log(`  Multi-Mention Bonus: +${score.multiMentionBonus}`);
-    console.log(`  Total Enhanced Score: ${score.totalScore}/100`);
+    console.debug(`\n${score.modelName}:`);
+    console.debug(`  Base Score: ${score.baseScore}`);
+    console.debug(`  Position Bonus: +${score.positionBonus}`);
+    console.debug(`  Confidence Bonus: +${score.confidenceBonus}`);
+    console.debug(`  Multi-Mention Bonus: +${score.multiMentionBonus}`);
+    console.debug(`  Total Enhanced Score: ${score.totalScore}/100`);
   });
 
   // Example 4: API usage pattern
-  console.log('\n🌐 Example 4: API Usage Pattern');
-  console.log('===============================');
+  console.debug('\n🌐 Example 4: API Usage Pattern');
+  console.debug('===============================');
   
   const apiExampleData = {
     businessName: 'SearchDogAI',
@@ -170,12 +170,12 @@ These platforms offer various features for tracking customer engagement, campaig
     variations: ['SearchDog AI', 'Search Dog AI']
   };
 
-  console.log('API Request Body:');
-  console.log(JSON.stringify(apiExampleData, null, 2));
+  console.debug('API Request Body:');
+  console.debug(JSON.stringify(apiExampleData, null, 2));
   
-  console.log('\nAPI Endpoint: POST /api/word-position-analysis');
-  console.log('Authentication: Required (existing session)');
-  console.log('Rate Limiting: Follows existing usage limits');
+  console.debug('\nAPI Endpoint: POST /api/word-position-analysis');
+  console.debug('Authentication: Required (existing session)');
+  console.debug('Rate Limiting: Follows existing usage limits');
 
   return basicAnalysis;
 }

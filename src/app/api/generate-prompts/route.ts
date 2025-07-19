@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🧠 Generating prompts for ${requestData.businessName} in ${requestData.industry}`);
+    console.debug(`🧠 Generating prompts for ${requestData.businessName} in ${requestData.industry}`);
 
     // Generate optimized prompts using the PromptFormationService
     const promptFormationService = new PromptFormationService();
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       keywords: requestData.keywords
     }, 5); // Generate 5 prompts for editing
 
-    console.log(`✅ Generated ${promptResult.queries.length} prompts`);
+    console.debug(`✅ Generated ${promptResult.queries.length} prompts`);
 
     return NextResponse.json({
       prompts: promptResult.queries,

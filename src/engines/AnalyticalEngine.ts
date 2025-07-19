@@ -167,20 +167,20 @@ export class AnalyticalEngine {
     businessName: string,
     customQueries: string[]
   ): Promise<QueryResult[]> {
-    console.log(`🚀 Starting AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
+    console.debug(`🚀 Starting AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
 
-    console.log(`🔍 Searching for business name: "${businessName}"`);
+    console.debug(`🔍 Searching for business name: "${businessName}"`);
 
     const results: QueryResult[] = [];
 
     for (let i = 0; i < customQueries.length; i++) {
       const query = customQueries[i];
-      console.log(`\n📤 Query ${i + 1}/${customQueries.length}: "${query}"`);
+      console.debug(`\n📤 Query ${i + 1}/${customQueries.length}: "${query}"`);
 
       try {
         const response = await queryFunction(query);
-        console.log(`📥 Response length: ${response.length} characters`);
-        console.log(`📄 Response preview: "${response.substring(0, 200)}..."`);
+        console.debug(`📥 Response length: ${response.length} characters`);
+        console.debug(`📄 Response preview: "${response.substring(0, 200)}..."`);
 
         const responseLower = response.toLowerCase();
 
@@ -190,12 +190,12 @@ export class AnalyticalEngine {
         let bestIndex = -1;
         let matchType = 'none';
 
-        console.log(`🔎 Searching for business name in response...`);
+        console.debug(`🔎 Searching for business name in response...`);
 
         // First try exact match
         const nameIndex = responseLower.indexOf(businessName.toLowerCase());
         if (nameIndex !== -1) {
-          console.log(`✅ EXACT MATCH "${businessName}" at position ${nameIndex}`);
+          console.debug(`✅ EXACT MATCH "${businessName}" at position ${nameIndex}`);
           mentioned = true;
           bestIndex = nameIndex;
           bestMatch = businessName;
@@ -204,11 +204,11 @@ export class AnalyticalEngine {
 
         // If no exact match, try fuzzy matching with AI reasoning
         if (!mentioned) {
-          console.log(`🔍 No exact match found, trying AI fuzzy matching...`);
+          console.debug(`🔍 No exact match found, trying AI fuzzy matching...`);
           const fuzzyMatches = this.findFuzzyMatches(businessName, responseLower);
           if (fuzzyMatches.length > 0) {
             const match = fuzzyMatches[0];
-            console.log(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index}`);
+            console.debug(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index}`);
             mentioned = true;
             bestIndex = match.index;
             bestMatch = match.match;
@@ -217,9 +217,9 @@ export class AnalyticalEngine {
         }
 
         if (!mentioned) {
-          console.log(`❌ Business name NOT found in this response`);
+          console.debug(`❌ Business name NOT found in this response`);
         } else {
-          console.log(`🎯 Best match: "${bestMatch}" at position ${bestIndex}`);
+          console.debug(`🎯 Best match: "${bestMatch}" at position ${bestIndex}`);
         }
 
         let rankPosition = 0;
@@ -233,7 +233,7 @@ export class AnalyticalEngine {
           else if (bestIndex < 500) rankPosition = 4;
           else rankPosition = 5;
 
-          console.log(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
+          console.debug(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
 
           // Calculate relevance score using extracted method
           relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessName, matchType);
@@ -242,7 +242,7 @@ export class AnalyticalEngine {
         // Generate word position data using AI analysis
         let wordPositionData;
         try {
-          console.log(`🔍 Generating detailed word position analysis...`);
+          console.debug(`🔍 Generating detailed word position analysis...`);
           const wordAnalysis = await WordPositionAnalysisService.analyzeWordPositions({
             businessName,
             responses: [{
@@ -264,7 +264,7 @@ export class AnalyticalEngine {
               lineNumbers: analysis.matches.map(match => match.lineNumber),
               businessMentionDensity: analysis.businessMentionDensity
             };
-            console.log(`📊 Word position analysis: ${wordPositionData.totalMatches} matches, avg position: ${wordPositionData.averagePosition.toFixed(1)}`);
+            console.debug(`📊 Word position analysis: ${wordPositionData.totalMatches} matches, avg position: ${wordPositionData.averagePosition.toFixed(1)}`);
           }
         } catch (error) {
           console.error(`⚠️ Word position analysis failed, using fallback:`, error);
@@ -296,7 +296,7 @@ export class AnalyticalEngine {
           wordPositionData
         });
 
-        console.log(`✅ Query ${i + 1} completed: mentioned=${mentioned}, rank=${rankPosition}, score=${relevanceScore}`);
+        console.debug(`✅ Query ${i + 1} completed: mentioned=${mentioned}, rank=${rankPosition}, score=${relevanceScore}`);
 
       } catch (error) {
         console.error(`❌ Error with query ${i + 1}: "${query}":`, error);
@@ -310,7 +310,7 @@ export class AnalyticalEngine {
       }
     }
 
-    console.log(`🏁 Analysis complete. Processed ${results.length} queries.`);
+    console.debug(`🏁 Analysis complete. Processed ${results.length} queries.`);
     return results;
   }
 
@@ -344,10 +344,10 @@ export class AnalyticalEngine {
     // Base score for being mentioned (adjust based on match type)
     if (matchType === 'exact') {
       score += 20;
-      console.log(`📊 Base score (exact match): +20 = ${score}`);
+      console.debug(`📊 Base score (exact match): +20 = ${score}`);
     } else if (matchType === 'fuzzy') {
       score += 15;
-      console.log(`📊 Base score (fuzzy match): +15 = ${score}`);
+      console.debug(`📊 Base score (fuzzy match): +15 = ${score}`);
     }
 
     // Enhanced logic for compound company names - significant partial matches
@@ -382,27 +382,27 @@ export class AnalyticalEngine {
         }
         
         score += wordMatchBonus;
-        console.log(`📊 Significant word matches (${significantWordMatches}/${totalSignificantWords}): +${wordMatchBonus} = ${score}`);
+        console.debug(`📊 Significant word matches (${significantWordMatches}/${totalSignificantWords}): +${wordMatchBonus} = ${score}`);
       }
     }
 
     // Bonus for early mention
     if (bestIndex < 50) {
       score += 30;
-      console.log(`📊 Early mention bonus: +30 = ${score}`);
+      console.debug(`📊 Early mention bonus: +30 = ${score}`);
     } else if (bestIndex < 150) {
       score += 20;
-      console.log(`📊 Early mention bonus: +20 = ${score}`);
+      console.debug(`📊 Early mention bonus: +20 = ${score}`);
     } else if (bestIndex < 300) {
       score += 10;
-      console.log(`📊 Early mention bonus: +10 = ${score}`);
+      console.debug(`📊 Early mention bonus: +10 = ${score}`);
     }
 
     // Bonus for being in first sentence
     const firstSentence = response.split(/[.!?]/)[0];
     if (firstSentence.toLowerCase().includes(bestMatch.toLowerCase())) {
       score += 25;
-      console.log(`📊 First sentence bonus: +25 = ${score}`);
+      console.debug(`📊 First sentence bonus: +25 = ${score}`);
     }
 
     // Bonus for context quality (mentioned with positive terms)
@@ -424,8 +424,8 @@ export class AnalyticalEngine {
     }
 
     score += contextBonus - contextPenalty;
-    if (contextBonus > 0) console.log(`📊 Positive context bonus: +${contextBonus} = ${score}`);
-    if (contextPenalty > 0) console.log(`📊 Negative context penalty: -${contextPenalty} = ${score}`);
+    if (contextBonus > 0) console.debug(`📊 Positive context bonus: +${contextBonus} = ${score}`);
+    if (contextPenalty > 0) console.debug(`📊 Negative context penalty: -${contextPenalty} = ${score}`);
 
     // Bonus for being mentioned multiple times
     const regex = new RegExp(businessName.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
@@ -434,11 +434,11 @@ export class AnalyticalEngine {
     if (mentionCount > 1) {
       const multiMentionBonus = Math.min(15, mentionCount * 3);
       score += multiMentionBonus;
-      console.log(`📊 Multiple mentions (${mentionCount}x): +${multiMentionBonus} = ${score}`);
+      console.debug(`📊 Multiple mentions (${mentionCount}x): +${multiMentionBonus} = ${score}`);
     }
 
     const finalScore = Math.min(100, Math.max(0, score));
-    console.log(`🎯 Final relevance score: ${finalScore}`);
+    console.debug(`🎯 Final relevance score: ${finalScore}`);
     return finalScore;
   }
 }

@@ -79,7 +79,7 @@ export default function PaymentPage() {
   // }, [user, loading, router, searchParams]);
 
   const handlePaymentSuccess = (result: string) => {
-    console.log('Payment successful:', result);
+    console.debug('Payment successful:', result);
     router.push(`/payment/success?plan=${selectedPlan?.id}`);
   };
 
