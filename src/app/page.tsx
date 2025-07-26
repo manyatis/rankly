@@ -130,11 +130,11 @@ export default function Home() {
                 <p className="text-gray-400 text-sm">Professional AEO Analytics Platform</p>
               </div>
             </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-              <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Overview</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">AI Visibility</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Conversations</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Analytics</div>
+            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Overview</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">AI Visibility</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Conversations</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
             </div>
           </div>
           <div className="p-6">
@@ -236,7 +236,7 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-white">1</span>
                       </div>
                       <span className="text-gray-300 text-sm">HubSpot</span>
@@ -248,7 +248,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-white">2</span>
                       </div>
                       <span className="text-blue-300 text-sm font-medium">Your Company</span>
@@ -413,11 +413,11 @@ export default function Home() {
                 <p className="text-gray-400 text-sm">Professional AEO Analytics Platform</p>
               </div>
             </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-              <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Overview</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">AI Visibility</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Conversations</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Analytics</div>
+            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Overview</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">AI Visibility</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Conversations</div>
+              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
             </div>
           </div>
           <div className="p-6">
@@ -499,7 +499,7 @@ export default function Home() {
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${item.rank === 3 ? 'bg-blue-600' : 'bg-gray-600'}`}>
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 ${item.rank === 3 ? 'bg-blue-600' : 'bg-gray-600'}`}>
                           <span className="text-xs font-bold text-white">{item.rank}</span>
                         </div>
                         <span className={`text-sm ${item.rank === 3 ? 'text-blue-300 font-medium' : 'text-gray-300'}`}>{item.company}</span>
@@ -564,43 +564,43 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of searches complete without clicks</p>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">60%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of searches complete without clicks</p>
               <p className="text-gray-500 text-xs mt-2">Source: SparkToro/Datos Study (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of Google queries now show AI Overviews</p>
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of Google queries now show AI Overviews</p>
               <p className="text-gray-500 text-xs mt-2">Source: Semrush Study (March 2025)</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-purple-600 mb-2">525%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">revenue growth for AI search engines in 2024</p>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 mb-2">525%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">revenue growth for AI search engines in 2024</p>
               <p className="text-gray-500 text-xs mt-2">Source: Industry Analysis (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-orange-600 mb-2">78%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">of enterprises now use AI in business functions</p>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-2">78%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of enterprises now use AI in business functions</p>
               <p className="text-gray-500 text-xs mt-2">Source: McKinsey AI Survey (2024)</p>
             </div>
           </div>
 
           {/* Additional Impact Statistics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-red-600 mb-2">25%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">predicted drop in traditional search volume by 2026</p>
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600 mb-2">25%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">predicted drop in traditional search volume by 2026</p>
               <p className="text-gray-500 text-xs mt-2">Source: Gartner Research (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-teal-600 mb-2">$13.8B</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
+            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-teal-600 mb-2">$13.8B</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
               <p className="text-gray-500 text-xs mt-2">Source: Enterprise AI Reports (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 sm:p-8 text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">34.5%</div>
-              <p className="text-gray-700 font-medium text-sm sm:text-base">drop in click-through rates when AI Overviews appear</p>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 mb-2">34.5%</div>
+              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">drop in click-through rates when AI Overviews appear</p>
               <p className="text-gray-500 text-xs mt-2">Source: Ahrefs Study (2024)</p>
             </div>
           </div>
@@ -930,10 +930,10 @@ export default function Home() {
           {/* CTA */}
           <div className="text-center mt-12">
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/aeo-score" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-lg inline-block">
+              <Link href="/aeo-score" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
                 Try Analytics Tool Free
               </Link>
-              <a href="#pricing" className="bg-gray-100 text-gray-700 px-8 py-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-lg inline-block">
+              <a href="#pricing" className="bg-gray-100 text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-base sm:text-lg inline-block">
                 View Pricing & Sign Up
               </a>
             </div>
@@ -965,7 +965,7 @@ export default function Home() {
           </p>
           <button
             onClick={handleCreateAccount}
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
+            className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg cursor-pointer"
           >
             Create Account - Get Discount
           </button>

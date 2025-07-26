@@ -211,8 +211,8 @@ export default function LearnPage() {
               <div className="bg-gray-50 rounded-xl p-8">
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold">1</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold">1</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">User types keywords</h4>
@@ -220,8 +220,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold">2</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold">2</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Scans 10 blue links</h4>
@@ -229,8 +229,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold">3</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold">3</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Reads multiple articles</h4>
@@ -238,8 +238,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold">4</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold">4</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Makes decision</h4>
@@ -255,8 +255,8 @@ export default function LearnPage() {
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold text-white">1</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-white">1</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Asks natural question</h4>
@@ -264,8 +264,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold text-white">2</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-white">2</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Gets instant, personalized answer</h4>
@@ -273,8 +273,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold text-white">3</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-white">3</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Asks follow-up questions</h4>
@@ -282,8 +282,8 @@ export default function LearnPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-4 mt-1">
-                      <span className="text-sm font-bold text-white">4</span>
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3 sm:mr-4 mt-1 flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-bold text-white">4</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Makes informed decision</h4>
