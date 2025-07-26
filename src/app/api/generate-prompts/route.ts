@@ -5,6 +5,7 @@ import { AEOAnalysisService } from '../../../services/AEOAnalysisService';
 interface GeneratePromptsRequest {
   businessName: string;
   industry: string;
+  location?: string;
   marketDescription: string;
   keywords: string[];
 }
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
     const promptResult = await promptFormationService.generateOptimizedPrompts({
       businessName: requestData.businessName,
       industry: requestData.industry,
+      location: requestData.location,
       marketDescription: requestData.marketDescription,
       keywords: requestData.keywords
     }, 5); // Generate 5 prompts for editing

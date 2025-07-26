@@ -27,6 +27,7 @@ export interface ProviderScoringResult {
 export interface AnalysisRequest {
   businessName: string;
   industry: string;
+  location?: string;
   marketDescription: string;
   keywords: string[];
   providers: AIProvider[];
@@ -156,10 +157,11 @@ export class AEOAnalysisService {
   }
 
   static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
-    const { businessName, industry, marketDescription, keywords, providers, customPrompts } = request;
+    const { businessName, industry, location, marketDescription, keywords, providers, customPrompts } = request;
 
     console.debug(`🏢 Business Name: "${businessName}"`);
     console.debug(`🏭 Industry: "${industry}"`);
+    if (location) console.debug(`📍 Location: "${location}"`);
     console.debug(`📄 Market Description: "${marketDescription}"`);
     console.debug(`🔑 Keywords:`, keywords);
     console.debug(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
@@ -179,6 +181,7 @@ export class AEOAnalysisService {
         const promptResult = await promptFormationService.generateOptimizedPrompts({
           businessName,
           industry,
+          location,
           marketDescription,
           keywords
         }, 3); // Generate 3 queries to match UI

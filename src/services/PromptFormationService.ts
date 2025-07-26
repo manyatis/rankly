@@ -4,6 +4,7 @@ import { PromptTemplateLoader } from '../lib/PromptTemplateLoader';
 interface BusinessContext {
   businessName: string;
   industry: string;
+  location?: string;
   marketDescription: string;
   keywords: string[];
 }
@@ -22,13 +23,14 @@ export class PromptFormationService {
   }
 
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
-    const { industry, marketDescription, keywords } = context;
+    const { industry, location, marketDescription, keywords } = context;
 
     try {
       // Load prompts from template files
       const systemPrompt = await PromptTemplateLoader.loadAEOSystemPrompt();
       const userPrompt = await PromptTemplateLoader.loadGenerateQueriesPrompt({
         industry,
+        location: location ? `\n- Location: ${location}\n\n` : '',
         marketDescription,
         keywords: keywords.join(', '),
         queryCount: queryCount.toString()
@@ -106,6 +108,11 @@ export class PromptFormationService {
     const primaryKeyword = keywords[0] || industry;
 
     const allQueries = [
+      `Top 10 ${primaryKeyword} products for businesses`,
+      `Best ${industry.toLowerCase()} products to buy in 2025`,
+      `Which ${primaryKeyword} products should I purchase`,
+      `Most recommended ${industry.toLowerCase()} products`,
+      `Premium ${primaryKeyword} products worth buying`,
       `What are the best ${industry.toLowerCase()} companies?`,
       `Top ${industry.toLowerCase()} solutions for businesses`,
       `How to choose a ${industry.toLowerCase()} provider`,
@@ -115,7 +122,12 @@ export class PromptFormationService {
       `${industry} recommendations for small businesses`,
       `Who are the top ${industry.toLowerCase()} vendors?`,
       `${primaryKeyword} market leaders`,
-      `Best ${industry.toLowerCase()} services in 2024`
+      `Best ${industry.toLowerCase()} services in 2024`,
+      `${primaryKeyword} products buying guide for ${industry.toLowerCase()}`,
+      `Should I buy ${primaryKeyword} products for my business`,
+      `Cost-effective ${primaryKeyword} products for startups`,
+      `Enterprise-grade ${primaryKeyword} products comparison`,
+      `Which ${primaryKeyword} products offer best ROI`
     ];
 
     return allQueries.slice(0, queryCount);

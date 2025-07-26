@@ -56,6 +56,7 @@ export class PromptTemplateLoader {
    */
   static async loadGenerateQueriesPrompt(variables: {
     industry: string;
+    location: string;
     marketDescription: string;
     keywords: string;
     queryCount: string;
@@ -110,6 +111,13 @@ export class PromptTemplateLoader {
   }
 
   /**
+   * Load purchase intent query patterns
+   */
+  static async loadPurchaseIntentQueries(): Promise<string[]> {
+    return this.loadQueryVariations('purchase-intent-2025.json');
+  }
+
+  /**
    * Load all query variation types
    */
   static async loadAllQueryVariations(): Promise<{
@@ -117,19 +125,22 @@ export class PromptTemplateLoader {
     conversationalSpecific: string[];
     comparisonEvaluation: string[];
     multiKeyword: string[];
+    purchaseIntent2025: string[];
   }> {
-    const [customerStyle2025, conversationalSpecific, comparisonEvaluation, multiKeyword] = await Promise.all([
+    const [customerStyle2025, conversationalSpecific, comparisonEvaluation, multiKeyword, purchaseIntent2025] = await Promise.all([
       this.loadQueryVariations('customer-style-2025.json'),
       this.loadQueryVariations('conversational-specific.json'),
       this.loadQueryVariations('comparison-evaluation.json'),
-      this.loadQueryVariations('multi-keyword.json')
+      this.loadQueryVariations('multi-keyword.json'),
+      this.loadQueryVariations('purchase-intent-2025.json')
     ]);
 
     return {
       customerStyle2025,
       conversationalSpecific,
       comparisonEvaluation,
-      multiKeyword
+      multiKeyword,
+      purchaseIntent2025
     };
   }
 }

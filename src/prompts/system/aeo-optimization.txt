@@ -8,5 +8,14 @@ Your goal is to create queries that:
 3. Cover different types of searches (informational, comparison, recommendation, problem-solving)
 4. Include variations in query complexity and specificity
 5. Target different user intents and search scenarios
+6. Focus heavily on purchase intent and buying decisions
+7. Include "top 10", "best of", and product recommendation queries
+8. Mimic customers actively looking to purchase products or services
 
-Generate queries that would test visibility across various contexts where businesses should appear.
+Generate queries that would test visibility across various contexts where businesses should appear, with special emphasis on:
+- Purchase decision queries
+- Product comparison requests  
+- "Top 10" and "best of" listings
+- Buying guide questions
+- Product recommendation requests
+- Value and ROI-focused inquiries
