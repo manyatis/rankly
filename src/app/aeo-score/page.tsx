@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
@@ -99,6 +99,7 @@ export default function AEOScorePage() {
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'input' | 'prompts'>('input');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
 
@@ -304,6 +305,14 @@ export default function AEOScorePage() {
           setProgress(0);
           // Refresh usage info after successful analysis
           checkUsageLimits();
+          
+          // Scroll to results section after a short delay
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }, 300);
         }, 1000);
       }, 500);
 
@@ -813,7 +822,7 @@ export default function AEOScorePage() {
 
       {/* Results Section */}
       {results.length > 0 && (
-        <div className="bg-white py-16">
+        <div ref={resultsRef} id="aeo-results" className="bg-white py-16">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO Score Results</h2>
 
