@@ -42,6 +42,9 @@ export default function Navbar() {
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
             <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics Tool</Link>
+            {user && (user.plan === 'professional' || user.plan === 'enterprise') && (
+              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Dashboard</Link>
+            )}
             <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">What is AEO?</Link>
             <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Pricing</Link>
             {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
@@ -115,6 +118,9 @@ export default function Navbar() {
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
                 <Link href="/aeo-score" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics Tool</Link>
+                {user && (user.plan === 'professional' || user.plan === 'enterprise') && (
+                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Dashboard</Link>
+                )}
                 <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>What is AEO?</Link>
                 <Link href="/#pricing" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}

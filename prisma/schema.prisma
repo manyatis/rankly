@@ -22,6 +22,7 @@ model User {
     plan              String          @default("free") // "free", "professional", "enterprise"
     createdAt         DateTime        @default(now())
     updatedAt         DateTime        @updatedAt
+    aeoScores         AeoScore[]
 }
 
 model Session {
@@ -57,4 +58,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model AeoScore {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  date        DateTime @default(now()) @db.Date
+  score       Int      // Overall AEO score (0-100)
+  businessName String
+  keywords    String[] // JSON array of keywords used
+  visibility  Int      // Visibility percentage
+  ranking     Int      // Average ranking score
+  relevance   Int      // Relevance score
+  accuracy    Int      // Accuracy score
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date, businessName])
+  @@index([userId, date])
 }

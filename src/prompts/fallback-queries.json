@@ -1,5 +1,10 @@
 {
   "patterns": [
+    "Top 10 {{primaryKeyword}} products for businesses",
+    "Best {{industry}} products to buy in 2025",
+    "Which {{primaryKeyword}} products should I purchase",
+    "Most recommended {{industry}} products",
+    "Premium {{primaryKeyword}} products worth buying",
     "What are the best {{industry}} companies?",
     "Top {{industry}} solutions for businesses",
     "How to choose a {{industry}} provider",
@@ -9,6 +14,11 @@
     "{{industry}} recommendations for small businesses",
     "Who are the top {{industry}} vendors?",
     "{{primaryKeyword}} market leaders",
-    "Best {{industry}} services in 2024"
+    "Best {{industry}} services in 2024",
+    "{{primaryKeyword}} products buying guide for {{industry}}",
+    "Should I buy {{primaryKeyword}} products for my business",
+    "Cost-effective {{primaryKeyword}} products for startups",
+    "Enterprise-grade {{primaryKeyword}} products comparison",
+    "Which {{primaryKeyword}} products offer best ROI"
   ]
 }

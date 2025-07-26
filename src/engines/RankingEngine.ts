@@ -28,8 +28,7 @@ export interface ScoringResult {
 export class RankingEngine {
   static calculateEnhancedAEOScore(
     queryResults: QueryResult[],
-    businessName: string,
-    keywords: string[]
+    businessName: string
   ): ScoringResult {
     console.debug(`\n📊 Calculating AEO score for "${businessName}" using position + word count algorithm`);
     console.debug(`📈 Query results summary: ${queryResults.length} total queries`);

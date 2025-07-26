@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
@@ -86,6 +86,7 @@ function extractKeywords(description: string, industry: string): string[] {
 export default function AEOScorePage() {
   const [businessName, setBusinessName] = useState('');
   const [industry, setIndustry] = useState('');
+  const [location, setLocation] = useState('');
   const [businessDescription, setBusinessDescription] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
@@ -98,6 +99,7 @@ export default function AEOScorePage() {
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'input' | 'prompts'>('input');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
 
@@ -166,6 +168,7 @@ export default function AEOScorePage() {
         body: JSON.stringify({
           businessName,
           industry,
+          location: location.trim() || undefined, // Include location if specified
           marketDescription: businessDescription, // Map businessDescription to marketDescription
           keywords: extractKeywords(businessDescription, industry) // Extract meaningful keywords
         }),
@@ -267,6 +270,7 @@ export default function AEOScorePage() {
         body: JSON.stringify({
           businessName,
           industry,
+          location: location.trim() || undefined, // Include location if specified
           marketDescription: businessDescription, // Map businessDescription to marketDescription
           keywords: extractKeywords(businessDescription, industry), // Extract keywords
           providers: aiProviders,
@@ -301,6 +305,14 @@ export default function AEOScorePage() {
           setProgress(0);
           // Refresh usage info after successful analysis
           checkUsageLimits();
+          
+          // Scroll to results section after a short delay
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }, 300);
         }, 1000);
       }, 500);
 
@@ -434,6 +446,31 @@ export default function AEOScorePage() {
                 />
                 <div className="mt-2 text-sm text-gray-500">
                   <strong>Examples:</strong> Software Development, Healthcare, E-commerce, Marketing, Finance, Education, Real Estate
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location (Optional)
+                  <div className="inline-block ml-2 relative group">
+                    <span className="text-xs text-gray-500 cursor-help">
+                      💡
+                    </span>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                      If specified, this location will be included in the analysis prompts to provide more targeted results. Leave blank for general analysis.
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Enter your location (e.g., 'New York', 'San Francisco Bay Area', 'London, UK')"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+                <div className="mt-2 text-sm text-gray-500">
+                  <strong>Optional:</strong> City, region, or country to include in prompts for location-specific analysis
                 </div>
               </div>
 
@@ -785,7 +822,7 @@ export default function AEOScorePage() {
 
       {/* Results Section */}
       {results.length > 0 && (
-        <div className="bg-white py-16">
+        <div ref={resultsRef} id="aeo-results" className="bg-white py-16">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">AEO Score Results</h2>
 
@@ -970,13 +1007,6 @@ export default function AEOScorePage() {
                     </div>
                   </div>
 
-                  {/* AI Response */}
-                  <div className="mb-6">
-                    <h4 className="font-semibold mb-2">AI Response:</h4>
-                    <div className="bg-white p-4 rounded border text-gray-700">
-                      {result.response}
-                    </div>
-                  </div>
 
                   {/* Summary Stats */}
                   <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -1104,27 +1134,6 @@ export default function AEOScorePage() {
                     <p className="text-gray-700">{result.analysis}</p>
                   </div>
 
-                  {/* Competitor Analysis */}
-                  {result.competitorAnalysis && result.competitorAnalysis.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="font-semibold mb-4">Top Competitors Found:</h4>
-                      <div className="bg-white rounded-lg p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {result.competitorAnalysis.slice(0, 8).map((competitor, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <span className="font-medium text-gray-900">{competitor.name}</span>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-600">{competitor.mentions}×</span>
-                                <span className={`text-sm font-medium ${competitor.score >= 60 ? 'text-green-600' : competitor.score >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
-                                  {competitor.score}%
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Missed Responses */}
                   {result.missedResponses && result.missedResponses.length > 0 && (

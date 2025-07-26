@@ -1,5 +1,5 @@
 Business Context:
-- Industry: {{industry}}
+- Industry: {{industry}}{{location}}
 - Market/Customers: {{marketDescription}}
 - Primary Keywords: {{keywords}}
 
@@ -9,11 +9,17 @@ IMPORTANT: Do NOT include any specific business names in the queries.
 
 Include queries that cover:
 - General industry recommendations
-- Comparison requests
+- Comparison requests  
 - "Best of" type questions
+- Product purchasing decisions
+- "Top 10" product listings
+- Purchase intent queries ("should I buy", "worth purchasing")
 - Questions that a consumer looking to make a purchase in the industry would ask
+- Buying guide and evaluation questions
+- Product recommendation requests
+- Value and ROI-focused queries
 
-IMPORTANT: Avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
+IMPORTANT: {{location}}If a location is specified in the context above, include location-aware queries that would be relevant for that geographic area (e.g., "best [industry] in [location]", "[location] [industry] providers"). If no location is specified, avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
 
 Return ONLY a JSON object with this structure and should only have {{queryCount}} queries inside the list:
 {

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../hooks/useAuth';
 import Navbar from '../../../components/Navbar';
 
@@ -9,7 +9,7 @@ export default function PaymentSuccessPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   // const searchParams = useSearchParams();
-  const [planName, setPlanName] = useState('');
+  const [planName] = useState('');
 
   // useEffect(() => {
   //   if (!loading && !user) {

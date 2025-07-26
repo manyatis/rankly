@@ -1,10 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-// import { CreditCard, PaymentForm } from 'react-square-web-payments-sdk';
 import { useAuth } from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
+
+// Square Web SDK types
+interface SquarePayments {
+  card(): Promise<SquareCard>;
+}
+
+interface SquareCard {
+  attach(selector: string): Promise<void>;
+  tokenize(): Promise<{ status: string; token?: string; errors?: Array<{ message: string }> }>;
+}
+
+declare global {
+  interface Window {
+    Square: {
+      payments(applicationId: string, locationId: string): SquarePayments;
+    };
+  }
+}
 
 interface PricingPlan {
   id: string;
@@ -54,29 +71,36 @@ const pricingPlans: Record<string, PricingPlan> = {
   }
 };
 
-export default function PaymentPage() {
+function PaymentPageContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  // const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
+  const [cardForm, setCardForm] = useState<SquareCard | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   // Check authentication
-  //   if (!loading && !user) {
-  //     router.push('/');
-  //     return;
-  //   }
+  useEffect(() => {
+    // Check authentication
+    if (!loading && !user) {
+      router.push('/');
+      return;
+    }
 
-  //   // Get plan from URL params
-  //   const planId = searchParams.get('plan');
-  //   if (planId && pricingPlans[planId]) {
-  //     setSelectedPlan(pricingPlans[planId]);
-  //   } else {
-  //     router.push('/');
-  //   }
-  // }, [user, loading, router, searchParams]);
+    // Get plan from URL params
+    const planId = searchParams.get('plan');
+    if (planId && pricingPlans[planId]) {
+      setSelectedPlan(pricingPlans[planId]);
+    } else {
+      router.push('/');
+    }
+
+    // Load Square Web SDK
+    const script = document.createElement('script');
+    script.src = 'https://web.squarecdn.com/v1/square.js';
+    script.async = true;
+    document.head.appendChild(script);
+  }, [user, loading, router, searchParams]);
 
   const handlePaymentSuccess = (result: string) => {
     console.debug('Payment successful:', result);
@@ -161,57 +185,72 @@ export default function PaymentPage() {
               </div>
             )}
 
-            {/* <PaymentForm
-              applicationId={process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID!}
-              locationId={process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!}
-              cardTokenizeResponseReceived={async (token) => {
+            <div id="card-container" className="mb-6"></div>
+            
+            <button
+              onClick={async () => {
+                if (!cardForm) {
+                  // Initialize Square payment form
+                  if (window.Square) {
+                    const payments = window.Square.payments(
+                      process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID!,
+                      process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!
+                    );
+                    
+                    const card = await payments.card();
+                    await card.attach('#card-container');
+                    setCardForm(card);
+                    return;
+                  }
+                }
+                
+                // Process payment
                 setPaymentProcessing(true);
                 setError(null);
                 
                 try {
-                  const response = await fetch('/api/payments/square', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      sourceId: token.token,
-                      amount: selectedPlan.price,
-                      planId: selectedPlan.id,
-                      planName: selectedPlan.name,
-                      userEmail: user?.email
-                    }),
-                  });
-
-                  const result = await response.json();
-                  
-                  if (response.ok) {
-                    handlePaymentSuccess(result);
-                  } else {
-                    handlePaymentError(result.error || 'Payment failed');
+                  if (!cardForm) {
+                    handlePaymentError('Payment form not initialized');
+                    return;
                   }
-                } catch (err) {
-                  handlePaymentError('Network error. Please try again.');
+                  
+                  const tokenResult = await cardForm.tokenize();
+                  
+                  if (tokenResult.status === 'OK') {
+                    const response = await fetch('/api/payments/square', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        sourceId: tokenResult.token,
+                        amount: selectedPlan.price,
+                        planId: selectedPlan.id,
+                        planName: selectedPlan.name,
+                        userEmail: user?.email
+                      }),
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                      handlePaymentSuccess(result);
+                    } else {
+                      handlePaymentError(result.error || 'Payment failed');
+                    }
+                  } else {
+                    handlePaymentError('Card validation failed');
+                  }
+                } catch (err: unknown) {
+                  console.error('Payment error:', err);
+                  handlePaymentError('Payment processing error. Please try again.');
                 }
               }}
-              createPaymentRequest={() => ({
-                countryCode: 'US',
-                currencyCode: 'USD',
-                total: {
-                  amount: (selectedPlan.price / 100).toString(),
-                  label: `${selectedPlan.name} Plan`,
-                },
-              })}
+              disabled={paymentProcessing}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
             >
-              <CreditCard 
-                style={{
-                  input: {
-                    fontSize: '16px',
-                    fontFamily: 'Arial, sans-serif',
-                  }
-                }}
-              />
-            </PaymentForm> */}
+              {paymentProcessing ? 'Processing...' : `Pay $${(selectedPlan.price / 100).toFixed(2)}`}
+            </button>
 
             {paymentProcessing && (
               <div className="mt-4 text-center">
@@ -239,5 +278,20 @@ export default function PaymentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    }>
+      <PaymentPageContent />
+    </Suspense>
   );
 }
