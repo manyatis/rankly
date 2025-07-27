@@ -3,6 +3,7 @@ import { AnalyticalEngine, QueryResult } from '../engines/AnalyticalEngine';
 import { RankingEngine, ScoringFactors, CompetitorInfo } from '../engines/RankingEngine';
 import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
 import { PromptFormationService } from './PromptFormationService';
+import { WebsiteAnalysisService, type WebsiteAnalysisResult } from './WebsiteAnalysisService';
 import { PrismaClient } from '../generated/prisma';
 
 export interface AIProvider {
@@ -28,6 +29,7 @@ export interface AnalysisRequest {
   businessName: string;
   industry: string;
   location?: string;
+  websiteUrl?: string;
   marketDescription: string;
   keywords: string[];
   providers: AIProvider[];
@@ -37,6 +39,7 @@ export interface AnalysisRequest {
 export interface AnalysisResult {
   results: ProviderScoringResult[];
   overallCompetitorAnalysis: CompetitorInfo[];
+  websiteAnalysis?: WebsiteAnalysisResult;
   usageInfo?: {
     usageCount: number;
     maxUsage: number | string;
@@ -119,7 +122,7 @@ export class AEOAnalysisService {
   }
 
   static validateRequest(request: AnalysisRequest): { isValid: boolean; error?: string } {
-    const { businessName, industry, marketDescription, keywords, providers } = request;
+    const { businessName, industry, marketDescription, keywords, providers, websiteUrl } = request;
 
     const missingFields = [];
     if (!businessName) missingFields.push('businessName');
@@ -132,6 +135,14 @@ export class AEOAnalysisService {
     else if (!Array.isArray(providers)) missingFields.push('providers (must be array)');
     else if (providers.length === 0) missingFields.push('providers (must be non-empty)');
 
+    // Validate websiteUrl if provided
+    if (websiteUrl && !this.isValidUrl(websiteUrl)) {
+      return {
+        isValid: false,
+        error: 'Invalid website URL format'
+      };
+    }
+
     if (missingFields.length > 0) {
       console.debug(`❌ Missing required fields: ${missingFields.join(', ')}`);
       return {
@@ -141,6 +152,15 @@ export class AEOAnalysisService {
     }
 
     return { isValid: true };
+  }
+
+  private static isValidUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   static async incrementUserUsage(userEmail: string): Promise<{ success: boolean; error?: string }> {
@@ -383,8 +403,50 @@ export class AEOAnalysisService {
       throw new Error(usageResult.error || 'Usage limit exceeded');
     }
 
-    // Run analysis
-    const results = await this.analyzeProviders(request);
+    // Run parallel analysis
+    const analysisPromises = [];
+
+    // 1. Run provider analysis
+    analysisPromises.push(this.analyzeProviders(request));
+
+    // 2. Run website analysis if URL provided
+    let websiteAnalysisPromise = null;
+    if (request.websiteUrl) {
+      console.debug(`🌐 Website analysis enabled for: ${request.websiteUrl}`);
+      websiteAnalysisPromise = WebsiteAnalysisService.analyzeWebsite({
+        url: request.websiteUrl,
+        businessName: request.businessName,
+        industry: request.industry,
+        recommendationLimit: 3 // Default to 3 recommendations as requested
+      });
+      analysisPromises.push(websiteAnalysisPromise);
+    }
+
+    // Wait for all analyses to complete
+    const analysisResults = await Promise.allSettled(analysisPromises);
+    
+    // Extract provider results (always the first promise)
+    const providerResults = analysisResults[0];
+    let results: ProviderScoringResult[] = [];
+    if (providerResults.status === 'fulfilled') {
+      results = providerResults.value as ProviderScoringResult[];
+    } else {
+      console.error('❌ Provider analysis failed:', providerResults.reason);
+      throw new Error('Provider analysis failed');
+    }
+
+    // Extract website analysis results if available
+    let websiteAnalysis: WebsiteAnalysisResult | undefined;
+    if (websiteAnalysisPromise && analysisResults[1]) {
+      const websiteResults = analysisResults[1];
+      if (websiteResults.status === 'fulfilled') {
+        websiteAnalysis = websiteResults.value as WebsiteAnalysisResult;
+        console.debug(`✅ Website analysis completed with ${websiteAnalysis.recommendations.length} recommendations`);
+      } else {
+        console.warn('⚠️ Website analysis failed:', websiteResults.reason);
+        // Continue without website analysis - don't break the main analysis
+      }
+    }
 
     // Aggregate competitors from all models
     const overallCompetitorAnalysis = this.aggregateCompetitors(results);
@@ -413,6 +475,7 @@ export class AEOAnalysisService {
     return {
       results,
       overallCompetitorAnalysis,
+      websiteAnalysis,
       usageInfo: authResult.usageInfo
     };
   }

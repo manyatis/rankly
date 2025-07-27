@@ -31,6 +31,34 @@ interface ScoringResult {
   missedResponses: QueryResult[];
 }
 
+interface AnalysisRecommendation {
+  category: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  effort: 'quick' | 'moderate' | 'significant';
+  impact: 'high' | 'medium' | 'low';
+}
+
+interface WebsiteAnalysisResult {
+  url: string;
+  title: string;
+  contentAnalysis: {
+    wordCount: number;
+    hasStructuredData: boolean;
+    headingStructure: string[];
+    authoritySignals: string[];
+    citationCount: number;
+  };
+  aeoOptimization: {
+    currentScore: number;
+    strengths: string[];
+    weaknesses: string[];
+  };
+  recommendations: AnalysisRecommendation[];
+  summary: string;
+}
+
 interface CompetitorInfo {
   name: string;
   mentions: number;
@@ -91,6 +119,7 @@ export default function AEOScorePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
   const [overallCompetitors, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
+  const [websiteAnalysis, setWebsiteAnalysis] = useState<WebsiteAnalysisResult | null>(null);
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -299,6 +328,7 @@ export default function AEOScorePage() {
         setTimeout(() => {
           setResults(data.results);
           setOverallCompetitors(data.overallCompetitorAnalysis || []);
+          setWebsiteAnalysis(data.websiteAnalysis || null);
           setIsAnalyzing(false);
           setCurrentStep('');
           setProgress(0);
@@ -390,19 +420,6 @@ export default function AEOScorePage() {
               {showPromptEditor && (
                 <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   Ready
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => {}}
-              disabled={true}
-              className='border-transparent text-gray-600 cursor-not-allowed'
-            >
-              3. Gain Insights to boost visibility
-              {showPromptEditor && (
-                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  Professional+
                 </span>
               )}
             </button>
@@ -956,6 +973,153 @@ export default function AEOScorePage() {
                       Competitor scores represent frequency of mentions across all AI model responses.
                       Higher scores indicate stronger competitive presence in AI search results.
                     </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Website Analysis Results */}
+            {websiteAnalysis && (
+              <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg p-8 mb-8 border border-gray-600">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">Website AEO Analysis</h3>
+                  <p className="text-gray-300">
+                    Analysis of <strong>{websiteAnalysis.url}</strong> for AI engine optimization
+                  </p>
+                </div>
+
+                {/* AEO Score */}
+                <div className="flex justify-center mb-8">
+                  <div className="relative">
+                    <div className="relative w-40 h-40">
+                      <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 120 120">
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          stroke="#E5E7EB"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="50"
+                          stroke={websiteAnalysis.aeoOptimization.currentScore >= 80 ? "#10B981" : websiteAnalysis.aeoOptimization.currentScore >= 60 ? "#F59E0B" : "#EF4444"}
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={`${(websiteAnalysis.aeoOptimization.currentScore / 100) * 314} 314`}
+                          strokeLinecap="round"
+                          className="transition-all duration-1000 ease-out"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`text-3xl font-bold ${getScoreColor(websiteAnalysis.aeoOptimization.currentScore)}`}>
+                          {websiteAnalysis.aeoOptimization.currentScore}
+                        </span>
+                        <span className="text-xs text-gray-300">Website Score</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-600">
+                  <h4 className="text-lg font-semibold text-white mb-3">Analysis Summary</h4>
+                  <p className="text-gray-300">{websiteAnalysis.summary}</p>
+                </div>
+
+                {/* Content Analysis */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-gray-800 rounded-lg p-6 border border-gray-600">
+                    <h5 className="text-md font-semibold text-white mb-4">Content Analysis</h5>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Word Count:</span>
+                        <span className="text-white font-medium">{websiteAnalysis.contentAnalysis.wordCount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Structured Data:</span>
+                        <span className={`font-medium ${websiteAnalysis.contentAnalysis.hasStructuredData ? 'text-green-400' : 'text-red-400'}`}>
+                          {websiteAnalysis.contentAnalysis.hasStructuredData ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Authority Signals:</span>
+                        <span className="text-white font-medium">{websiteAnalysis.contentAnalysis.authoritySignals.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">External Links:</span>
+                        <span className="text-white font-medium">{websiteAnalysis.contentAnalysis.citationCount}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-800 rounded-lg p-6 border border-gray-600">
+                    <h5 className="text-md font-semibold text-white mb-4">Strengths & Weaknesses</h5>
+                    
+                    {websiteAnalysis.aeoOptimization.strengths.length > 0 && (
+                      <div className="mb-4">
+                        <h6 className="text-sm font-medium text-green-400 mb-2">✅ Strengths</h6>
+                        <ul className="text-xs text-gray-300 space-y-1">
+                          {websiteAnalysis.aeoOptimization.strengths.slice(0, 3).map((strength, idx) => (
+                            <li key={idx}>• {strength}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {websiteAnalysis.aeoOptimization.weaknesses.length > 0 && (
+                      <div>
+                        <h6 className="text-sm font-medium text-red-400 mb-2">⚠️ Areas for Improvement</h6>
+                        <ul className="text-xs text-gray-300 space-y-1">
+                          {websiteAnalysis.aeoOptimization.weaknesses.slice(0, 3).map((weakness, idx) => (
+                            <li key={idx}>• {weakness}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actionable Recommendations */}
+                <div className="bg-gray-800 rounded-lg p-6 border border-gray-600">
+                  <h4 className="text-lg font-semibold text-white mb-4">🎯 Actionable Recommendations</h4>
+                  <div className="space-y-4">
+                    {websiteAnalysis.recommendations.map((rec, idx) => (
+                      <div key={idx} className="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-4 border border-gray-500">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                              rec.priority === 'high' ? 'bg-red-100 text-red-800' :
+                              rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {rec.priority.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-gray-400">{rec.category}</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              rec.effort === 'quick' ? 'bg-green-900 text-green-300' :
+                              rec.effort === 'moderate' ? 'bg-yellow-900 text-yellow-300' :
+                              'bg-red-900 text-red-300'
+                            }`}>
+                              {rec.effort}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              rec.impact === 'high' ? 'bg-blue-900 text-blue-300' :
+                              rec.impact === 'medium' ? 'bg-purple-900 text-purple-300' :
+                              'bg-gray-900 text-gray-300'
+                            }`}>
+                              {rec.impact} impact
+                            </span>
+                          </div>
+                        </div>
+                        <h5 className="text-white font-semibold mb-2">{rec.title}</h5>
+                        <p className="text-gray-300 text-sm">{rec.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
