@@ -58,8 +58,8 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
             <div className="text-center mb-6 lg:mb-8">
               <h3 className="text-xl lg:text-2xl font-bold text-white mb-2">Indie</h3>
               <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
-                <div className="text-xl lg:text-2xl text-gray-400 line-through">$45</div>
-                <div className="text-3xl lg:text-4xl font-bold text-green-600">$20</div>
+                <div className="text-xl lg:text-2xl text-gray-400 line-through">$20</div>
+                <div className="text-3xl lg:text-4xl font-bold text-green-600">$10</div>
               </div>
               <p className="text-gray-300 text-sm lg:text-base">per month (create account before release for discount)</p>
             </div>
@@ -99,11 +99,8 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
             </div>
             <div className="text-center mb-6 lg:mb-8">
               <h3 className="text-xl lg:text-2xl font-bold text-white mb-2">Professional</h3>
-              <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
-                <div className="text-xl lg:text-2xl text-gray-400 line-through">$150</div>
-                <div className="text-3xl lg:text-4xl font-bold text-blue-600">$75</div>
-              </div>
-              <p className="text-gray-300 text-sm lg:text-base">per month (create account before release for discount)</p>
+              <div className="text-3xl lg:text-4xl font-bold text-blue-600 mb-2">50% off pre-release</div>
+              <p className="text-gray-300 text-sm lg:text-base">Create account before release for discount</p>
             </div>
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
               <li className="flex items-center text-gray-300">
@@ -152,11 +149,8 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
             </div>
             <div className="text-center mb-6 lg:mb-8">
               <h3 className="text-xl lg:text-2xl font-bold text-white mb-2">Enterprise</h3>
-              <div className="flex items-center justify-center gap-2 lg:gap-3 mb-2">
-                <div className="text-xl lg:text-2xl text-gray-400 line-through">$500</div>
-                <div className="text-3xl lg:text-4xl font-bold text-blue-600">$250</div>
-              </div>
-              <p className="text-gray-300 text-sm lg:text-base">per month (create account before release for discount)</p>
+              <div className="text-3xl lg:text-4xl font-bold text-blue-600 mb-2">50% off pre-release</div>
+              <p className="text-gray-300 text-sm lg:text-base">Create account before release for discount</p>
             </div>
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
               <li className="flex items-center text-gray-300">
