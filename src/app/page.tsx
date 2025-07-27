@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
@@ -9,13 +8,11 @@ import LoginModal from '../components/LoginModal';
 import { useAuth } from '../hooks/useAuth';
 import HeroSection from '../components/home/HeroSection';
 import PricingSection from '../components/home/PricingSection';
-import AnalyticsFeatures from '../components/home/AnalyticsFeatures';
 import SolutionsSection from '../components/home/SolutionsSection';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentAnalyticsSlide, setCurrentAnalyticsSlide] = useState(0);
   const [currentDashboardSlide, setCurrentDashboardSlide] = useState(0);
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -41,93 +38,36 @@ export default function Home() {
     router.push(`/payment?plan=${planId}`);
   };
 
-  const analyticsFeatures = [
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-      title: "Analyze Response Quality",
-      description: "Analyze responses which included or didn't include your business - understand how AI engines respond about your brand with detailed visibility scoring."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      ),
-      title: "Brand Visibility Analysis",
-      description: "See how engines respond about your brand with comprehensive monthly views of visibility across the top engines."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      ),
-      title: "Competitive Intelligence",
-      description: "See how you stack up against your competition with detailed competitor analysis and benchmarking across all AI platforms."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-        </svg>
-      ),
-      title: "AI Search Insights & Plans",
-      description: "Get insights and plans to improve your AI search presence with automated recommendations and implementation strategies."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
-      title: "Dedicated Support",
-      description: "Get dedicated support from our team to help you optimize your AI search presence and maximize your visibility."
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      title: "Monthly Visibility Reports",
-      description: "Monthly view of visibility across the top engines with trend analysis and performance tracking over time."
-    }
-  ];
 
   const solutions = [
     {
-      title: "Enterprise Analytics Suite",
-      description: "Complete AEO analytics platform with custom dashboards, API access, and dedicated support.",
-      features: ["Custom dashboards", "API integration", "White-label reports", "Dedicated support"]
+      title: "Agency & Freelance Pro",
+      description: "Complete AI engine analytics platform designed for SEO professionals managing multiple clients with automated report generation.",
+      features: ["Multi-client dashboards", "White-label reports", "API integration", "Priority support"]
     },
     {
-      title: "SMB Growth Package",
-      description: "Essential analytics and optimization tools designed for small to medium businesses looking to improve their search presence.",
-      features: ["Weekly reports", "Competitor analysis", "Keyword tracking", "Basic optimization"]
+      title: "DIY Business Package",
+      description: "Perfect for small to medium businesses managing their own SEO strategy. Get AI-powered recommendations and easy-to-understand reports.",
+      features: ["Automated recommendations", "Simple reports", "Competitor tracking", "Self-service optimization"]
     },
     {
-      title: "Agency Partner Program",
-      description: "Comprehensive analytics platform with client management tools and reseller capabilities for digital agencies.",
-      features: ["Multi-client dashboard", "Reseller pricing", "White-label branding", "Agency tools"]
+      title: "Enterprise Solution",
+      description: "Advanced AI engine analytics for large organizations with custom integrations, dedicated support, and unlimited report generation.",
+      features: ["Custom integrations", "Unlimited reports", "Dedicated account manager", "Advanced analytics"]
     }
   ];
 
   const dashboardSlides = [
     {
       title: "Main Dashboard",
-      subtitle: "Professional AEO Analytics Platform",
+      subtitle: "Professional AI Engine Analytics Platform",
       component: (
         <div className="bg-gray-800 rounded-xl overflow-hidden">
           <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-2xl font-bold text-white">SearchDogAI Dashboard</h3>
-                <p className="text-gray-400 text-sm">Professional AEO Analytics Platform</p>
+                <h3 className="text-2xl font-bold text-white">Rankly Dashboard</h3>
+                <p className="text-gray-400 text-sm">Professional AI Engine Analytics Platform</p>
               </div>
             </div>
             <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
@@ -267,138 +207,6 @@ export default function Home() {
     }
   ];
 
-  const analyticsSlides = [
-    {
-      title: "Conversation Explorer",
-      subtitle: "Discover what people ask AI about your industry",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-4 lg:px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg lg:text-xl font-bold text-white">Conversation Explorer</h3>
-                <p className="text-gray-400 text-xs lg:text-sm">Discover what people ask AI about your industry</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Overview</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Conversations</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Insights</div>
-            </div>
-          </div>
-          <div className="p-4 lg:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <div className="bg-gray-700 rounded-lg p-6">
-                <h4 className="text-white font-semibold mb-4">Top AI Queries About Your Industry</h4>
-                <div className="space-y-4">
-                  {[
-                    { query: "Best marketing automation tools for 2025", mentions: 847, trend: "+23%" },
-                    { query: "CRM software comparison guide", mentions: 612, trend: "+18%" },
-                    { query: "Email marketing platforms that integrate with AI", mentions: 534, trend: "+31%" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
-                      <div className="flex-1">
-                        <div className="text-white text-sm font-medium mb-1">&quot;{item.query}&quot;</div>
-                        <div className="text-gray-300 text-xs">{item.mentions} mentions across AI platforms</div>
-                      </div>
-                      <div className="text-green-400 text-sm font-medium">{item.trend}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-6">
-                <h4 className="text-white font-semibold mb-4">Query Volume Trends</h4>
-                <div className="flex items-end space-x-2 h-32">
-                  {[42, 58, 71, 65, 89, 94, 87, 103, 98, 112].map((height, idx) => (
-                    <div key={idx} className="bg-blue-500 rounded-t flex-1" style={{ height: `${height / 2}px` }}></div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Industry Analytics",
-      subtitle: "Deep insights into your market landscape",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-4 lg:px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg lg:text-xl font-bold text-white">Industry Analytics</h3>
-                <p className="text-gray-400 text-xs lg:text-sm">Deep insights into your market landscape</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Overview</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Conversations</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Analytics</div>
-              <div className="px-2 lg:px-3 py-2 rounded-md text-xs lg:text-sm font-medium text-gray-300 whitespace-nowrap">Insights</div>
-            </div>
-          </div>
-          <div className="p-4 lg:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-              <div className="bg-gray-700 rounded-lg p-6">
-                <h4 className="text-white font-semibold mb-4">Emerging Topics & Opportunities</h4>
-                <div className="space-y-4">
-                  {[
-                    { topic: "AI-powered customer segmentation", score: 94, status: "Hot" },
-                    { topic: "Privacy-first marketing analytics", score: 87, status: "Rising" },
-                    { topic: "Automated workflow optimization", score: 81, status: "Growing" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
-                      <div className="flex-1">
-                        <div className="text-white text-sm font-medium mb-1">{item.topic}</div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-16 bg-gray-500 rounded-full h-1.5">
-                            <div className="bg-blue-400 h-1.5 rounded-full" style={{ width: `${item.score}%` }}></div>
-                          </div>
-                          <span className="text-gray-300 text-xs">{item.score}%</span>
-                        </div>
-                      </div>
-                      <div className={`text-xs px-2 py-1 rounded-full ${
-                        item.status === 'Hot' ? 'bg-red-500 text-white' :
-                        item.status === 'Rising' ? 'bg-orange-500 text-white' :
-                        'bg-yellow-500 text-black'
-                      }`}>
-                        {item.status}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-6">
-                <h4 className="text-white font-semibold mb-4">Market Positioning</h4>
-                <div className="space-y-3">
-                  {[
-                    { category: "Marketing Tech", rank: 3, total: 50, score: 78 },
-                    { category: "AI Analytics", rank: 2, total: 25, score: 85 },
-                    { category: "Search Optimization", rank: 5, total: 40, score: 72 }
-                  ].map((item, idx) => (
-                    <div key={idx} className="p-3 bg-gray-600 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-white text-sm font-medium">{item.category}</span>
-                        <span className="text-gray-300 text-xs">#{item.rank} of {item.total}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-full bg-gray-500 rounded-full h-2">
-                          <div className="bg-blue-400 h-2 rounded-full" style={{ width: `${item.score}%` }}></div>
-                        </div>
-                        <span className="text-white text-xs font-medium">{item.score}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-  ];
 
   const dashboardPreviewSlides = [
     {
@@ -409,8 +217,8 @@ export default function Home() {
           <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-2xl font-bold text-white">SearchDogAI Dashboard</h3>
-                <p className="text-gray-400 text-sm">Professional AEO Analytics Platform</p>
+                <h3 className="text-2xl font-bold text-white">Rankly Dashboard</h3>
+                <p className="text-gray-400 text-sm">Professional AI Engine Analytics Platform</p>
               </div>
             </div>
             <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
@@ -528,13 +336,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [dashboardSlides.length]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentAnalyticsSlide((prev) => (prev + 1) % analyticsSlides.length);
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [analyticsSlides.length]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -546,184 +347,184 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+    <div className="min-h-screen bg-gray-900" style={{ fontFamily: "system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
       <Navbar />
 
       <HeroSection onCreateAccount={handleCreateAccount} />
 
       {/* Statistics Section */}
-      <div className="bg-white py-12 sm:py-16">
+      <div className="bg-gray-900 py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              The Search Revolution Is Here
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+              Built for SEO Professionals & DIY Businesses
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              AI-powered search is transforming how users find information. Stay ahead with comprehensive AEO analytics.
+            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              Freelance SEOs need quick client reports. Businesses want to handle their own SEO. Our AI-powered platform 
+              aggregates rankings from all major AI engines and generates actionable recommendations automatically.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of searches complete without clicks</p>
-              <p className="text-gray-500 text-xs mt-2">Source: SparkToro/Datos Study (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of searches complete without clicks</p>
+              <p className="text-gray-400 text-xs mt-2">Source: SparkToro/Datos Study (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of Google queries now show AI Overviews</p>
-              <p className="text-gray-500 text-xs mt-2">Source: Semrush Study (March 2025)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of Google queries now show AI Overviews</p>
+              <p className="text-gray-400 text-xs mt-2">Source: Semrush Study (March 2025)</p>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 mb-2">525%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">revenue growth for AI search engines in 2024</p>
-              <p className="text-gray-500 text-xs mt-2">Source: Industry Analysis (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">revenue growth for AI search engines in 2024</p>
+              <p className="text-gray-400 text-xs mt-2">Source: Industry Analysis (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-2">78%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">of enterprises now use AI in business functions</p>
-              <p className="text-gray-500 text-xs mt-2">Source: McKinsey AI Survey (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of enterprises now use AI in business functions</p>
+              <p className="text-gray-400 text-xs mt-2">Source: McKinsey AI Survey (2024)</p>
             </div>
           </div>
 
           {/* Additional Impact Statistics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600 mb-2">25%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">predicted drop in traditional search volume by 2026</p>
-              <p className="text-gray-500 text-xs mt-2">Source: Gartner Research (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">predicted drop in traditional search volume by 2026</p>
+              <p className="text-gray-400 text-xs mt-2">Source: Gartner Research (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-teal-600 mb-2">$13.8B</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
-              <p className="text-gray-500 text-xs mt-2">Source: Enterprise AI Reports (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
+              <p className="text-gray-400 text-xs mt-2">Source: Enterprise AI Reports (2024)</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 sm:p-6 lg:p-8 text-center">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 mb-2">34.5%</div>
-              <p className="text-gray-700 font-medium text-xs sm:text-sm lg:text-base">drop in click-through rates when AI Overviews appear</p>
-              <p className="text-gray-500 text-xs mt-2">Source: Ahrefs Study (2024)</p>
+              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">drop in click-through rates when AI Overviews appear</p>
+              <p className="text-gray-400 text-xs mt-2">Source: Ahrefs Study (2024)</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 sm:p-8 max-w-4xl mx-auto">
-            <p className="text-gray-700 text-base sm:text-lg text-center leading-relaxed">
-              <strong>The new reality:</strong> Traditional search optimization alone isn&apos;t enough. Companies need comprehensive analytics
-              to track their performance across both traditional search engines and AI platforms.
-              <strong className="text-blue-600"> AEO optimization is becoming critical</strong> for maintaining online visibility.
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-6 sm:p-8 max-w-4xl mx-auto">
+            <p className="text-gray-300 text-base sm:text-lg text-center leading-relaxed">
+              We use a <strong className="text-blue-600">multi-agentic AI workflow</strong> to handle prompt generation, 
+              analysis, and recommendations automatically.
             </p>
           </div>
 
           {/* Research-Backed Methodology Section */}
           <div className="mt-16 sm:mt-20">
             <div className="text-center mb-12">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                 Research-Backed Ranking Methodology
               </h3>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto">
                 Our AEO scoring methodology incorporates established research principles and known ranking factors that influence AI search visibility.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">Content Authority</h4>
+                  <h4 className="text-lg font-semibold text-white">Content Authority</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Based on established E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) principles and content quality signals that AI models use for source evaluation.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">Semantic Relevance</h4>
+                  <h4 className="text-lg font-semibold text-white">Semantic Relevance</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Leveraging natural language processing principles for semantic understanding and context matching in AI model information retrieval.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">Citation Patterns</h4>
+                  <h4 className="text-lg font-semibold text-white">Citation Patterns</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Analyzing how AI models select and rank information sources based on established citation behavior patterns in information retrieval systems.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">Structured Data</h4>
+                  <h4 className="text-lg font-semibold text-white">Structured Data</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Incorporating structured data principles and schema markup that enhance AI model information extraction and understanding.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">Recency Signals</h4>
+                  <h4 className="text-lg font-semibold text-white">Recency Signals</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Based on temporal relevance principles and how AI models weight information freshness and update frequency in their responses.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900">User Engagement</h4>
+                  <h4 className="text-lg font-semibold text-white">User Engagement</h4>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Incorporating user interaction patterns and engagement metrics that influence how AI systems rank and present information.
                 </p>
               </div>
             </div>
 
-            <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
+            <div className="mt-12 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-8 border border-gray-600">
               <div className="text-center">
-                <h4 className="text-xl font-bold text-gray-900 mb-4">
+                <h4 className="text-xl font-bold text-white mb-4">
                   Built on Established Research Principles
                 </h4>
-                <p className="text-gray-700 mb-6 max-w-3xl mx-auto">
+                <p className="text-gray-300 mb-6 max-w-3xl mx-auto">
                   Our methodology draws from established research in natural language processing, information retrieval, and AI system behavior 
                   to create a comprehensive AEO scoring approach.
                 </p>
-                <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Natural Language Processing</span>
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Information Retrieval</span>
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">AI System Behavior</span>
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm">Search Quality Guidelines</span>
+                <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-300">
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Natural Language Processing</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Information Retrieval</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">AI System Behavior</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Search Quality Guidelines</span>
                 </div>
               </div>
             </div>
@@ -732,12 +533,12 @@ export default function Home() {
           {/* Charts Section */}
           <div className="mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* SEO Effectiveness Chart */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
+            <div className="bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-600">
               <div className="mb-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">SEO Click-Through Rates</h3>
-                <p className="text-gray-600 text-sm sm:text-base">Position #1 organic search result CTR over time</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">SEO Click-Through Rates</h3>
+                <p className="text-gray-300 text-sm sm:text-base">Position #1 organic search result CTR over time</p>
               </div>
-              <div className="relative h-48 sm:h-64 bg-gray-50 rounded-lg p-4">
+              <div className="relative h-48 sm:h-64 bg-gray-700 rounded-lg p-4">
                 <div className="h-full flex items-end justify-between gap-1">
                   {/* Real CTR data for position #1 */}
                   {[
@@ -771,13 +572,13 @@ export default function Home() {
             </div>
 
             {/* AI Search Growth Chart */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100">
+            <div className="bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-600">
               <div className="mb-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Search Tool Usage</h3>
-                <p className="text-gray-600 text-sm sm:text-base">Monthly active users (millions) for AI search platforms</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">AI Search Tool Usage</h3>
+                <p className="text-gray-300 text-sm sm:text-base">Monthly active users (millions) for AI search platforms</p>
                 <p className="text-gray-500 text-xs mt-1">Source: Google court documents & public disclosures</p>
               </div>
-              <div className="relative h-48 sm:h-64 bg-gray-50 rounded-lg p-4">
+              <div className="relative h-48 sm:h-64 bg-gray-700 rounded-lg p-4">
                 <div className="h-full flex items-end justify-between gap-1">
                   {/* Real usage data in millions of users */}
                   {[
@@ -814,21 +615,15 @@ export default function Home() {
         </div>
       </div>
 
-      <AnalyticsFeatures 
-        features={analyticsFeatures}
-        analyticsSlides={analyticsSlides}
-        currentSlide={currentAnalyticsSlide}
-        onSlideChange={setCurrentAnalyticsSlide}
-        onCreateAccount={handleCreateAccount}
-      />
 
       {/* Dashboard Preview Section */}
-      <div className="bg-white py-20">
+      <div className="bg-gray-900 py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Professional Dashboard Experience</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Get complete visibility into your AI search performance with our enterprise-grade analytics platform.
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Generate comprehensive AI engine ranking reports with automated recommendations. Perfect for freelance SEOs creating client deliverables 
+              and businesses managing their own SEO strategy.
             </p>
           </div>
 
@@ -904,8 +699,8 @@ export default function Home() {
                   <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Real-Time Monitoring</h3>
-              <p className="text-gray-600">Track your AI visibility across all major platforms with live updates and trend analysis.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">Instant Report Generation</h3>
+              <p className="text-gray-300">Generate professional client reports in minutes. Perfect for freelance SEOs who need quick, comprehensive analysis.</p>
             </div>
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -913,8 +708,8 @@ export default function Home() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Competitive Intelligence</h3>
-              <p className="text-gray-600">See how you stack up against competitors with comprehensive ranking analysis.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">AI-Powered Recommendations</h3>
+              <p className="text-gray-300">Our multi-agentic AI analyzes your rankings and automatically generates actionable optimization strategies.</p>
             </div>
             <div className="text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -922,8 +717,8 @@ export default function Home() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Actionable Insights</h3>
-              <p className="text-gray-600">Get AI-powered recommendations and action plans to improve your search visibility.</p>
+              <h3 className="text-xl font-semibold mb-2 text-white">DIY-Friendly Interface</h3>
+              <p className="text-gray-300">Easy-to-use platform designed for businesses managing their own SEO without technical expertise required.</p>
             </div>
           </div>
 
@@ -931,7 +726,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/aeo-score" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
-                Try Analytics Tool Free
+                Generate AI Ranking Report
               </Link>
               <a href="#pricing" className="bg-gray-100 text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-base sm:text-lg inline-block">
                 View Pricing & Sign Up
@@ -958,16 +753,17 @@ export default function Home() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to Optimize for AI Search?
+            Ready to Generate Professional SEO Reports?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of businesses preparing for the AI-first search future. Create your account now to access our free tool and lock in pre-release discounts.
+            Join freelance SEOs and businesses using our AI-powered platform to quickly generate comprehensive ranking reports 
+            and optimization recommendations.
           </p>
           <button
             onClick={handleCreateAccount}
             className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg cursor-pointer"
           >
-            Create Account - Get Discount
+            Start Generating Reports
           </button>
         </div>
       </div>
@@ -977,17 +773,17 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Image src="/dog.png" alt="SearchDogAI" width={24} height={24} className="object-contain" />
-              <span className="text-xl font-semibold">SearchDogAI</span>
+              <span className="text-2xl">🚀</span>
+              <span className="text-xl font-semibold">Rankly</span>
             </div>
             <div className="flex space-x-6">
-              <Link href="/aeo" className="text-gray-400 hover:text-white transition-colors">Learn AEO</Link>
-              <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">AEO Score</Link>
+              <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
+              <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
               <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 American Code LLC. All rights reserved. Leading the future of AEO analytics.</p>
+            <p>&copy; 2025 American Code LLC. All rights reserved. AI-powered report generation for SEO professionals.</p>
           </div>
         </div>
       </footer>

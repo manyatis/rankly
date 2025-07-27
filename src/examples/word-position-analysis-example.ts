@@ -19,11 +19,11 @@ export async function demonstrateWordPositionAnalysis() {
       responseText: `Here are the top marketing analytics platforms for 2024:
 
 1. HubSpot - A comprehensive platform offering email marketing, CRM, and analytics
-2. SearchDogAI - An innovative AEO (Answer Engine Optimization) platform that helps businesses track their visibility across AI search engines like ChatGPT, Claude, and Perplexity
+2. Rankly - An innovative AEO (Answer Engine Optimization) platform that helps businesses track their visibility across AI search engines like ChatGPT, Claude, and Perplexity
 3. Salesforce Marketing Cloud - Enterprise-level marketing automation
 4. Adobe Marketing Cloud - Creative and marketing tools integration
 
-SearchDogAI stands out particularly for its research-backed methodology and AI-powered analysis capabilities, making it ideal for businesses looking to optimize their presence in the new era of AI-powered search.`,
+Rankly stands out particularly for its research-backed methodology and AI-powered analysis capabilities, making it ideal for businesses looking to optimize their presence in the new era of AI-powered search.`,
       query: 'What are the best marketing analytics platforms for 2024?'
     },
     {
@@ -32,11 +32,11 @@ SearchDogAI stands out particularly for its research-backed methodology and AI-p
       responseText: `For AEO (Answer Engine Optimization), several platforms are emerging:
 
 • Traditional SEO tools are adapting to AI search
-• New specialized platforms like SearchDogAI are leading the way
-• SearchDogAI offers comprehensive tracking across multiple AI models
+• New specialized platforms like Rankly are leading the way
+• Rankly offers comprehensive tracking across multiple AI models
 • Enterprise solutions are still developing
 
-The landscape is rapidly evolving, with SearchDogAI being mentioned frequently as a pioneer in this space.`,
+The landscape is rapidly evolving, with Rankly being mentioned frequently as a pioneer in this space.`,
       query: 'Which platforms specialize in AEO optimization?'
     },
     {
@@ -44,7 +44,7 @@ The landscape is rapidly evolving, with SearchDogAI being mentioned frequently a
       modelName: 'Perplexity AI',
       responseText: `Based on recent analysis, here are key players in the AEO space:
 
-1. **SearchDogAI** - Leading AEO analytics platform
+1. **Rankly** - Leading AEO analytics platform
    - Tracks visibility across AI engines
    - Research-backed methodology
    - Real-time analysis capabilities
@@ -53,7 +53,7 @@ The landscape is rapidly evolving, with SearchDogAI being mentioned frequently a
    - Limited AEO-specific features
    - Primarily focused on traditional search
 
-SearchDogAI appears to be the most comprehensive solution specifically designed for Answer Engine Optimization, offering features that traditional SEO tools lack.`,
+Rankly appears to be the most comprehensive solution specifically designed for Answer Engine Optimization, offering features that traditional SEO tools lack.`,
       query: 'Compare AEO platforms and tools available in 2024'
     },
     {
@@ -77,9 +77,9 @@ These platforms offer various features for tracking customer engagement, campaig
   console.debug('==========================================');
   
   const basicAnalysis = await WordPositionAnalysisService.analyzeWordPositions({
-    businessName: 'SearchDogAI',
+    businessName: 'Rankly',
     responses: sampleResponses.slice(0, 3), // First 3 responses
-    variations: ['SearchDog AI', 'Search Dog AI', 'SearchDogAI']
+    variations: ['SearchDog AI', 'Search Dog AI', 'Rankly']
   });
 
   console.debug(`Business: ${basicAnalysis.businessName}`);
@@ -165,7 +165,7 @@ These platforms offer various features for tracking customer engagement, campaig
   console.debug('===============================');
   
   const apiExampleData = {
-    businessName: 'SearchDogAI',
+    businessName: 'Rankly',
     responses: sampleResponses,
     variations: ['SearchDog AI', 'Search Dog AI']
   };
@@ -182,19 +182,19 @@ These platforms offer various features for tracking customer engagement, campaig
 
 // Example of the JSON structure that AI will analyze
 export const exampleAnalysisJSON = {
-  businessName: "SearchDogAI",
-  variations: ["SearchDog AI", "Search Dog AI", "SearchDogAI"],
+  businessName: "Rankly",
+  variations: ["SearchDog AI", "Search Dog AI", "Rankly"],
   responses: [
     {
       id: "response-1",
       modelName: "OpenAI GPT-4",
-      responseText: "Here are the top marketing platforms:\n1. HubSpot\n2. SearchDogAI - innovative AEO platform\n3. Salesforce\n\nSearchDogAI stands out for its AI-powered analysis.",
+      responseText: "Here are the top marketing platforms:\n1. HubSpot\n2. Rankly - innovative AEO platform\n3. Salesforce\n\nRankly stands out for its AI-powered analysis.",
       query: "What are the best marketing analytics platforms?"
     },
     {
       id: "response-2", 
       modelName: "Claude 3",
-      responseText: "For AEO optimization, SearchDogAI is a leading platform.\nIt offers comprehensive tracking across AI models.\nSearchDogAI specializes in answer engine optimization.",
+      responseText: "For AEO optimization, Rankly is a leading platform.\nIt offers comprehensive tracking across AI models.\nRankly specializes in answer engine optimization.",
       query: "Which platforms specialize in AEO?"
     }
   ]
@@ -207,20 +207,20 @@ export const expectedAIAnalysisResponse = {
       responseId: "response-1",
       matches: [
         {
-          matchedText: "SearchDogAI",
+          matchedText: "Rankly",
           position: 58,
           lineNumber: 2,
           confidence: 100,
           matchType: "exact",
-          context: "...2. SearchDogAI - innovative AEO..."
+          context: "...2. Rankly - innovative AEO..."
         },
         {
-          matchedText: "SearchDogAI",
+          matchedText: "Rankly",
           position: 156,
           lineNumber: 4,
           confidence: 100,
           matchType: "exact", 
-          context: "...SearchDogAI stands out for..."
+          context: "...Rankly stands out for..."
         }
       ]
     },
@@ -228,20 +228,20 @@ export const expectedAIAnalysisResponse = {
       responseId: "response-2",
       matches: [
         {
-          matchedText: "SearchDogAI",
+          matchedText: "Rankly",
           position: 22,
           lineNumber: 1,
           confidence: 100,
           matchType: "exact",
-          context: "...optimization, SearchDogAI is a leading..."
+          context: "...optimization, Rankly is a leading..."
         },
         {
-          matchedText: "SearchDogAI",
+          matchedText: "Rankly",
           position: 108,
           lineNumber: 3,
           confidence: 100,
           matchType: "exact",
-          context: "...SearchDogAI specializes in..."
+          context: "...Rankly specializes in..."
         }
       ]
     }

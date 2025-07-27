@@ -80,7 +80,7 @@ export default function Waitlist({
             {title || 'Ready to Optimize for AI Search?'}
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            {description || `Join thousands of businesses preparing for the AI-first search future. Get notified when SearchDogAI launches with your exclusive ${discount} discount.`}
+            {description || `Join thousands of businesses preparing for the AI-first search future. Get notified when Rankly launches with your exclusive ${discount} discount.`}
           </p>
 
           {!isSubmitted ? (
@@ -103,7 +103,7 @@ export default function Waitlist({
           ) : (
             <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
               <p className="font-semibold text-gray-900">🎉 You&apos;re on the list!</p>
-              <p className="text-gray-600">We&apos;ll notify you when SearchDogAI launches.</p>
+              <p className="text-gray-600">We&apos;ll notify you when Rankly launches.</p>
             </div>
           )}
         </div>

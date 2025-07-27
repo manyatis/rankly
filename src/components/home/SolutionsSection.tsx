@@ -34,25 +34,25 @@ export default function SolutionsSection({
   };
 
   return (
-    <div id="solutions" className="bg-white py-20">
+    <div id="solutions" className="bg-gray-900 py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Tailored Solutions</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Tailored Solutions</h2>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Choose the perfect analytics and optimization package for your business needs.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {solutions.map((solution, index) => (
-            <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-shadow">
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">{solution.title}</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
+            <div key={index} className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-8 hover:shadow-lg transition-shadow border border-gray-600">
+              <h3 className="text-2xl font-bold mb-4 text-white">{solution.title}</h3>
+              <p className="text-gray-300 mb-6 leading-relaxed">
                 {solution.description}
               </p>
               <ul className="space-y-3 mb-8">
                 {solution.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center text-gray-700">
+                  <li key={featureIndex} className="flex items-center text-gray-300">
                     <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -128,16 +128,16 @@ export default function SolutionsSection({
 
         {/* CTA after Agent Analytics */}
         <div className="text-center mt-12">
-          <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl p-8 border border-gray-200">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Get Full Visibility Into AI Crawling Activity</h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-2xl p-8 border border-gray-600">
+            <h3 className="text-2xl font-bold text-white mb-4">Get Full Visibility Into AI Crawling Activity</h3>
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
               Track how AI crawlers interact with your content and optimize for maximum visibility across all platforms.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/aeo-score" className="bg-gray-800 text-white px-8 py-4 rounded-lg hover:bg-gray-900 transition-colors font-medium text-lg shadow-sm inline-block">
+              <Link href="/aeo-score" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
                 Test Your Site Now
               </Link>
-              <a href="#pricing" className="bg-white text-gray-800 border-2 border-gray-800 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-medium text-lg inline-block">
+              <a href="#pricing" className="bg-gray-700 text-white border-2 border-gray-500 px-8 py-4 rounded-lg hover:bg-gray-600 transition-colors font-medium text-lg inline-block">
                 Upgrade for Full Monitoring
               </a>
             </div>

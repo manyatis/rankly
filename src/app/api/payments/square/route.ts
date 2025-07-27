@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         amount: amount,
         currency: 'USD' as const,
       },
-      note: `SearchDogAI ${planName} Plan - ${user.email}`,
+      note: `Rankly ${planName} Plan - ${user.email}`,
       buyerEmailAddress: user.email,
     };
 

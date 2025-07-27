@@ -8,7 +8,7 @@ Store all your data (sketchy)
 Give you a report and make YOU do the work
 Completely ignore AI search engines
 
-So I built SearchDog AI.
+So I built Rankly.
 
 What it does: Connects to your GitHub, analyzes your site, then automatically creates optimized content via pull requests. Zero data storage - everything happens in real-time and gets deleted immediately.
 
@@ -20,4 +20,4 @@ The launch deal: Opening waitlist with 75% off ($24.75 instead of $99) - only an
 
 Happy to answer questions about the tech or privacy approach.
 
-Edit: Site is https://searchdogai.vercel.app
+Edit: Site is https://rankly.vercel.app

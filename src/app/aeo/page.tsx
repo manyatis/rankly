@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
@@ -51,7 +50,7 @@ export default function AEOPage() {
       <div className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why SearchDogAI Outperforms Enterprise Platforms</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Rankly Outperforms Enterprise Platforms</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               While competitors charge $5,000-$15,000/month for basic AEO services, we deliver superior results through advanced AI technology and seamless integrations.
             </p>
@@ -258,7 +257,7 @@ export default function AEOPage() {
                 </div>
               </div>
               <div className="bg-white/10 rounded-lg p-8 backdrop-blur-sm text-left">
-                <h3 className="text-2xl font-semibold mb-4 text-center">SearchDogAI</h3>
+                <h3 className="text-2xl font-semibold mb-4 text-center">Rankly</h3>
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <span className="text-green-300 mr-3">✓</span>
@@ -363,12 +362,12 @@ export default function AEOPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Image src="/dog.png" alt="SearchDogAI" width={20} height={20} className="object-contain" />
-              <span className="text-xl font-semibold text-gray-900">SearchDogAI</span>
+              <span className="text-2xl">🚀</span>
+              <span className="text-xl font-semibold text-gray-900">Rankly</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <span className="text-gray-600">One-click AEO optimization</span>
-              <span className="text-gray-600">&copy; {new Date().getFullYear()} SearchDogAI</span>
+              <span className="text-gray-600">&copy; {new Date().getFullYear()} Rankly</span>
             </div>
           </div>
         </div>

@@ -15,9 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SearchDogAI",
-  description: "Your AI Solution",
+  title: "Rankly",
+  description: "AI Engine Ranking Reports",
   viewport: "width=device-width, initial-scale=1",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233B82F6'><path d='M12 2C10 10 10 10 4 12c6 2 6 2 8 10 2-8 2-8 8-10-6-2-6-2-8-10z'/><circle cx='10' cy='8' r='1' fill='%23EF4444'/><circle cx='14' cy='8' r='1' fill='%23EF4444'/></svg>",
+  },
 };
 
 export default function RootLayout({

@@ -45,7 +45,7 @@ export default function DashboardPreview() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white">SearchDogAI Dashboard</h1>
+              <h1 className="text-3xl font-bold text-white">Rankly Dashboard</h1>
               <p className="text-gray-400 mt-1">Professional AEO Analytics Platform Preview</p>
             </div>
           </div>

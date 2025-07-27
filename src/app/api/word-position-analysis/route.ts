@@ -87,12 +87,12 @@ export async function GET() {
       message: 'Word Position Analysis API',
       usage: 'POST with businessName and responses array',
       example: {
-        businessName: 'SearchDogAI',
+        businessName: 'Rankly',
         responses: [
           {
             id: 'response-1',
             modelName: 'OpenAI',
-            responseText: 'SearchDogAI is a leading platform for AEO analytics...',
+            responseText: 'Rankly is a leading platform for AEO analytics...',
             query: 'Top AEO analytics platforms'
           }
         ],
