@@ -50,14 +50,11 @@ export class WebsiteAnalysisService {
       // Analyze content structure
       const contentAnalysis = this.analyzeContentStructure(websiteContent);
       
-      // Generate AI-powered AEO analysis
-      const aeoAnalysis = await this.generateAEOAnalysis(websiteContent, businessName, industry);
-      
-      // Generate actionable recommendations
-      const recommendations = await this.generateRecommendations(
-        contentAnalysis, 
-        aeoAnalysis, 
-        businessName, 
+      // Generate combined AI analysis and recommendations
+      const { aeoAnalysis, recommendations } = await this.generateCombinedAnalysis(
+        websiteContent,
+        contentAnalysis,
+        businessName,
         industry,
         recommendationLimit
       );
@@ -149,13 +146,15 @@ export class WebsiteAnalysisService {
     };
   }
 
-  private static async generateAEOAnalysis(
-    html: string, 
-    businessName: string, 
-    industry: string
-  ): Promise<WebsiteAnalysisResult['aeoOptimization']> {
+  private static async generateCombinedAnalysis(
+    html: string,
+    contentAnalysis: WebsiteAnalysisResult['contentAnalysis'],
+    businessName: string,
+    industry: string,
+    recommendationLimit: number
+  ): Promise<{ aeoAnalysis: WebsiteAnalysisResult['aeoOptimization'], recommendations: AnalysisRecommendation[] }> {
     
-    const analysisPrompt = `Analyze this website content for Answer Engine Optimization (AEO) and Google Enterprise Optimization (GEO).
+    const combinedPrompt = `Analyze this website content for Answer Engine Optimization (AEO) and Google Enterprise Optimization (GEO), then provide actionable recommendations.
 
 Business: ${businessName}
 Industry: ${industry}
@@ -163,99 +162,84 @@ Industry: ${industry}
 Website Content (first 3000 chars):
 ${html.substring(0, 3000)}
 
-Evaluate the content for AEO/GEO optimization on a scale of 1-100 considering:
-1. Authoritative voice and expertise demonstration
-2. Use of statistics, data, and citations
-3. Content structure and clarity
-4. Industry authority signals
-5. Factual, referenced information
-6. Answer-focused content structure
-
-Provide:
-1. A score out of 100
-2. 3 key strengths
-3. 3 key weaknesses
-
-Format as JSON: {"score": number, "strengths": [string], "weaknesses": [string]}`;
-
-    try {
-      const response = await ModelFactory.queryModel('openai', analysisPrompt);
-      const parsed = JSON.parse(response);
-      
-      return {
-        currentScore: parsed.score || 50,
-        strengths: parsed.strengths || [],
-        weaknesses: parsed.weaknesses || []
-      };
-    } catch (error) {
-      console.warn(`⚠️ AI analysis failed, using fallback:`, error);
-      return {
-        currentScore: 60,
-        strengths: ['Content is present', 'Website is accessible', 'Basic structure exists'],
-        weaknesses: ['Limited authority signals', 'Could improve data citations', 'May need more structured content']
-      };
-    }
-  }
-
-  private static async generateRecommendations(
-    contentAnalysis: WebsiteAnalysisResult['contentAnalysis'],
-    aeoAnalysis: WebsiteAnalysisResult['aeoOptimization'],
-    businessName: string,
-    industry: string,
-    limit: number
-  ): Promise<AnalysisRecommendation[]> {
-    
-    const recommendationPrompt = `Based on this website analysis, generate exactly ${limit} specific, actionable AEO/GEO optimization recommendations.
-
-Business: ${businessName}
-Industry: ${industry}
-
-Current Analysis:
-- AEO Score: ${aeoAnalysis.currentScore}/100
+Content Analysis:
 - Word Count: ${contentAnalysis.wordCount}
 - Has Structured Data: ${contentAnalysis.hasStructuredData}
 - Authority Signals: ${contentAnalysis.authoritySignals.join(', ')}
+- Citations: ${contentAnalysis.citationCount}
 
-Strengths: ${aeoAnalysis.strengths.join(', ')}
-Weaknesses: ${aeoAnalysis.weaknesses.join(', ')}
+PLEASE PROVIDE BOTH:
 
-Generate exactly ${limit} recommendations focused on:
-- More authoritative voice
-- Use more quotes/statistics 
-- Reference more reports/studies
-- Create blog sections with keywords
-- Structure data better
-- Improve industry authority
+1. AEO/GEO ANALYSIS - Evaluate on a scale of 1-100 considering:
+   - Authoritative voice and expertise demonstration
+   - Use of statistics, data, and citations
+   - Content structure and clarity
+   - Industry authority signals
+   - Factual, referenced information
+   - Answer-focused content structure
+   - Information clarity and accessibility
+   - Technical terminology usage
+   - Fluency optimization
 
-Each recommendation should have:
-- category: (Content, Technical, Authority, Structure)
-- title: Brief actionable title
-- description: 2-3 sentences explaining the action
-- priority: high/medium/low
-- effort: quick/moderate/significant  
-- impact: high/medium/low
+2. RECOMMENDATIONS - Generate exactly ${recommendationLimit} specific, actionable recommendations focused on:
+   - More authoritative voice
+   - Use more quotes/statistics
+   - Reference more reports/studies
+   - Create blog sections with keywords
+   - Structure data better
+   - Improve industry authority
 
-Format as JSON array: [{"category": "", "title": "", "description": "", "priority": "", "effort": "", "impact": ""}]`;
+Format as JSON:
+{
+  "analysis": {
+    "score": number,
+    "strengths": [string, string, string],
+    "weaknesses": [string, string, string]
+  },
+  "recommendations": [
+    {
+      "category": "Content|Technical|Authority|Structure",
+      "title": "Brief actionable title",
+      "description": "2-3 sentences explaining the action",
+      "priority": "high|medium|low",
+      "effort": "quick|moderate|significant",
+      "impact": "high|medium|low"
+    }
+  ]
+}`;
 
     try {
-      const response = await ModelFactory.queryModel('openai', recommendationPrompt);
+      const response = await ModelFactory.queryModel('openai', combinedPrompt);
       const parsed = JSON.parse(response);
       
-      // Ensure we return exactly the requested number of recommendations
-      const recommendations = Array.isArray(parsed) ? parsed.slice(0, limit) : [];
+      const aeoAnalysis = {
+        currentScore: parsed.analysis?.score || 50,
+        strengths: parsed.analysis?.strengths || [],
+        weaknesses: parsed.analysis?.weaknesses || []
+      };
+      
+      let recommendations = Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, recommendationLimit) : [];
       
       // Fill with default recommendations if AI didn't provide enough
-      while (recommendations.length < limit) {
+      while (recommendations.length < recommendationLimit) {
         recommendations.push(this.getDefaultRecommendation(recommendations.length + 1, industry));
       }
       
-      return recommendations;
+      return { aeoAnalysis, recommendations };
       
     } catch (error) {
-      console.warn(`⚠️ Recommendation generation failed, using defaults:`, error);
-      return this.getDefaultRecommendations(limit, industry);
+      console.warn(`⚠️ Combined analysis failed, using fallback:`, error);
+      return {
+        aeoAnalysis: {
+          currentScore: 60,
+          strengths: ['Content is present', 'Website is accessible', 'Basic structure exists'],
+          weaknesses: ['Limited authority signals', 'Could improve data citations', 'May need more structured content']
+        },
+        recommendations: this.getDefaultRecommendations(recommendationLimit, industry)
+      };
     }
   }
+
 
   private static getDefaultRecommendation(index: number, industry: string): AnalysisRecommendation {
     const defaults = [

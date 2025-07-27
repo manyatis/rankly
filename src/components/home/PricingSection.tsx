@@ -33,7 +33,13 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                3 usage per day **Limited time only**
+                Monitor up to 1 website
+              </li>
+              <li className="flex items-center text-gray-300">
+                <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                2 usage per day **Limited time only**
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +80,13 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                5 usage per day
+                Monitor up to 3 websites
+              </li>
+              <li className="flex items-center text-gray-300">
+                <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                3 usage per day
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,6 +120,12 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Complete coverage of all AI models
+              </li>
+              <li className="flex items-center text-gray-300">
+                <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Monitor up to 10 website
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +176,12 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Everything in Professional
+              </li>
+              <li className="flex items-center text-gray-300">
+                <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Monitor unlimited websites
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

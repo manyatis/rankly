@@ -128,6 +128,7 @@ export default function AEOScorePage() {
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'input' | 'prompts'>('input');
+  const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
@@ -204,6 +205,7 @@ export default function AEOScorePage() {
       const data = await response.json();
       setGeneratedPrompts(data.prompts);
       setEditablePrompts([...data.prompts]);
+      setCurrentPromptIndex(0); // Reset to first prompt
       setShowPromptEditor(true);
       setActiveTab('prompts'); // Switch to prompts tab
       setIsAnalyzing(false);
@@ -574,77 +576,100 @@ export default function AEOScorePage() {
                 </div>
               </div>
 
-              <div className="space-y-6 mb-8">
-                {editablePrompts.map((prompt, index) => (
-                  <div key={index} className="relative group">
-                    {/* Floating Professional Prompt Box */}
-                    <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-600 overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                      <div className="relative bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-4 border-b border-gray-600">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h3 className="text-base font-semibold text-white">Analysis Prompt {index + 1}</h3>
-                              <p className="text-sm text-gray-300">AI-optimized query for maximum accuracy</p>
-                            </div>
+              {/* Compact Prompt Editor with Navigation */}
+              <div className="mb-8">
+                {editablePrompts.length > 0 && (
+                  <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-600 overflow-hidden">
+                    {/* Header with Navigation */}
+                    <div className="relative bg-gradient-to-r from-gray-700 to-gray-600 px-6 py-4 border-b border-gray-600">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                           </div>
-
-                        </div>
-                      </div>
-
-                      {/* Content Area */}
-                      <div className="p-6">
-                        <div className="relative">
-                          <textarea
-                            id={`prompt-${index}`}
-                            value={prompt}
-                            onChange={(e) => {
-                              const newPrompts = [...editablePrompts];
-                              newPrompts[index] = e.target.value;
-                              setEditablePrompts(newPrompts);
-                            }}
-                            className="w-full p-4 border border-gray-600 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all duration-200 leading-relaxed placeholder-gray-400 focus:bg-gray-700 hover:bg-gray-700"
-                            rows={4}
-                            placeholder="Enter your custom analysis prompt to optimize AI search visibility..."
-                          />
-
-                          {/* Character Counter */}
-                          <div className="absolute bottom-3 right-3 text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded shadow border border-gray-600">
-                            {prompt.length} chars
+                          <div>
+                            <h3 className="text-base font-semibold text-white">Analysis Prompts</h3>
+                            <p className="text-sm text-gray-300">AI-optimized queries for maximum accuracy</p>
                           </div>
                         </div>
-
-                        {/* Status Indicator */}
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-600">
-                          <div className="flex items-center space-x-2">
-                            <div className={`w-2 h-2 rounded-full ${prompt.trim() ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                            <span className="text-sm text-gray-300">
-                              {prompt.trim() ? 'Ready for analysis' : 'Prompt required'}
-                            </span>
-                          </div>
-
-                          {/* Quick Actions */}
-                          <div className="flex items-center space-x-2">
+                        
+                        {/* Prompt Navigation */}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-300">
+                            {currentPromptIndex + 1} of {editablePrompts.length}
+                          </span>
+                          <div className="flex space-x-1">
                             <button
-                              onClick={() => {
-                                const newPrompts = [...editablePrompts];
-                                newPrompts[index] = generatedPrompts[index] || '';
-                                setEditablePrompts(newPrompts);
-                              }}
-                              className="cursor-pointer text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                              onClick={() => setCurrentPromptIndex(Math.max(0, currentPromptIndex - 1))}
+                              disabled={currentPromptIndex === 0}
+                              className="p-2 rounded bg-gray-600 text-white hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Reset to Original
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setCurrentPromptIndex(Math.min(editablePrompts.length - 1, currentPromptIndex + 1))}
+                              disabled={currentPromptIndex === editablePrompts.length - 1}
+                              className="p-2 rounded bg-gray-600 text-white hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
                             </button>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Scrollable Prompt Content */}
+                    <div className="p-6">
+                      <div className="relative">
+                        <div className="mb-4 flex items-center justify-between">
+                          <h4 className="text-lg font-semibold text-white">Prompt {currentPromptIndex + 1}</h4>
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 rounded-full ${editablePrompts[currentPromptIndex]?.trim() ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                            <span className="text-sm text-gray-300">
+                              {editablePrompts[currentPromptIndex]?.trim() ? 'Ready for analysis' : 'Prompt required'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-700 rounded-lg p-4 max-h-80 overflow-y-auto border border-gray-600">
+                          <textarea
+                            value={editablePrompts[currentPromptIndex] || ''}
+                            onChange={(e) => {
+                              const newPrompts = [...editablePrompts];
+                              newPrompts[currentPromptIndex] = e.target.value;
+                              setEditablePrompts(newPrompts);
+                            }}
+                            className="w-full h-64 p-4 border border-gray-600 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-all duration-200 leading-relaxed placeholder-gray-400"
+                            placeholder="Enter your custom analysis prompt to optimize AI search visibility..."
+                          />
+                        </div>
+
+                        {/* Character Counter and Actions */}
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-600">
+                          <div className="text-xs text-gray-400">
+                            {(editablePrompts[currentPromptIndex] || '').length} characters
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newPrompts = [...editablePrompts];
+                              newPrompts[currentPromptIndex] = generatedPrompts[currentPromptIndex] || '';
+                              setEditablePrompts(newPrompts);
+                            }}
+                            className="cursor-pointer text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                          >
+                            Reset to Original
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -658,7 +683,7 @@ export default function AEOScorePage() {
                 </button>
                 <button
                   onClick={handleAnalyze}
-                  disabled={isAnalyzing}
+                  disabled={isAnalyzing || !user || !usageInfo || (usageInfo && !usageInfo.canUse)}
                   className="cursor-pointer bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? (
@@ -669,6 +694,10 @@ export default function AEOScorePage() {
                       </svg>
                       <span>Analyzing...</span>
                     </span>
+                  ) : !user ? (
+                    'Login to Generate Report'
+                  ) : (usageInfo && !usageInfo.canUse) ? (
+                    'Daily Limit Reached'
                   ) : (
                     'Generate Professional Report'
                   )}
