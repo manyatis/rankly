@@ -218,6 +218,7 @@ Format as JSON:
         weaknesses: parsed.analysis?.weaknesses || []
       };
       
+      // eslint-disable-next-line prefer-const
       let recommendations = Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, recommendationLimit) : [];
       
       // Fill with default recommendations if AI didn't provide enough
