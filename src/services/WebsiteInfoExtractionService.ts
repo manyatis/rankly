@@ -38,7 +38,7 @@ export class WebsiteInfoExtractionService {
 Please search for information about this website and business, then extract comprehensive business information and provide it in the following JSON format:
 
 {
-  "businessName": "The main business/company name",
+  "businessName": "The main business/company name. Do not include generic words that may be in the business name.,
   "industry": "The primary industry/sector (e.g., 'Software Development', 'Healthcare', 'E-commerce', 'Booking Platform', 'Banking', 'Financial Servies')",
   "location": "Physical location if mentioned (city, state/country) or null if remote/not specified",
   "businessDescription": "A 2-3 sentence description of what the business does and who they serve",
