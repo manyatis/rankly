@@ -118,6 +118,13 @@ export class PromptTemplateLoader {
   }
 
   /**
+   * Load website business info extraction prompt
+   */
+  static async loadWebsiteExtractionPrompt(url: string): Promise<string> {
+    return this.loadTextPrompt('extraction', 'website-business-info.txt', { url });
+  }
+
+  /**
    * Load all query variation types
    */
   static async loadAllQueryVariations(): Promise<{
