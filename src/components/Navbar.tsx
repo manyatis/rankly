@@ -35,7 +35,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-            <Image src="/eye.png" alt="Rankly" width={24} height={24} />
+            <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
             <span>Rankly</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">

@@ -363,7 +363,7 @@ export default function AEOPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-              <Image src="/eye.png" alt="Rankly" width={24} height={24} />
+              <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
               <span>Rankly</span>
             </Link>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
