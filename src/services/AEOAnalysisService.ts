@@ -135,16 +135,27 @@ export class AEOAnalysisService {
     else if (!Array.isArray(providers)) missingFields.push('providers (must be array)');
     else if (providers.length === 0) missingFields.push('providers (must be non-empty)');
 
-    // Validate websiteUrl if provided
-    if (websiteUrl && !this.isValidUrl(websiteUrl)) {
-      return {
-        isValid: false,
-        error: 'Invalid website URL format'
-      };
+    // Validate and normalize websiteUrl if provided
+    if (websiteUrl) {
+      // Add https:// if no protocol is present
+      let normalizedUrl = websiteUrl.trim();
+      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+        normalizedUrl = 'https://' + normalizedUrl;
+      }
+      
+      if (!this.isValidUrl(normalizedUrl)) {
+        return {
+          isValid: false,
+          error: 'Invalid website URL format'
+        };
+      }
+      
+      // Update the request with the normalized URL
+      request.websiteUrl = normalizedUrl;
     }
 
     if (missingFields.length > 0) {
-      console.debug(`❌ Missing required fields: ${missingFields.join(', ')}`);
+      console.info(`❌ Missing required fields: ${missingFields.join(', ')}`);
       return {
         isValid: false,
         error: `Missing required fields: ${missingFields.join(', ')}`
@@ -383,7 +394,7 @@ export class AEOAnalysisService {
   }
 
   static async runAnalysis(request: AnalysisRequest): Promise<AnalysisResult> {
-    console.debug(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
+    console.info(`\n🚀 === NEW AEO ANALYSIS REQUEST ===`);
 
     // Validate authentication and usage
     const authResult = await this.validateAuthAndUsage();
@@ -396,6 +407,8 @@ export class AEOAnalysisService {
     if (!requestValidation.isValid) {
       throw new Error(requestValidation.error || 'Invalid request');
     }
+
+    console.log("\n🚀 === usage + request Validated!")
 
     // Increment usage
     const usageResult = await this.incrementUserUsage(authResult.user!.email);

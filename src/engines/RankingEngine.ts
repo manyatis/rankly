@@ -246,7 +246,7 @@ export class RankingEngine {
       'October', 'November', 'December', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
       'Saturday', 'Sunday', 'Today', 'Yesterday', 'Tomorrow', 'Week', 'Month', 'Year',
       'Inc', 'LLC', 'Corp', 'Corporation', 'Company', 'Co', 'Ltd', 'Limited', 'Enterprises',
-      'International', 'Global', 'USA', 'America', 'United', 'States', 'Europe', 'Asia'
+      'International', 'Global', 'USA', 'America', 'United', 'States', 'Europe', 'Asia', 'Golf'
     ]);
 
     // Pattern 1: Companies with explicit business suffixes

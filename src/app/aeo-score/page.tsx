@@ -87,27 +87,15 @@ interface QueryResult {
   };
 }
 
-// Helper function to extract meaningful keywords from business description
-function extractKeywords(description: string, industry: string): string[] {
-  // Common stop words to filter out
-  const stopWords = new Set([
-    'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'a', 'an', 'as', 'if', 'then', 'than', 'so', 'very', 'also', 'too', 'much', 'more', 'most', 'many', 'some', 'any', 'all', 'both', 'each', 'few', 'other', 'another', 'such', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'now'
-  ]);
-
-  // Extract words from description
-  const words = description.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter(word => word.length > 2 && !stopWords.has(word));
-
-  // Add industry as a primary keyword
-  const keywords = [industry.toLowerCase()];
-
-  // Add unique meaningful words
-  const uniqueWords = [...new Set(words)];
-  keywords.push(...uniqueWords.slice(0, 4)); // Take first 4 unique meaningful words
-
-  return keywords.filter(keyword => keyword.length > 0).slice(0, 5);
+// Helper function to parse keywords from user input
+function parseKeywords(keywordString: string): string[] {
+  if (!keywordString.trim()) return [];
+  
+  return keywordString
+    .split(/[,\n]+/)
+    .map(keyword => keyword.trim())
+    .filter(keyword => keyword.length > 0)
+    .slice(0, 10); // Limit to 10 keywords
 }
 
 export default function AEOScorePage() {
@@ -116,6 +104,7 @@ export default function AEOScorePage() {
   const [location, setLocation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [businessDescription, setBusinessDescription] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
   const [overallCompetitors, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
@@ -129,10 +118,103 @@ export default function AEOScorePage() {
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'input' | 'prompts'>('input');
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [workflowType, setWorkflowType] = useState<'manual' | 'website'>('website');
+  const [websiteUrlForExtraction, setWebsiteUrlForExtraction] = useState('');
+  const [isExtractingInfo, setIsExtractingInfo] = useState(false);
+  const [extractedInfo, setExtractedInfo] = useState<{
+    businessName: string;
+    industry: string;
+    location?: string;
+    businessDescription: string;
+    keywords: string[];
+    confidence: number;
+  } | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
 
+  // Handle keywords input with real-time limit to 10 keywords
+  const handleKeywordsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = e.target.value;
+    const commaCount = (inputValue.match(/,/g) || []).length;
+    
+    // Allow up to 9 commas (which means 10 keywords)
+    if (commaCount <= 9) {
+      setKeywords(inputValue);
+    }
+    // If we're at the limit and user is trying to add more, prevent it
+    // unless they're deleting (inputValue is shorter than current)
+    else if (inputValue.length < keywords.length) {
+      setKeywords(inputValue);
+    }
+  };
+
+  // Handle website information extraction
+  const handleExtractWebsiteInfo = async () => {
+    if (!websiteUrlForExtraction.trim()) return;
+    
+    // Check if user is logged in
+    if (!user?.email) {
+      setLoginModalOpen(true);
+      return;
+    }
+
+    // Check usage limits
+    if (usageInfo && !usageInfo.canUse) {
+      setError(`Daily limit reached. You've used ${usageInfo.usageCount}/${usageInfo.maxUsage} free analytics today. Please upgrade for unlimited access.`);
+      return;
+    }
+
+    setIsExtractingInfo(true);
+    setError(null);
+
+    try {
+      // Add https:// if no protocol is present
+      let normalizedUrl = websiteUrlForExtraction.trim();
+      if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+        normalizedUrl = 'https://' + normalizedUrl;
+      }
+
+      const response = await fetch('/api/extract-website-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ url: normalizedUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      const extractedData = await response.json();
+      setExtractedInfo(extractedData);
+      
+    } catch (error) {
+      console.error('Error extracting website info:', error);
+      setError(error instanceof Error ? error.message : 'Failed to extract website information. Please try again.');
+    } finally {
+      setIsExtractingInfo(false);
+    }
+  };
+
+  // Handle using the extracted information
+  const handleUseExtractedInfo = () => {
+    if (!extractedInfo) return;
+    
+    // Populate the form fields with extracted information
+    setBusinessName(extractedInfo.businessName);
+    setIndustry(extractedInfo.industry);
+    setLocation(extractedInfo.location || '');
+    setWebsiteUrl(websiteUrlForExtraction);
+    setBusinessDescription(extractedInfo.businessDescription);
+    setKeywords(extractedInfo.keywords.join(', '));
+    
+    // Switch to manual workflow to show the populated fields
+    setWorkflowType('manual');
+    setExtractedInfo(null);
+  };
 
   const handleLogin = () => {
     setLoginModalOpen(false);
@@ -169,7 +251,7 @@ export default function AEOScorePage() {
 
 
   const handleGeneratePrompts = async () => {
-    if (!businessName.trim() || !industry.trim() || !businessDescription.trim()) return;
+    if (!businessName.trim() || !industry.trim() || !businessDescription.trim() || !keywords.trim()) return;
 
     // Check if user is logged in
     if (!user?.email) {
@@ -198,7 +280,7 @@ export default function AEOScorePage() {
           location: location.trim() || undefined, // Include location if specified
           websiteUrl: websiteUrl.trim() || undefined, // Include website URL if specified
           marketDescription: businessDescription, // Map businessDescription to marketDescription
-          keywords: extractKeywords(businessDescription, industry) // Extract meaningful keywords
+          keywords: parseKeywords(keywords) // Parse user-provided keywords
         }),
       });
 
@@ -213,7 +295,7 @@ export default function AEOScorePage() {
       setProgress(0);
     } catch (error) {
       console.error('Error generating prompts:', error);
-      alert('Failed to generate prompts. Please try again.');
+      setError('Failed to generate prompts. Please try again.');
       setIsAnalyzing(false);
       setCurrentStep('');
       setProgress(0);
@@ -244,7 +326,7 @@ export default function AEOScorePage() {
     const messageInterval: NodeJS.Timeout = setInterval(() => {
       messageIndex = (messageIndex + 1) % funMessages.length;
       setCurrentStep(funMessages[messageIndex]);
-    }, 3000); // Change message every 3 seconds
+    }, 5000); // Change message every 3 seconds
 
     // Calculate total operations: 1 provider × 5 queries each = 5 total operations
     // const totalProviders = aiProviders.length;
@@ -267,15 +349,15 @@ export default function AEOScorePage() {
         let estimatedDuration;
         if (elapsed < 5000) {
           // First 5 seconds: slow ramp up
-          estimatedDuration = 35000;
+          estimatedDuration = 50000;
           currentProgress = (elapsed / estimatedDuration) * 15; // First 15% in 5 seconds
-        } else if (elapsed < 20000) {
+        } else if (elapsed < 50000) {
           // 5-20 seconds: main processing
-          estimatedDuration = 35000;
+          estimatedDuration = 50000;
           currentProgress = 15 + ((elapsed - 5000) / 15000) * 60; // Next 60% over 15 seconds
         } else {
           // 20+ seconds: final phase
-          estimatedDuration = 35000;
+          estimatedDuration = 50000;
           currentProgress = 75 + ((elapsed - 20000) / 15000) * 15; // Final 15% slowly
         }
 
@@ -302,7 +384,7 @@ export default function AEOScorePage() {
           location: location.trim() || undefined, // Include location if specified
           websiteUrl: websiteUrl.trim() || undefined, // Include website URL if specified
           marketDescription: businessDescription, // Map businessDescription to marketDescription
-          keywords: extractKeywords(businessDescription, industry), // Extract keywords
+          keywords: parseKeywords(keywords), // Parse user-provided keywords
           providers: aiProviders,
           customPrompts: editablePrompts
         }),
@@ -318,6 +400,11 @@ export default function AEOScorePage() {
       // Final steps
       setProgress(90);
       setCurrentStep('🎉 Wrapping up the magic...');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -350,7 +437,7 @@ export default function AEOScorePage() {
     } catch (error) {
       if (messageInterval) clearInterval(messageInterval);
       console.error('Error analyzing AEO scores:', error);
-      alert('Failed to analyze AEO scores. Please try again.');
+      setError(error instanceof Error ? error.message : 'Failed to analyze AEO scores. Please try again.');
       setIsAnalyzing(false);
       setCurrentStep('');
       setProgress(0);
@@ -395,6 +482,31 @@ export default function AEOScorePage() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-900/50 border-b border-red-700">
+          <div className="max-w-4xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-red-200 font-medium">Error</span>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-300 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-red-100 text-sm mt-2">{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Tab Navigation */}
       <div className="bg-gray-900 border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-6">
@@ -434,7 +546,164 @@ export default function AEOScorePage() {
         <div className="bg-gray-900 ">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-gray-800 rounded-lg p-8">
+              
+              {/* Workflow Selection */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-white mb-4">Choose Your Workflow</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setWorkflowType('website')}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      workflowType === 'website'
+                        ? 'border-blue-500 bg-blue-900/30'
+                        : 'border-gray-600 bg-gray-700 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                        🌐
+                      </div>
+                      <span className="font-semibold text-white ">Website Analysis</span>
+                      <div className="flex items-center space-x-2">
+                        <span></span>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">AI-Powered</span>
+                        <div className="relative group">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium cursor-help">
+                            Indie+
+                          </span>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-3 bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border border-gray-600">
+                            This AI-powered feature will be exclusive to Indie+ subscribers. Currently free during preview period!
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-700"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-300">Just enter your website URL and let AI extract all business information automatically.</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => setWorkflowType('manual')}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      workflowType === 'manual'
+                        ? 'border-blue-500 bg-blue-900/30'
+                        : 'border-gray-600 bg-gray-700 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        ✏️
+                      </div>
+                      <span className="font-semibold text-white">Manual Entry</span>
+                    </div>
+                    <p className="text-sm text-gray-300">Enter your business details manually for complete control over the information.</p>
+                  </button>
+                </div>
+              </div>
 
+              {/* Website Analysis Workflow */}
+              {workflowType === 'website' && (
+                <div className="mb-8">
+                  <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 border border-blue-600/30">
+                    <h4 className="text-lg font-semibold text-white mb-4">🌐 AI Website Analysis</h4>
+                    
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-white mb-2">Website URL</label>
+                      <input
+                        type="url"
+                        value={websiteUrlForExtraction}
+                        onChange={(e) => setWebsiteUrlForExtraction(e.target.value)}
+                        placeholder="Enter your website URL (e.g., https://yoursite.com)"
+                        className="w-full p-4 border border-gray-600 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder-gray-400"
+                      />
+                      <div className="mt-2 text-sm text-gray-300">
+                        <strong>AI will extract:</strong> Business name, industry, location, description, and SEO keywords automatically
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={handleExtractWebsiteInfo}
+                      disabled={isExtractingInfo || !websiteUrlForExtraction.trim() || !user || !usageInfo || (usageInfo && !usageInfo.canUse)}
+                      className="bg-blue-600 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isExtractingInfo ? (
+                        <span className="flex items-center space-x-2">
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Analyzing Website...</span>
+                        </span>
+                      ) : (
+                        '🔍 Analyze Website'
+                      )}
+                    </button>
+                  </div>
+                  
+                  {/* Display extracted information */}
+                  {extractedInfo && (
+                    <div className="mt-6 bg-green-900/30 rounded-lg p-6 border border-green-600/30">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-white">✅ Extracted Information</h4>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-300">Confidence:</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            extractedInfo.confidence >= 80 ? 'bg-green-100 text-green-800' :
+                            extractedInfo.confidence >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {extractedInfo.confidence}%
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-green-200 mb-1">Business Name</label>
+                          <div className="bg-gray-800 p-3 rounded border border-gray-600 text-white">{extractedInfo.businessName}</div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-green-200 mb-1">Industry</label>
+                          <div className="bg-gray-800 p-3 rounded border border-gray-600 text-white">{extractedInfo.industry}</div>
+                        </div>
+                        {extractedInfo.location && (
+                          <div>
+                            <label className="block text-sm font-medium text-green-200 mb-1">Location</label>
+                            <div className="bg-gray-800 p-3 rounded border border-gray-600 text-white">{extractedInfo.location}</div>
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-green-200 mb-1">Keywords ({extractedInfo.keywords.length})</label>
+                          <div className="bg-gray-800 p-3 rounded border border-gray-600 text-white">{extractedInfo.keywords.join(', ')}</div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-green-200 mb-1">Business Description</label>
+                        <div className="bg-gray-800 p-3 rounded border border-gray-600 text-white">{extractedInfo.businessDescription}</div>
+                      </div>
+                      
+                      <div className="flex space-x-3 mt-4">
+                        <button
+                          onClick={handleUseExtractedInfo}
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                        >
+                          ✅ Use This Information
+                        </button>
+                        <button
+                          onClick={() => setExtractedInfo(null)}
+                          className="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                        >
+                          🔄 Try Again
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Manual Entry Workflow */}
+              {workflowType === 'manual' && (
+                <div>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-white mb-2">Business Name</label>
                 <input
@@ -500,17 +769,35 @@ export default function AEOScorePage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-white mb-2">Business Description & SEO Keywords</label>
+                <label className="block text-sm font-medium text-white mb-2">Business Description, How Customers Find You</label>
                 <textarea
                   value={businessDescription}
                   onChange={(e) => setBusinessDescription(e.target.value)}
-                  placeholder="Describe your business, target market, customers, and include your primary SEO keywords. For example: 'We help small businesses with SEO and digital marketing optimization. Our customers are marketing agencies and SMB owners who want to improve their search visibility across traditional and AI-powered search engines. Primary focus: SEO optimization, search marketing, digital visibility tools.'"
+                  placeholder="Describe your business, target market, and how customers will find you. For example: 'We help small businesses with digital marketing optimization. Our customers are marketing agencies and SMB owners who want to improve their search visibility across traditional and AI-powered search engines.'"
                   className="w-full p-4 border border-gray-600 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-32 resize-none placeholder-gray-400"
                 />
                 <div className="mt-2 text-sm text-gray-300">
-                  <strong>Include:</strong> What your business does, target customers, main problems you solve, and your primary SEO keywords/phrases for comprehensive search optimization.
+                  <strong>Include:</strong> What your business does, target customers, and main problems you solve.
                 </div>
               </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white mb-2">SEO Keywords</label>
+                <textarea
+                  value={keywords}
+                  onChange={handleKeywordsChange}
+                  placeholder="Enter your primary SEO keywords/phrases, separated by commas. For example: SEO optimization, search marketing, digital visibility tools, AI search engines, marketing analytics"
+                  className="w-full p-4 border border-gray-600 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-24 resize-none placeholder-gray-400"
+                />
+                <div className="mt-2 text-sm text-gray-300">
+                  <strong>Separate with commas:</strong> Your primary SEO keywords and phrases for comprehensive search optimization. 
+                  <span className={`font-medium ${(keywords.match(/,/g) || []).length >= 9 ? 'text-red-400' : 'text-green-400'}`}>
+                    {Math.min((keywords.match(/,/g) || []).length + (keywords.trim() ? 1 : 0), 10)}/10 keywords
+                  </span>
+                </div>
+              </div>
+              </div>
+              )}
 
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-300">
@@ -522,7 +809,7 @@ export default function AEOScorePage() {
                     <span className="text-blue-400 font-medium">🚀 Unlimited usage ({usageInfo.tier} plan)</span>
                   ) : usageInfo ? (
                     <span className="text-green-400 font-medium">✅ {typeof usageInfo.maxUsage === 'number' ? usageInfo.maxUsage - usageInfo.usageCount : 'unlimited'} uses remaining today</span>
-                  ) : businessName.trim() && industry.trim() && businessDescription.trim() ? (
+                  ) : businessName.trim() && industry.trim() && businessDescription.trim() && keywords.trim() ? (
                     <span>All fields ready</span>
                   ) : (
                     <span>Fill in all required fields</span>
@@ -530,7 +817,7 @@ export default function AEOScorePage() {
                 </div>
                 <button
                   onClick={handleGeneratePrompts}
-                  disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
+                  disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || !keywords.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
                   className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
                 >
                   {isAnalyzing ? (
@@ -699,7 +986,7 @@ export default function AEOScorePage() {
                   ) : (usageInfo && !usageInfo.canUse) ? (
                     'Daily Limit Reached'
                   ) : (
-                    'Generate Professional Report'
+                    'Generate!'
                   )}
                 </button>
               </div>

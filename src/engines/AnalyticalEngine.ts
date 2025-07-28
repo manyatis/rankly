@@ -314,7 +314,6 @@ export class AnalyticalEngine {
     return results;
   }
 
-
   private static getLineNumber(text: string, position: number): number {
     const beforePosition = text.substring(0, position);
     return beforePosition.split('\n').length;
