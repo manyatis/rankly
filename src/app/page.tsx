@@ -357,7 +357,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-              AI Search Rankings join the SEO equation 
+              AI Search Rankings Join The SEO Equation 
             </h2>
             {/* <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
               Freelance SEOs need quick client reports. Businesses want to handle their own SEO. Our AI-powered platform 
