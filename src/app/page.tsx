@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
@@ -8,7 +9,6 @@ import LoginModal from '../components/LoginModal';
 import { useAuth } from '../hooks/useAuth';
 import HeroSection from '../components/home/HeroSection';
 import PricingSection from '../components/home/PricingSection';
-import SolutionsSection from '../components/home/SolutionsSection';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -357,12 +357,12 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-              Built for SEO Professionals & DIY Businesses
+              AI Search Rankings join the SEO equation 
             </h2>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            {/* <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
               Freelance SEOs need quick client reports. Businesses want to handle their own SEO. Our AI-powered platform 
               aggregates rankings from all major AI engines and generates actionable recommendations automatically.
-            </p>
+            </p> */}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
@@ -620,9 +620,9 @@ export default function Home() {
       <div className="bg-gray-900 py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2>
+            {/* <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2> */}
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Generate comprehensive AI engine ranking reports with automated recommendations. Perfect for freelance SEOs creating client deliverables 
+              Generate comprehensive AI engine ranking reports with automated recommendations tailored for your websites. Perfect for freelance SEOs creating client deliverables 
               and businesses managing their own SEO strategy.
             </p>
           </div>
@@ -726,23 +726,20 @@ export default function Home() {
           <div className="text-center mt-12">
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/aeo-score" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
-                Generate AI Ranking Report
+                Test Your Site Free Now
               </Link>
-              <a href="#pricing" className="bg-gray-100 text-gray-700 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-base sm:text-lg inline-block">
-                View Pricing & Sign Up
-              </a>
             </div>
           </div>
 
         </div>
       </div>
-
+{/* 
       <SolutionsSection 
         solutions={solutions}
         dashboardSlides={dashboardSlides}
         currentSlide={currentSlide}
         onSlideChange={setCurrentSlide}
-      />
+      /> */}
 
       <PricingSection 
         onCreateAccount={handleCreateAccount}
@@ -773,7 +770,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <span className="text-2xl">🚀</span>
+              <Image src="/eye.png" alt="Rankly" width={24} height={24} />
               <span className="text-xl font-semibold">Rankly</span>
             </div>
             <div className="flex space-x-6">

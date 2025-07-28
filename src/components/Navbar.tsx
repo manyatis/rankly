@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '../hooks/useAuth';
 import LoginModal from './LoginModal';
 
@@ -34,17 +35,14 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-            <span className="text-2xl">🚀</span>
+            <Image src="/eye.png" alt="Rankly" width={24} height={24} />
             <span>Rankly</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
-            <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium">Report Generator</Link>
-            {user && (user.plan === 'professional' || user.plan === 'enterprise') && (
-              <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium">Dashboard</Link>
-            )}
-            <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium">Learn More</Link>
+            <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium">Dashboard</Link>
+            <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium">Learn</Link>
             <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium">Pricing</Link>
             {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
             {loading ? (

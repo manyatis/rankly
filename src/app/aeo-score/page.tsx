@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface AIProvider {
   name: string;
@@ -622,24 +624,24 @@ export default function AEOScorePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={() => setWorkflowType('website')}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    className={`cursor-pointer  p-4 rounded-lg border-2 transition-all text-left ${
                       workflowType === 'website'
                         ? 'border-blue-500 bg-blue-900/30'
                         : 'border-gray-600 bg-gray-700 hover:border-gray-500'
                     }`}
                   >
-                    <div className="flex items-center mb-2">
+                    <div className="flex items-center mb-2" >
                       <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
                         🌐
                       </div>
-                      <span className="font-semibold text-white ">Website Analysis</span>
+                      <span className="font-semibold text-white ">Website Auto Fill</span>
                       <div className="flex items-center space-x-2">
                         <span></span>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">AI-Powered</span>
                         <div className="relative group">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium cursor-help">
+                          {/* <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium cursor-help">
                             Indie+
-                          </span>
+                          </span> */}
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-3 bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 border border-gray-600">
                             This AI-powered feature will be exclusive to Indie+ subscribers. Currently free during preview period!
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-700"></div>
@@ -652,7 +654,7 @@ export default function AEOScorePage() {
                   
                   <button
                     onClick={() => setWorkflowType('manual')}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    className={`cursor-pointer  p-4 rounded-lg border-2 transition-all text-left ${
                       workflowType === 'manual'
                         ? 'border-blue-500 bg-blue-900/30'
                         : 'border-gray-600 bg-gray-700 hover:border-gray-500'
@@ -673,7 +675,7 @@ export default function AEOScorePage() {
               {workflowType === 'website' && (
                 <div className="mb-8">
                   <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 border border-blue-600/30">
-                    <h4 className="text-lg font-semibold text-white mb-4">🌐 AI Website Analysis</h4>
+                    <h4 className="text-lg font-semibold text-white mb-4">🧠 AI Auto Fill</h4>
                     
                     <div className="mb-6">
                       <label className="block text-sm font-medium text-white mb-2">Website URL</label>
@@ -1767,10 +1769,10 @@ export default function AEOScorePage() {
       <footer className="bg-gray-800 border-t border-gray-700 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <span className="text-2xl">🚀</span>
-              <span className="text-xl font-semibold text-white">Rankly</span>
-            </div>
+            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
+              <Image src="/eye.png" alt="Rankly" width={24} height={24} />
+              <span>Rankly</span>
+            </Link>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <span className="text-gray-400">AI-powered reports for SEO professionals</span>
               <span className="text-gray-400">&copy; {new Date().getFullYear()} Rankly</span>

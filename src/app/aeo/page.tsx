@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
+import Image from 'next/image';
 
 export default function AEOPage() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function AEOPage() {
               Get superior Answer Engine Optimization with AI-powered insights, built-in WordPress support, and privacy-first analytics - all at a fraction of enterprise platform costs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
+              <button
                 onClick={handleCreateAccount}
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg cursor-pointer"
               >
@@ -284,7 +285,7 @@ export default function AEOPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
+              <button
                 onClick={handleCreateAccount}
                 className="bg-white text-green-600 px-8 py-3 rounded-md font-semibold hover:bg-gray-50 transition-colors shadow-md inline-block cursor-pointer"
               >
@@ -347,7 +348,7 @@ export default function AEOPage() {
               Join thousands of businesses preparing for the AI-first search future. Create your account now to access our free tool and lock in pre-release discounts.
             </p>
 
-            <button 
+            <button
               onClick={handleCreateAccount}
               className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg cursor-pointer"
             >
@@ -361,10 +362,10 @@ export default function AEOPage() {
       <footer className="bg-gray-50 border-t border-gray-100 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <span className="text-2xl">🚀</span>
-              <span className="text-xl font-semibold text-gray-900">Rankly</span>
-            </div>
+            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
+              <Image src="/eye.png" alt="Rankly" width={24} height={24} />
+              <span>Rankly</span>
+            </Link>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <span className="text-gray-600">One-click AEO optimization</span>
               <span className="text-gray-600">&copy; {new Date().getFullYear()} Rankly</span>
@@ -372,7 +373,7 @@ export default function AEOPage() {
           </div>
         </div>
       </footer>
-      
+
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}

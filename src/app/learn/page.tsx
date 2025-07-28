@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
+import Image from 'next/image';
 
 export default function LearnPage() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -390,19 +391,13 @@ export default function LearnPage() {
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Master AEO?</h2>
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to start free?</h2>
           <p className="text-xl text-blue-100 mb-8">
             Don&apos;t let your competitors dominate AI search results. Start optimizing for the future of search today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={handleCreateAccount}
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg cursor-pointer"
-            >
-              Start Free
-            </button>
             <Link href="/aeo-score" className="bg-blue-500 text-white px-8 py-4 rounded-lg hover:bg-blue-400 transition-colors font-medium text-lg border-2 border-white">
-              Test Your AEO Score
+              Get Your Rank
             </Link>
           </div>
         </div>
@@ -412,10 +407,10 @@ export default function LearnPage() {
       <footer className="bg-gray-800 border-t border-gray-700 py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <span className="text-2xl">🚀</span>
-              <span className="text-xl font-semibold text-white">Rankly</span>
-            </div>
+            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
+              <Image src="/eye.png" alt="Rankly" width={24} height={24} />
+              <span>Rankly</span>
+            </Link>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <span className="text-gray-400">Amplify SEO with AEO & GEO</span>
               <span className="text-gray-400">&copy; {new Date().getFullYear()} Rankly</span>
