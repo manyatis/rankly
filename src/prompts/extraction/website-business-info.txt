@@ -12,7 +12,7 @@ Please search for information about this website and business, then extract comp
 }
 
 Guidelines for extraction:
-- businessName: Extract the main company/brand name, not taglines or slogans
+- businessName: Extract the main company/brand name, not taglines or slogans. Do not include generic words that may be in the business name such as ("llc", "golf", "inc"..).
 - industry: Use standard industry categories that would be searchable
 - location: Only include if there's a clear physical address or location mentioned; use null for remote/online-only businesses  
 - businessDescription: Focus on what they actually do and who they serve, avoid marketing fluff
