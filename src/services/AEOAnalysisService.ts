@@ -5,6 +5,7 @@ import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
 import { PromptFormationService } from './PromptFormationService';
 import { WebsiteAnalysisService, type WebsiteAnalysisResult } from './WebsiteAnalysisService';
 import { PrismaClient } from '../generated/prisma';
+import { randomUUID } from 'crypto';
 
 export interface AIProvider {
   name: string;
@@ -464,23 +465,94 @@ export class AEOAnalysisService {
     // Aggregate competitors from all models
     const overallCompetitorAnalysis = this.aggregateCompetitors(results);
 
-    // Save AEO scores for professional+ users (using the best/first result)
+    // Persist both input and ranking results to database with linked UUID
     const user = authResult.user!;
     if (user.id && results.length > 0) {
-      // Get user's plan to check if they have professional+
       try {
         const userRecord = await this.prisma.user.findUnique({
           where: { email: user.email },
           select: { plan: true, id: true }
         });
 
-        if (userRecord && (userRecord.plan === 'professional' || userRecord.plan === 'enterprise')) {
-          // Save the best score (first result, as they're typically sorted by performance)
-          const bestResult = results[0];
-          await this.saveAeoScore(userRecord.id, request.businessName, request.keywords, bestResult);
+        if (userRecord) {
+          // Generate a unique UUID for this analysis run
+          const runUuid = randomUUID();
+          
+          // Determine the prompts used (custom prompts or generated ones)
+          let prompts: string[] = [];
+          if (request.customPrompts && request.customPrompts.length > 0) {
+            prompts = request.customPrompts;
+          } else {
+            // Extract the prompts that were actually used during analysis from the first result
+            // This is a bit indirect but the prompts should be similar across providers
+            if (results[0]?.queryVariations && results[0].queryVariations.length > 0) {
+              prompts = results[0].queryVariations.map(q => q.query);
+            }
+          }
+
+          // Extract rankings from provider results
+          let openaiRank: number | null = null;
+          let claudeRank: number | null = null;
+          let perplexityRank: number | null = null;
+          
+          for (const result of results) {
+            const providerName = result.provider.name.toLowerCase();
+            if (providerName.includes('openai')) {
+              openaiRank = result.aeoScore;
+            } else if (providerName.includes('claude')) {
+              claudeRank = result.aeoScore;
+            } else if (providerName.includes('perplexity')) {
+              perplexityRank = result.aeoScore;
+            }
+          }
+          
+          // Calculate average rank
+          const ranks = [openaiRank, claudeRank, perplexityRank].filter(rank => rank !== null) as number[];
+          const averageRank = ranks.length > 0 ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) : null;
+
+          // Use database transaction to ensure both records are created together
+          await this.prisma.$transaction(async (tx) => {
+            // Save input history
+            await tx.inputHistory.create({
+              data: {
+                userId: userRecord.id,
+                runUuid,
+                businessName: request.businessName,
+                industry: request.industry,
+                location: request.location || null,
+                websiteUrl: request.websiteUrl || null,
+                businessDescription: request.marketDescription,
+                keywords: request.keywords,
+                prompts,
+              }
+            });
+            
+            // Save ranking history with the same UUID
+            await tx.rankingHistory.create({
+              data: {
+                userId: userRecord.id,
+                runUuid,
+                businessName: request.businessName,
+                openaiRank,
+                claudeRank,
+                perplexityRank,
+                averageRank,
+                websiteScore: websiteAnalysis?.aeoOptimization?.currentScore || null,
+                hasWebsiteAnalysis: !!websiteAnalysis,
+              }
+            });
+          });
+
+          console.debug(`✅ Saved analysis run ${runUuid} for ${request.businessName} - Average: ${averageRank || 'N/A'}/100`);
+
+          // Save AEO scores for professional+ users (legacy format for backward compatibility)
+          if (userRecord.plan === 'professional' || userRecord.plan === 'enterprise') {
+            const bestResult = results[0];
+            await this.saveAeoScore(userRecord.id, request.businessName, request.keywords, bestResult);
+          }
         }
       } catch (error) {
-        console.error('❌ Error checking user plan for score saving:', error);
+        console.error('❌ Error saving analysis run data:', error);
         // Continue without saving - don't break the analysis
       }
     }

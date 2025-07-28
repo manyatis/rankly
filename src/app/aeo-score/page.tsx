@@ -768,13 +768,13 @@ export default function AEOScorePage() {
                       <div className="flex space-x-3 mt-4">
                         <button
                           onClick={handleUseExtractedInfo}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                          className="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                         >
                           ✅ Use This Information
                         </button>
                         <button
                           onClick={() => setExtractedInfo(null)}
-                          className="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                          className="cursor-pointer bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                         >
                           🔄 Try Again
                         </button>

@@ -28,6 +28,8 @@ model User {
     createdAt         DateTime        @default(now())
     updatedAt         DateTime        @updatedAt
     aeoScores         AeoScore[]
+    inputHistory      InputHistory[]
+    rankingHistory    RankingHistory[]
 }
 
 model Session {
@@ -83,4 +85,53 @@ model AeoScore {
   
   @@unique([userId, date, businessName])
   @@index([userId, date])
+}
+
+// Input History - stores business information and prompts used
+model InputHistory {
+  id                  Int       @id @default(autoincrement())
+  userId              Int
+  runUuid             String?   @unique // UUID linking this input to its ranking results
+  businessName        String
+  industry            String
+  location            String?
+  websiteUrl          String?   // If present, indicates website analysis was used
+  businessDescription String    @db.Text
+  keywords            String[]  // Array of keywords
+  prompts             String[]  // Array of prompts used
+  createdAt           DateTime  @default(now())
+  
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([businessName])
+  @@index([runUuid])
+}
+
+// Ranking History - stores search engine ranks and website analysis scores
+model RankingHistory {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  runUuid           String?   @unique // UUID linking this result to its input
+  businessName      String
+  
+  // Search Engine Rankings (AEO scores across providers)
+  openaiRank        Int?      // OpenAI ranking/score
+  claudeRank        Int?      // Claude ranking/score  
+  perplexityRank    Int?      // Perplexity ranking/score
+  averageRank       Int?      // Average across all providers
+  
+  // Website Analysis Score (if website was analyzed)
+  websiteScore      Int?      // Website analysis score (0-100)
+  hasWebsiteAnalysis Boolean  @default(false)
+  
+  createdAt         DateTime  @default(now())
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([businessName])
+  @@index([runUuid])
 }
