@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PromptFormationService } from '../../../services/PromptFormationService';
 import { AEOAnalysisService } from '../../../services/AEOAnalysisService';
+import { getUser, checkRateLimit, incrementRateLimit } from '../../../lib/auth';
 
 interface GeneratePromptsRequest {
   businessName: string;
@@ -12,7 +13,23 @@ interface GeneratePromptsRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate authentication and usage first
+    // Check authentication
+    const user = await getUser();
+    if (!user?.email) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // Check rate limit for generate prompts
+    const rateLimitCheck = await checkRateLimit(user.email, 'generatePrompts');
+    if (!rateLimitCheck.canUse) {
+      return NextResponse.json({ 
+        error: 'Rate limit exceeded', 
+        waitMinutes: rateLimitCheck.waitMinutes,
+        message: `You're doing that too frequently. Try again in ${rateLimitCheck.waitMinutes} minute${rateLimitCheck.waitMinutes !== 1 ? 's' : ''}.`
+      }, { status: 429 });
+    }
+
+    // Validate daily usage limit
     const authResult = await AEOAnalysisService.validateAuthAndUsage();
     if (!authResult.isValid) {
       return NextResponse.json(
@@ -52,6 +69,9 @@ export async function POST(request: NextRequest) {
     }, 5); // Generate 5 prompts for editing
 
     console.debug(`✅ Generated ${promptResult.queries.length} prompts`);
+
+    // Increment rate limit counter on successful request
+    await incrementRateLimit(user.email, 'generatePrompts');
 
     return NextResponse.json({
       prompts: promptResult.queries,

@@ -130,9 +130,60 @@ export default function AEOScorePage() {
     keywords: string[];
     confidence: number;
   } | null>(null);
+  
+  // Rate limiting states
+  const [analyzeWebsiteRateLimit, setAnalyzeWebsiteRateLimit] = useState<{
+    canUse: boolean;
+    waitMinutes: number;
+  }>({ canUse: true, waitMinutes: 0 });
+  const [generatePromptsRateLimit, setGeneratePromptsRateLimit] = useState<{
+    canUse: boolean;
+    waitMinutes: number;
+  }>({ canUse: true, waitMinutes: 0 });
+  
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
+
+  // Check rate limits
+  const checkRateLimits = useCallback(async () => {
+    if (!user?.email) return;
+
+    try {
+      const [analyzeResponse, generateResponse] = await Promise.all([
+        fetch('/api/rate-limit-check?action=analyzeWebsite', { credentials: 'include' }),
+        fetch('/api/rate-limit-check?action=generatePrompts', { credentials: 'include' })
+      ]);
+
+      if (analyzeResponse.ok) {
+        const analyzeData = await analyzeResponse.json();
+        setAnalyzeWebsiteRateLimit({
+          canUse: analyzeData.canUse,
+          waitMinutes: analyzeData.waitMinutes || 0
+        });
+      }
+
+      if (generateResponse.ok) {
+        const generateData = await generateResponse.json();
+        setGeneratePromptsRateLimit({
+          canUse: generateData.canUse,
+          waitMinutes: generateData.waitMinutes || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error checking rate limits:', error);
+    }
+  }, [user?.email]);
+
+  // Check rate limits when user changes or component mounts
+  useEffect(() => {
+    if (user?.email) {
+      checkRateLimits();
+      // Check rate limits every 30 seconds to update wait times
+      const interval = setInterval(checkRateLimits, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.email, checkRateLimits]);
 
   // Handle keywords input with real-time limit to 10 keywords
   const handleKeywordsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -157,6 +208,12 @@ export default function AEOScorePage() {
     // Check if user is logged in
     if (!user?.email) {
       setLoginModalOpen(true);
+      return;
+    }
+
+    // Check rate limit first
+    if (!analyzeWebsiteRateLimit.canUse) {
+      setError(`You're doing that too frequently. Try again in ${analyzeWebsiteRateLimit.waitMinutes} minute${analyzeWebsiteRateLimit.waitMinutes !== 1 ? 's' : ''}.`);
       return;
     }
 
@@ -190,6 +247,9 @@ export default function AEOScorePage() {
 
       const extractedData = await response.json();
       setExtractedInfo(extractedData);
+      
+      // Refresh rate limits after successful request
+      await checkRateLimits();
       
     } catch (error) {
       console.error('Error extracting website info:', error);
@@ -259,6 +319,12 @@ export default function AEOScorePage() {
       return;
     }
 
+    // Check rate limit first
+    if (!generatePromptsRateLimit.canUse) {
+      setError(`You're doing that too frequently. Try again in ${generatePromptsRateLimit.waitMinutes} minute${generatePromptsRateLimit.waitMinutes !== 1 ? 's' : ''}.`);
+      return;
+    }
+
     // Check usage limits
     if (usageInfo && !usageInfo.canUse) {
       alert(`Daily limit reached. You've used ${usageInfo.usageCount}/${usageInfo.maxUsage} free analytics today. Please upgrade for unlimited access.`);
@@ -293,6 +359,9 @@ export default function AEOScorePage() {
       setIsAnalyzing(false);
       setCurrentStep('');
       setProgress(0);
+      
+      // Refresh rate limits after successful request
+      await checkRateLimits();
     } catch (error) {
       console.error('Error generating prompts:', error);
       setError('Failed to generate prompts. Please try again.');
@@ -620,23 +689,37 @@ export default function AEOScorePage() {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={handleExtractWebsiteInfo}
-                      disabled={isExtractingInfo || !websiteUrlForExtraction.trim() || !user || !usageInfo || (usageInfo && !usageInfo.canUse)}
-                      className="bg-blue-600 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isExtractingInfo ? (
-                        <span className="flex items-center space-x-2">
-                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <button
+                        onClick={handleExtractWebsiteInfo}
+                        disabled={isExtractingInfo || !websiteUrlForExtraction.trim() || !user || !usageInfo || (usageInfo && !usageInfo.canUse) || !analyzeWebsiteRateLimit.canUse}
+                        className="bg-blue-600 cursor-pointer text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isExtractingInfo ? (
+                          <span className="flex items-center space-x-2">
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Analyzing Website...</span>
+                          </span>
+                        ) : (
+                          '🔍 Analyze Website'
+                        )}
+                      </button>
+                      
+                      {/* Rate limit error message */}
+                      {!analyzeWebsiteRateLimit.canUse && user?.email && (
+                        <div className="flex items-center space-x-2 text-sm">
+                          <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>Analyzing Website...</span>
-                        </span>
-                      ) : (
-                        '🔍 Analyze Website'
+                          <span className="text-red-400">
+                            Too frequent. Try again in {analyzeWebsiteRateLimit.waitMinutes} minute{analyzeWebsiteRateLimit.waitMinutes !== 1 ? 's' : ''}.
+                          </span>
+                        </div>
                       )}
-                    </button>
+                    </div>
                   </div>
                   
                   {/* Display extracted information */}
@@ -815,11 +898,12 @@ export default function AEOScorePage() {
                     <span>Fill in all required fields</span>
                   )}
                 </div>
-                <button
-                  onClick={handleGeneratePrompts}
-                  disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || !keywords.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse)}
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
-                >
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                  <button
+                    onClick={handleGeneratePrompts}
+                    disabled={isAnalyzing || !businessName.trim() || !industry.trim() || !businessDescription.trim() || !keywords.trim() || user == null || usageInfo == null || (usageInfo && !usageInfo.canUse) || !generatePromptsRateLimit.canUse}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
+                  >
                   {isAnalyzing ? (
                     <span className="flex items-center space-x-2">
                       <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -835,7 +919,20 @@ export default function AEOScorePage() {
                   ) : (
                     'Generate Report Prompts'
                   )}
-                </button>
+                  </button>
+                  
+                  {/* Rate limit error message */}
+                  {!generatePromptsRateLimit.canUse && user?.email && (
+                    <div className="flex items-center space-x-2 text-sm sm:mt-1">
+                      <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-red-400">
+                        Too frequent. Try again in {generatePromptsRateLimit.waitMinutes} minute{generatePromptsRateLimit.waitMinutes !== 1 ? 's' : ''}.
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

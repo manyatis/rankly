@@ -20,6 +20,11 @@ model User {
     lastUsageDate     DateTime?
     subscriptionTier  String          @default("free") // "free", "professional", "enterprise"
     plan              String          @default("free") // "free", "professional", "enterprise"
+    // Rate limiting fields for 5-minute windows
+    analyzeWebsiteCount     Int       @default(0)  // Count of analyze website button uses
+    analyzeWebsiteResetTime DateTime? // When the 5-minute window resets
+    generatePromptsCount    Int       @default(0)  // Count of generate prompts button uses  
+    generatePromptsResetTime DateTime? // When the 5-minute window resets
     createdAt         DateTime        @default(now())
     updatedAt         DateTime        @updatedAt
     aeoScores         AeoScore[]
