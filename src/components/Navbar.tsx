@@ -42,6 +42,7 @@ export default function Navbar() {
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
             <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium">Dashboard</Link>
+            <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-medium">API</Link>
             <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium">Learn</Link>
             <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium">Pricing</Link>
             {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
@@ -115,6 +116,7 @@ export default function Navbar() {
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
                 <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Dashboard</Link>
+                <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>API</Link>
                 <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn More</Link>
                 <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}

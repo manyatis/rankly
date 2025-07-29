@@ -44,7 +44,26 @@ export async function GET(
       return NextResponse.json({ error: 'Business not found or access denied' }, { status: 404 });
     }
 
-    return NextResponse.json({ business });
+    // Fetch the most recent keywords from InputHistory for this business
+    const recentInput = await prisma.inputHistory.findFirst({
+      where: {
+        businessId: businessId
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        keywords: true
+      }
+    });
+
+    // Add keywords to business object
+    const businessWithKeywords = {
+      ...business,
+      recentKeywords: recentInput?.keywords || []
+    };
+
+    return NextResponse.json({ business: businessWithKeywords });
 
   } catch (error) {
     console.error('Error fetching business:', error);

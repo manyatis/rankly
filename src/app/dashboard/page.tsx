@@ -9,7 +9,7 @@ import TrendsTab from '@/components/dashboard/TrendsTab';
 import AIInsightsTab from '@/components/dashboard/AIInsightsTab';
 import BusinessInfoTab from '@/components/dashboard/BusinessInfoTab';
 import PromptsTab from '@/components/dashboard/PromptsTab';
-import ExecuteTab from '@/components/dashboard/ExecuteTab';
+import ExecuteTab from '@/components/dashboard/ExecuteTabNew';
 
 interface Organization {
   id: number;
@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'prompts' | 'execute'>('trends');
   const [loading, setLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   useEffect(() => {
@@ -48,10 +49,12 @@ export default function Dashboard() {
     }
   }, [selectedOrganization]);
 
-  // Automatically switch to execute tab when no businesses exist
+  // Automatically switch to appropriate tab based on business availability
   useEffect(() => {
     if (businesses.length === 0 && activeTab !== 'execute') {
       setActiveTab('execute');
+    } else if (businesses.length > 0 && activeTab === 'execute') {
+      setActiveTab('trends'); // Default to trends when businesses exist
     }
   }, [businesses.length, activeTab]);
 
@@ -63,12 +66,16 @@ export default function Dashboard() {
         setOrganizations(data.organizations);
         if (data.organizations.length > 0) {
           setSelectedOrganization(data.organizations[0].id);
+        } else {
+          setInitialLoadComplete(true);
         }
       } else {
         console.error('Failed to fetch organizations:', response.status);
+        setInitialLoadComplete(true);
       }
     } catch (error) {
       console.error('Error fetching organizations:', error);
+      setInitialLoadComplete(true);
     } finally {
       setLoading(false);
     }
@@ -82,22 +89,30 @@ export default function Dashboard() {
         setBusinesses(data.businesses);
         if (data.businesses.length > 0) {
           setSelectedBusiness(data.businesses[0].id);
+          // Give a brief moment for the business selection to settle before showing content
+          setTimeout(() => setInitialLoadComplete(true), 300);
         } else {
           setSelectedBusiness(null);
+          setInitialLoadComplete(true);
         }
       }
     } catch (error) {
       console.error('Error fetching businesses:', error);
+      setInitialLoadComplete(true);
     }
   };
 
   const handleOrganizationChange = (orgId: number) => {
     setSelectedOrganization(orgId);
     setSelectedBusiness(null);
+    setInitialLoadComplete(false);
   };
 
   const handleBusinessChange = (businessId: number) => {
     setSelectedBusiness(businessId);
+    setInitialLoadComplete(false);
+    // Brief delay to allow tab component to start loading
+    setTimeout(() => setInitialLoadComplete(true), 200);
   };
 
   const selectedOrgName = organizations.find(org => org.id === selectedOrganization)?.name || 'Select Organization';
@@ -111,13 +126,95 @@ export default function Dashboard() {
     { id: 'execute', name: 'Execute Analysis', icon: '🔍', description: 'Run new AEO analysis' },
   ] as const;
 
-  if (status === 'loading' || (session?.user && loading)) {
+  if (status === 'loading' || (session?.user && (loading || !initialLoadComplete))) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-300">Loading dashboard...</p>
+      <div className="min-h-screen bg-gray-900 flex flex-col">
+        <Navbar />
+        
+        <div className="flex-1 flex">
+          {/* Sidebar Skeleton */}
+          <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+            {/* Header with Dropdowns Skeleton */}
+            <div className="p-6 border-b border-gray-700">
+              <div className="mb-4">
+                <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
+                <div className="h-12 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+              <div>
+                <div className="h-4 bg-gray-600 rounded w-24 mb-2 animate-pulse"></div>
+                <div className="h-12 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Navigation Tabs Skeleton */}
+            <div className="flex-1 p-6">
+              <div className="space-y-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="p-4 bg-gray-700 rounded-lg">
+                    <div className="flex items-start">
+                      <div className="w-8 h-8 bg-gray-600 rounded mr-3 animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-600 rounded w-20 mb-1 animate-pulse"></div>
+                        <div className="h-3 bg-gray-700 rounded w-32 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Current Selection Info Skeleton */}
+            <div className="p-6 border-t border-gray-700 bg-gray-800/50">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-3 bg-gray-600 rounded w-16 animate-pulse"></div>
+                  <div className="h-3 bg-gray-700 rounded w-20 animate-pulse"></div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="h-3 bg-gray-600 rounded w-12 animate-pulse"></div>
+                  <div className="h-3 bg-gray-700 rounded w-24 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Skeleton */}
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 p-8">
+              <div className="space-y-6">
+                {/* Header Skeleton */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="h-8 bg-gray-600 rounded w-48 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-700 rounded w-64 animate-pulse"></div>
+                  </div>
+                  <div className="h-10 bg-gray-600 rounded w-32 animate-pulse"></div>
+                </div>
+
+                {/* Stats Cards Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                      <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
+                      <div className="flex items-center">
+                        <div className="h-8 bg-gray-700 rounded w-12 animate-pulse"></div>
+                        <div className="h-4 bg-gray-600 rounded w-8 ml-2 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart/Content Skeleton */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <div className="h-6 bg-gray-600 rounded w-48 mb-6 animate-pulse"></div>
+                  <div className="h-80 bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -286,7 +383,7 @@ export default function Dashboard() {
                 {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
                 {activeTab === 'business' && selectedBusiness && <BusinessInfoTab businessId={selectedBusiness} />}
                 {activeTab === 'prompts' && selectedBusiness && <PromptsTab businessId={selectedBusiness} />}
-                {activeTab === 'execute' && selectedBusiness && <ExecuteTab businessId={selectedBusiness} />}
+                {activeTab === 'execute' && <ExecuteTab businessId={selectedBusiness} />}
               </div>
             )}
           </div>

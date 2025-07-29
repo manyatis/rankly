@@ -100,9 +100,44 @@ export default function BusinessInfoTab({ businessId }: BusinessInfoTabProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-300">Loading business information...</span>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="h-8 bg-gray-600 rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-700 rounded w-64 animate-pulse"></div>
+          </div>
+          <div className="h-10 bg-gray-600 rounded w-16 animate-pulse"></div>
+        </div>
+
+        {/* Business Information Skeleton */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i}>
+                <div className="h-4 bg-gray-600 rounded w-24 mb-2 animate-pulse"></div>
+                <div className="h-12 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ))}
+            <div className="md:col-span-2">
+              <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
+              <div className="h-24 bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metadata Skeleton */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="h-6 bg-gray-600 rounded w-20 mb-4 animate-pulse"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <div className="h-4 bg-gray-600 rounded w-16 animate-pulse"></div>
+                <div className="h-4 bg-gray-700 rounded w-32 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
