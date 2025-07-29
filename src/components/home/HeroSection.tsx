@@ -10,27 +10,27 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-            Instant AI Engine Rank Reports
+            Analyze Your Site&apos;s AI Visibility
           </h1>
           <p className="text-lg text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed">
-            Generate your engine rank & actionable items report in seconds!
+            Get 1 site analysis free - See how your website ranks across all major AI engines and get actionable optimization recommendations.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
+            <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-base sm:text-lg">
+              Analyze Your Site Free
+            </Link>
             <button
               onClick={onCreateAccount}
-              className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-base sm:text-lg cursor-pointer"
+              className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg cursor-pointer"
             >
-              Create an Account
+              View Dashboard
             </button>
-            <Link href="/dashboard" className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg">
-              Try Free Rank Check
-            </Link>
           </div>
 
           {/* Top Models Section */}
           <div className="mt-12 sm:mt-16">
             <p className="text-gray-300 text-sm sm:text-base mb-6 sm:mb-8 font-medium">
-              Generate instant rank reports across all major AI engines:
+              Analyze your site&apos;s visibility across all major AI engines:
             </p>
             <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 lg:gap-8">
               {/* ChatGPT */}

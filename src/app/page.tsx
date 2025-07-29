@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import LoginModal from '../components/LoginModal';
@@ -12,7 +12,6 @@ import PricingSection from '../components/home/PricingSection';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [currentDashboardSlide, setCurrentDashboardSlide] = useState(0);
   const router = useRouter();
   const { user, loading } = useAuth();
 
@@ -41,134 +40,6 @@ export default function Home() {
 
 
 
-  const dashboardPreviewSlides = [
-    {
-      title: "Main Dashboard",
-      subtitle: "Complete visibility into your AI search performance",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white">Rankly Dashboard</h3>
-                <p className="text-gray-400 text-sm">Professional AI Engine Analytics Platform</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Overview</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">AI Visibility</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Conversations</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">AI Visibility Score</div>
-                <div className="text-2xl font-bold text-white">78%</div>
-                <div className="text-green-400 text-xs">+12%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Brand Mentions</div>
-                <div className="text-2xl font-bold text-white">2,847</div>
-                <div className="text-green-400 text-xs">+8%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">AI Traffic</div>
-                <div className="text-2xl font-bold text-white">24.3K</div>
-                <div className="text-green-400 text-xs">+15%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Industry Rank</div>
-                <div className="text-2xl font-bold text-white">#3</div>
-                <div className="text-green-400 text-xs">+2 positions</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Performance Analytics",
-      subtitle: "Detailed performance breakdown across AI platforms",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white">Performance Analytics</h3>
-                <p className="text-gray-400 text-sm">Detailed performance breakdown across AI platforms</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Analytics</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Conversations</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Competitors</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-4">AI Platform Performance</h4>
-                <div className="space-y-3">
-                  {[
-                    { platform: "OpenAI (ChatGPT)", score: 85, color: "bg-green-500" },
-                    { platform: "Google Gemini", score: 81, color: "bg-blue-500" },
-                    { platform: "Perplexity", score: 76, color: "bg-purple-500" },
-                    { platform: "Claude", score: 72, color: "bg-orange-500" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className="text-gray-300 text-sm">{item.platform}</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 bg-gray-600 rounded-full h-2">
-                          <div className={`${item.color} h-2 rounded-full`} style={{ width: `${item.score}%` }}></div>
-                        </div>
-                        <span className="text-white text-sm font-medium">{item.score}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-4">Competitive Intelligence</h4>
-                <div className="space-y-3">
-                  {[
-                    { rank: 1, company: "HubSpot", score: 92, change: "+3%" },
-                    { rank: 2, company: "Salesforce", score: 89, change: "-1%" },
-                    { rank: 3, company: "Your Company", score: 78, change: "+12%" }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 ${item.rank === 3 ? 'bg-blue-600' : 'bg-gray-600'}`}>
-                          <span className="text-xs font-bold text-white">{item.rank}</span>
-                        </div>
-                        <span className={`text-sm ${item.rank === 3 ? 'text-blue-300 font-medium' : 'text-gray-300'}`}>{item.company}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-medium text-sm ${item.rank === 3 ? 'text-blue-300' : 'text-white'}`}>{item.score}%</div>
-                        <div className={`text-xs ${item.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>{item.change}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-  ];
-
-
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentDashboardSlide((prev) => (prev + 1) % dashboardPreviewSlides.length);
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [dashboardPreviewSlides.length]);
 
 
   return (
@@ -447,71 +318,43 @@ export default function Home() {
           <div className="text-center mb-16">
             {/* <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2> */}
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Generate comprehensive AI engine ranking reports with automated recommendations tailored for your websites. Perfect for freelance SEOs creating client deliverables 
-              and businesses managing their own SEO strategy.
+              Get your first site analysis free to see how your website ranks across AI engines. Perfect for businesses wanting to understand their AI visibility 
+              and get actionable optimization recommendations.
             </p>
           </div>
 
-          {/* Dashboard Preview Carousel */}
+          {/* Dashboard Screenshot */}
           <div className="mb-16">
-            <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 shadow-2xl overflow-hidden">
-              <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-medium border border-gray-500 z-20 shadow-lg">
-                🔍 Preview
+            <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-8 shadow-2xl overflow-hidden">
+              <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium border border-gray-500 z-20 shadow-lg">
+                📊 Live Dashboard
               </div>
-              <div className="animate-pulse absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform translate-x-[-100%] animate-shimmer"></div>
               
-              {/* Carousel Container */}
+              {/* Screenshot Container */}
               <div className="relative">
-                <div className="overflow-hidden">
-                  <div 
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentDashboardSlide * 100}%)` }}
-                  >
-                    {dashboardPreviewSlides.map((slide, index) => (
-                      <div key={index} className="w-full flex-shrink-0">
-                        {slide.component}
+                <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg">
+                  {/* Placeholder for dashboard screenshot - replace with actual screenshot */}
+                  <div className="aspect-video bg-gray-900 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
                       </div>
-                    ))}
+                      <h3 className="text-xl font-bold text-white mb-2">Real Dashboard Preview</h3>
+                      <p className="text-gray-400 text-sm max-w-md mx-auto">
+                        See your website&apos;s AI visibility across all major search engines with actionable optimization recommendations.
+                      </p>
+                      {/* Note: Replace this placeholder with: <Image src="/dashboard-screenshot.png" alt="Rankly Dashboard" width={1200} height={675} className="w-full h-auto" /> */}
+                    </div>
                   </div>
                 </div>
-                
-                {/* Navigation Arrows */}
-                <button
-                  onClick={() => setCurrentDashboardSlide(currentDashboardSlide === 0 ? dashboardPreviewSlides.length - 1 : currentDashboardSlide - 1)}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-2 transition-all duration-200 z-10"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button
-                  onClick={() => setCurrentDashboardSlide((currentDashboardSlide + 1) % dashboardPreviewSlides.length)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-2 transition-all duration-200 z-10"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
               </div>
               
-              {/* Slide Indicators */}
-              <div className="flex justify-center space-x-2 mt-6">
-                {dashboardPreviewSlides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentDashboardSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                      index === currentDashboardSlide ? 'bg-blue-500' : 'bg-white/30 hover:bg-white/50'
-                    }`}
-                  />
-                ))}
-              </div>
-              
-              {/* Slide Title */}
-              <div className="text-center mt-4">
-                <h3 className="text-xl font-bold text-white mb-1">{dashboardPreviewSlides[currentDashboardSlide].title}</h3>
-                <p className="text-gray-400 text-sm">{dashboardPreviewSlides[currentDashboardSlide].subtitle}</p>
+              {/* Dashboard Title */}
+              <div className="text-center mt-6">
+                <h3 className="text-xl font-bold text-white mb-1">Complete AI Visibility Analysis</h3>
+                <p className="text-gray-400 text-sm">Track your performance across ChatGPT, Claude, Perplexity, and more</p>
               </div>
             </div>
           </div>
@@ -524,8 +367,8 @@ export default function Home() {
                   <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Instant Report Generation</h3>
-              <p className="text-sm sm:text-base text-gray-300">Generate professional client reports in minutes. Perfect for freelance SEOs who need quick, comprehensive analysis.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Free Site Analysis</h3>
+              <p className="text-sm sm:text-base text-gray-300">Get your first comprehensive site analysis at no cost. Perfect for businesses wanting to understand their AI visibility.</p>
             </div>
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -542,8 +385,8 @@ export default function Home() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">DIY-Friendly Interface</h3>
-              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for businesses managing their own SEO without technical expertise required.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Simple Analysis Process</h3>
+              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for business owners to understand their AI visibility without technical expertise required.</p>
             </div>
           </div>
 
@@ -551,7 +394,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
-                Test Your Site Free Now
+                Analyze Your Site Free
               </Link>
             </div>
           </div>
@@ -575,17 +418,17 @@ export default function Home() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to Generate Professional SEO Reports?
+            Ready to Analyze Your Site&apos;s AI Visibility?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join freelance SEOs and businesses using our AI-powered platform to quickly generate comprehensive ranking reports 
-            and optimization recommendations.
+            Get your first site analysis free. See how your website ranks across all major AI engines and discover 
+            actionable optimization opportunities.
           </p>
           <button
             onClick={handleCreateAccount}
             className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg cursor-pointer"
           >
-            Start Generating Reports
+            Start Free Analysis
           </button>
         </div>
       </div>
@@ -600,12 +443,12 @@ export default function Home() {
             </div>
             <div className="flex space-x-6">
               <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
-              <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
+              <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Analyze Site</Link>
               <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 American Code LLC. All rights reserved. AI-powered report generation for SEO professionals.</p>
+            <p>&copy; 2025 American Code LLC. All rights reserved. Free AI visibility analysis for your website.</p>
           </div>
         </div>
       </footer>

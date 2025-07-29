@@ -8,9 +8,9 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
     <div id="pricing" className="bg-gray-800 py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Flexible Pricing</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Start with 1 Site Analysis Free</h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Create your account to access our free AEO Score tool and get pre-release discounts on our comprehensive analytics platform.
+            Get started immediately with one free site analysis. No credit card required. Upgrade for additional sites and advanced features.
           </p>
         </div>
 
@@ -20,26 +20,26 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
             <div className="text-center mb-6 lg:mb-8">
               <h3 className="text-xl lg:text-2xl font-bold text-white mb-2">Free</h3>
               <div className="text-3xl lg:text-4xl font-bold text-blue-600 mb-2">$0</div>
-              <p className="text-gray-300 text-sm lg:text-base">Requires account creation</p>
+              <p className="text-gray-300 text-sm lg:text-base">1 site analysis included</p>
             </div>
             <ul className="space-y-3 lg:space-y-4 mb-6 lg:mb-8 flex-grow">
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Limited to 3 models only
+                1 free site analysis
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Monitor up to 1 website
+                Manual analysis execution
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                2 usage per day **Limited time only**
+                All AI engines coverage
               </li>
               <li className="flex items-center text-gray-300">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
               onClick={onCreateAccount}
               className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
             >
-              Create Account
+              Start Free Analysis
             </button>
           </div>
 
