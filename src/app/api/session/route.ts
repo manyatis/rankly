@@ -39,7 +39,5 @@ export async function GET() {
   } catch (error) {
     console.error('Session API error:', error);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

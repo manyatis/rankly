@@ -116,8 +116,6 @@ export async function POST(request: NextRequest) {
       { error: 'Payment processing failed. Please try again.' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

@@ -91,8 +91,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error saving AEO score:', error);
     return NextResponse.json({ error: 'Failed to save AEO score' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -151,7 +149,5 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching AEO scores:', error);
     return NextResponse.json({ error: 'Failed to fetch AEO scores' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
