@@ -98,8 +98,8 @@ export default function APIPage() {
                 <p className="text-gray-300 mb-4">Retrieve AI-powered insights for your business</p>
                 <div className="bg-gray-900 rounded p-4 font-mono text-sm text-gray-300">
                   <div className="text-green-400">GET</div>
-                  <div>curl -X GET "https://api.rankly.com/v1/insights" \</div>
-                  <div className="ml-4">-H "Authorization: Bearer YOUR_API_KEY"</div>
+                  <div>curl -X GET &quot;https://api.rankly.com/v1/insights&quot; \</div>
+                  <div className="ml-4">-H &quot;Authorization: Bearer YOUR_API_KEY&quot;</div>
                 </div>
               </div>
               
@@ -108,9 +108,9 @@ export default function APIPage() {
                 <p className="text-gray-300 mb-4">Start a new AEO analysis for a website</p>
                 <div className="bg-gray-900 rounded p-4 font-mono text-sm text-gray-300">
                   <div className="text-blue-400">POST</div>
-                  <div>curl -X POST "https://api.rankly.com/v1/analysis" \</div>
-                  <div className="ml-4">-H "Authorization: Bearer YOUR_API_KEY" \</div>
-                  <div className="ml-4">-H "Content-Type: application/json" \</div>
+                  <div>curl -X POST &quot;https://api.rankly.com/v1/analysis&quot; \</div>
+                  <div className="ml-4">-H &quot;Authorization: Bearer YOUR_API_KEY&quot; \</div>
+                  <div className="ml-4">-H &quot;Content-Type: application/json&quot; \</div>
                   {/* <div className="ml-4">-d "{website: example.com}"</div> */}
                 </div>
               </div>
@@ -120,8 +120,8 @@ export default function APIPage() {
                 <p className="text-gray-300 mb-4">Get current ranking positions</p>
                 <div className="bg-gray-900 rounded p-4 font-mono text-sm text-gray-300">
                   <div className="text-green-400">GET</div>
-                  <div>curl -X GET "https://api.rankly.com/v1/rankings?business_id=123" \</div>
-                  <div className="ml-4">-H "Authorization: Bearer YOUR_API_KEY"</div>
+                  <div>curl -X GET &quot;https://api.rankly.com/v1/rankings?business_id=123&quot; \</div>
+                  <div className="ml-4">-H &quot;Authorization: Bearer YOUR_API_KEY&quot;</div>
                 </div>
               </div>
             </div>

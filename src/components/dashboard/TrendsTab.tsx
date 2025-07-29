@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,13 +41,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<7 | 14 | 30>(30);
 
-  useEffect(() => {
-    if (businessId) {
-      fetchRankingData();
-    }
-  }, [businessId, timeRange]);
-
-  const fetchRankingData = async () => {
+  const fetchRankingData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -67,7 +61,13 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId, timeRange]);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchRankingData();
+    }
+  }, [businessId, timeRange, fetchRankingData]);
 
   const chartData = {
     labels: rankingData.map(item => {

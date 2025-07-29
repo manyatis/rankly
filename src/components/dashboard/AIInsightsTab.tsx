@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface AIInsight {
   id: string;
@@ -32,16 +32,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
   const [filterCriticality, setFilterCriticality] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  useEffect(() => {
-    if (businessId) {
-      fetchInsights();
-    } else {
-      setInsights([]);
-      setLoading(false);
-    }
-  }, [businessId]);
-
-  const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
     if (!businessId) return;
 
     try {
@@ -61,7 +52,16 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchInsights();
+    } else {
+      setInsights([]);
+      setLoading(false);
+    }
+  }, [businessId, fetchInsights]);
 
   const updateInsightStatus = async (insightId: string, status: AIInsight['status']) => {
     try {

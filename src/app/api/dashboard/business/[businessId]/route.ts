@@ -108,7 +108,7 @@ export async function PUT(
     }
 
     // Validate input
-    const { websiteName, websiteUrl, industry, location, description } = body;
+    const { websiteName, websiteUrl, industry, location, description, recurringScans, scanFrequency } = body;
 
     if (!websiteName?.trim()) {
       return NextResponse.json({ error: 'Website name is required' }, { status: 400 });
@@ -131,6 +131,23 @@ export async function PUT(
       }, { status: 400 });
     }
 
+    // Calculate next scan date if recurring scans are enabled
+    let nextScanDate = null;
+    if (recurringScans && scanFrequency) {
+      const now = new Date();
+      switch (scanFrequency) {
+        case 'daily':
+          nextScanDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+          break;
+        case 'weekly':
+          nextScanDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'monthly':
+          nextScanDate = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+          break;
+      }
+    }
+
     // Update business
     const updatedBusiness = await prisma.business.update({
       where: { id: businessId },
@@ -140,6 +157,9 @@ export async function PUT(
         industry: industry?.trim() || null,
         location: location?.trim() || null,
         description: description?.trim() || null,
+        recurringScans: recurringScans || false,
+        scanFrequency: recurringScans ? scanFrequency?.trim() || null : null,
+        nextScanDate: recurringScans ? nextScanDate : null,
       },
       include: {
         organization: true,
@@ -156,6 +176,63 @@ export async function PUT(
 
   } catch (error) {
     console.error('Error updating business:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ businessId: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const businessId = parseInt((await params).businessId);
+
+    // Get user from database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Verify business exists and user has access
+    const existingBusiness = await prisma.business.findUnique({
+      where: { id: businessId },
+      include: { organization: true }
+    });
+
+    if (!existingBusiness || existingBusiness.organization.id !== user.organizationId) {
+      return NextResponse.json({ error: 'Business not found or access denied' }, { status: 404 });
+    }
+
+    // Delete business and decrement organization website count
+    await prisma.$transaction(async (tx) => {
+      // Delete business (this will cascade delete related records due to schema setup)
+      await tx.business.delete({
+        where: { id: businessId }
+      });
+
+      // Decrement organization website count
+      await tx.organization.update({
+        where: { id: existingBusiness.organization.id },
+        data: { websiteCount: { decrement: 1 } }
+      });
+    });
+
+    return NextResponse.json({ success: true, message: 'Business deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting business:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

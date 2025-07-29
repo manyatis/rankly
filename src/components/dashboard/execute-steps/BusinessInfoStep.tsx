@@ -14,8 +14,8 @@ interface BusinessInfoStepProps {
   parseKeywords: (keywordString: string) => string[];
   handleGeneratePrompts: () => void;
   isAnalyzing: boolean;
-  user: any;
-  usageInfo: any;
+  user: { email: string } | null;
+  usageInfo: { canUse: boolean } | null;
   generatePromptsRateLimit: {
     canUse: boolean;
     waitMinutes: number;

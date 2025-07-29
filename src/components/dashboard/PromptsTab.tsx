@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface PromptHistory {
   id: number;
@@ -18,13 +18,7 @@ export default function PromptsTab({ businessId }: PromptsTabProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptHistory | null>(null);
 
-  useEffect(() => {
-    if (businessId) {
-      fetchPromptHistory();
-    }
-  }, [businessId]);
-
-  const fetchPromptHistory = async () => {
+  const fetchPromptHistory = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -42,7 +36,13 @@ export default function PromptsTab({ businessId }: PromptsTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId]);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchPromptHistory();
+    }
+  }, [businessId, fetchPromptHistory]);
 
   if (loading) {
     return (

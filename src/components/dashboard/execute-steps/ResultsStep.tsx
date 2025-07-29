@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface AIProvider {
@@ -36,7 +35,7 @@ interface ResultsStepProps {
   results: ScoringResult[];
   overallCompetitors: CompetitorInfo[];
   queryIndexes: {[key: number]: number};
-  setQueryIndexes: (indexes: {[key: number]: number}) => void;
+  setQueryIndexes: React.Dispatch<React.SetStateAction<{[key: number]: number}>>;
 }
 
 export default function ResultsStep({
@@ -208,7 +207,7 @@ export default function ResultsStep({
                       </div>
                       
                       <div className="text-sm text-gray-300 mb-3 font-medium">
-                        "{result.queryVariations[currentQueryIndex]?.query}"
+                        &quot;{result.queryVariations[currentQueryIndex]?.query}&quot;
                       </div>
                       
                       <div className="text-sm text-gray-300 bg-gray-900 p-3 rounded border border-gray-600 max-h-32 overflow-y-auto">

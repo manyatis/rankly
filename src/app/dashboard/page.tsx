@@ -36,10 +36,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [websiteLimitInfo, setWebsiteLimitInfo] = useState<{
+    canAddWebsite: boolean;
+    currentCount: number;
+    limit: number;
+    remainingSlots: number | null;
+    tier: string;
+    isUnlimited: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (session?.user) {
       fetchOrganizations();
+      fetchWebsiteLimitInfo();
     }
   }, [session]);
 
@@ -99,6 +108,18 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching businesses:', error);
       setInitialLoadComplete(true);
+    }
+  };
+
+  const fetchWebsiteLimitInfo = async () => {
+    try {
+      const response = await fetch('/api/dashboard/website-limit-check');
+      if (response.ok) {
+        const data = await response.json();
+        setWebsiteLimitInfo(data);
+      }
+    } catch (error) {
+      console.error('Error fetching website limit info:', error);
     }
   };
 
@@ -297,20 +318,42 @@ export default function Dashboard() {
               <div className="relative">
                 <select
                   value={selectedBusiness || ''}
-                  onChange={(e) => handleBusinessChange(parseInt(e.target.value))}
-                  disabled={businesses.length === 0}
-                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === 'add-new') {
+                      setActiveTab('execute');
+                      setSelectedBusiness(null);
+                    } else if (value) {
+                      handleBusinessChange(parseInt(value));
+                    } else {
+                      setSelectedBusiness(null);
+                    }
+                  }}
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
                 >
                   {businesses.length === 0 ? (
-                    <option value="">No businesses available</option>
+                    websiteLimitInfo?.canAddWebsite ? (
+                      <option value="add-new">Add a new business</option>
+                    ) : (
+                      <option value="" disabled>
+                        Website limit reached ({websiteLimitInfo?.tier} - {websiteLimitInfo?.limit} website{websiteLimitInfo?.limit !== 1 ? 's' : ''})
+                      </option>
+                    )
                   ) : (
                     <>
-                      <option value="">Select a business</option>
+                      {/* <option value="">Select a business</option> */}
                       {businesses.map((business) => (
                         <option key={business.id} value={business.id}>
                           {business.websiteName}
                         </option>
                       ))}
+                      {websiteLimitInfo?.canAddWebsite ? (
+                        <option value="add-new">+ Add a new business</option>
+                      ) : (
+                        <option value="" disabled>
+                          --- Limit reached ({websiteLimitInfo?.tier} - {websiteLimitInfo?.limit} website{websiteLimitInfo?.limit !== 1 ? 's' : ''}) ---
+                        </option>
+                      )}
                     </>
                   )}
                 </select>
@@ -362,6 +405,14 @@ export default function Dashboard() {
                   <span className="text-gray-300 font-medium truncate ml-2">{selectedBusinessName}</span>
                 </div>
               )}
+              {websiteLimitInfo && (
+                <div className="flex justify-between pt-1 border-t border-gray-600/50 mt-2">
+                  <span>Websites:</span>
+                  <span className={`font-medium truncate ml-2 ${websiteLimitInfo.canAddWebsite ? 'text-gray-300' : 'text-yellow-400'}`}>
+                    {websiteLimitInfo.currentCount}/{websiteLimitInfo.isUnlimited ? '∞' : websiteLimitInfo.limit}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -381,7 +432,19 @@ export default function Dashboard() {
               <div className="h-full">
                 {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} />}
                 {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
-                {activeTab === 'business' && selectedBusiness && <BusinessInfoTab businessId={selectedBusiness} />}
+                {activeTab === 'business' && selectedBusiness && (
+                  <BusinessInfoTab 
+                    businessId={selectedBusiness} 
+                    onBusinessDeleted={() => {
+                      // Refresh businesses list, website limit info, and reset selection
+                      if (selectedOrganization) {
+                        fetchBusinesses(selectedOrganization);
+                      }
+                      fetchWebsiteLimitInfo();
+                      setActiveTab('execute');
+                    }} 
+                  />
+                )}
                 {activeTab === 'prompts' && selectedBusiness && <PromptsTab businessId={selectedBusiness} />}
                 {activeTab === 'execute' && <ExecuteTab businessId={selectedBusiness} />}
               </div>

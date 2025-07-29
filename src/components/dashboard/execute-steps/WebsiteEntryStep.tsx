@@ -3,8 +3,8 @@ interface WebsiteEntryStepProps {
   setWebsiteUrlForExtraction: (url: string) => void;
   isExtractingInfo: boolean;
   handleExtractWebsiteInfo: () => void;
-  user: any;
-  usageInfo: any;
+  user: { email: string } | null;
+  usageInfo: { canUse: boolean } | null;
   analyzeWebsiteRateLimit: {
     canUse: boolean;
     waitMinutes: number;
@@ -24,7 +24,7 @@ export default function WebsiteEntryStep({
     <div className="p-6 space-y-6">
       <div>
         <h3 className="text-xl font-semibold text-white mb-2">Step 1: Enter Your Website</h3>
-        <p className="text-gray-400">We'll analyze your website and extract business information automatically</p>
+        <p className="text-gray-400">We&apos;ll analyze your website and extract business information automatically</p>
       </div>
       
       <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 border border-blue-600/30">

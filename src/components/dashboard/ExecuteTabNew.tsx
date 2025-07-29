@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import WebsiteEntryStep from './execute-steps/WebsiteEntryStep';
 import BusinessInfoStep from './execute-steps/BusinessInfoStep';
@@ -76,7 +75,7 @@ function parseKeywords(keywordString: string): string[] {
 }
 
 export default function ExecuteTab({ businessId }: ExecuteTabProps) {
-  const router = useRouter();
+  // const router = useRouter();
   const { user } = useAuth();
   
   // Form data states
@@ -93,14 +92,14 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
   );
   const [websiteUrlForExtraction, setWebsiteUrlForExtraction] = useState('');
   const [isExtractingInfo, setIsExtractingInfo] = useState(false);
-  const [extractedInfo, setExtractedInfo] = useState<{
-    businessName: string;
-    industry: string;
-    location?: string;
-    businessDescription: string;
-    keywords: string[];
-    confidence: number;
-  } | null>(null);
+  // const [extractedInfo, setExtractedInfo] = useState<{
+  //   businessName: string;
+  //   industry: string;
+  //   location?: string;
+  //   businessDescription: string;
+  //   keywords: string[];
+  //   confidence: number;
+  // } | null>(null);
   
   // Transition states
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -109,9 +108,9 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
   const [overallCompetitors, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
-  const [currentStep, setCurrentStep] = useState('');
+  // const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
-  const [generatedPrompts, setGeneratedPrompts] = useState<string[]>([]);
+  // const [generatedPrompts, setGeneratedPrompts] = useState<string[]>([]);
   const [editablePrompts, setEditablePrompts] = useState<string[]>([]);
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
   
@@ -290,7 +289,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
       }
 
       const extractedData = await response.json();
-      setExtractedInfo(extractedData);
+      // setExtractedInfo(extractedData);
       
       setBusinessName(extractedData.businessName);
       setIndustry(extractedData.industry);
@@ -329,7 +328,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     }
 
     setIsAnalyzing(true);
-    setCurrentStep('🧠 Generating optimized prompts...');
+    // setCurrentStep('🧠 Generating optimized prompts...');
     setProgress(30);
 
     try {
@@ -348,11 +347,11 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
       });
 
       const data = await response.json();
-      setGeneratedPrompts(data.prompts);
+      // setGeneratedPrompts(data.prompts);
       setEditablePrompts([...data.prompts]);
       setCurrentPromptIndex(0);
       setIsAnalyzing(false);
-      setCurrentStep('');
+      // setCurrentStep('');
       setProgress(0);
       
       await checkRateLimits();
@@ -361,7 +360,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
       console.error('Error generating prompts:', error);
       setError('Failed to generate prompts. Please try again.');
       setIsAnalyzing(false);
-      setCurrentStep('');
+      // setCurrentStep('');
       setProgress(0);
     }
   };
@@ -400,7 +399,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
 
     setIsAnalyzing(true);
     setProgress(0);
-    setCurrentStep('🎪 The robots are getting excited...');
+    // setCurrentStep('🎪 The robots are getting excited...');
 
     const funMessages = [
       '🎪 The robots are getting excited...',
@@ -418,7 +417,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     let messageIndex = 0;
     const messageInterval: NodeJS.Timeout = setInterval(() => {
       messageIndex = (messageIndex + 1) % funMessages.length;
-      setCurrentStep(funMessages[messageIndex]);
+      // setCurrentStep(funMessages[messageIndex]);
     }, 5000);
 
     try {
@@ -465,7 +464,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
       clearInterval(messageInterval);
 
       setProgress(90);
-      setCurrentStep('🎉 Wrapping up the magic...');
+      // setCurrentStep('🎉 Wrapping up the magic...');
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -476,13 +475,13 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
 
       setTimeout(() => {
         setProgress(100);
-        setCurrentStep('✨ Ta-da! Your rankings are ready!');
+        // setCurrentStep('✨ Ta-da! Your rankings are ready!');
 
         setTimeout(() => {
           setResults(data.results);
           setOverallCompetitors(data.overallCompetitorAnalysis || []);
           setIsAnalyzing(false);
-          setCurrentStep('');
+          // setCurrentStep('');
           setProgress(0);
           checkUsageLimits();
           
@@ -502,7 +501,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
       console.error('Error analyzing AEO scores:', error);
       setError(error instanceof Error ? error.message : 'Failed to analyze AEO scores. Please try again.');
       setIsAnalyzing(false);
-      setCurrentStep('');
+      // setCurrentStep('');
       setProgress(0);
     }
   };

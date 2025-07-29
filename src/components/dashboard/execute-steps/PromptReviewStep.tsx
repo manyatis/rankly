@@ -6,8 +6,8 @@ interface PromptReviewStepProps {
   handleAnalyze: () => void;
   isAnalyzing: boolean;
   progress: number;
-  user: any;
-  usageInfo: any;
+  user: { email: string } | null;
+  usageInfo: { canUse: boolean } | null;
 }
 
 export default function PromptReviewStep({
