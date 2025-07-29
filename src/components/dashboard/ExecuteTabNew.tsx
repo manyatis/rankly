@@ -142,29 +142,29 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     { name: 'Perplexity', model: '', color: 'bg-blue-100 text-blue-800' },
   ];
 
-  // Check rate limits
+  // Check rate limits using consolidated endpoint
   const checkRateLimits = useCallback(async () => {
     if (!user?.email) return;
 
     try {
       const [analyzeResponse, generateResponse] = await Promise.all([
-        fetch('/api/rate-limit-check?action=analyzeWebsite', { credentials: 'include' }),
-        fetch('/api/rate-limit-check?action=generatePrompts', { credentials: 'include' })
+        fetch('/api/usage-check?action=analyzeWebsite', { credentials: 'include' }),
+        fetch('/api/usage-check?action=generatePrompts', { credentials: 'include' })
       ]);
 
       if (analyzeResponse.ok) {
         const analyzeData = await analyzeResponse.json();
         setAnalyzeWebsiteRateLimit({
-          canUse: analyzeData.canUse,
-          waitMinutes: analyzeData.waitMinutes || 0
+          canUse: analyzeData.rateLimit?.canUse ?? true,
+          waitMinutes: analyzeData.rateLimit?.waitMinutes || 0
         });
       }
 
       if (generateResponse.ok) {
         const generateData = await generateResponse.json();
         setGeneratePromptsRateLimit({
-          canUse: generateData.canUse,
-          waitMinutes: generateData.waitMinutes || 0
+          canUse: generateData.rateLimit?.canUse ?? true,
+          waitMinutes: generateData.rateLimit?.waitMinutes || 0
         });
       }
     } catch (error) {
@@ -176,7 +176,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     if (!user?.email) return;
 
     try {
-      const response = await fetch('/api/usage-check', {
+      const response = await fetch('/api/usage-check?checkWebsiteLimit=true', {
         credentials: 'include'
       });
       const data = await response.json();

@@ -3,6 +3,11 @@ export interface SubscriptionTier {
   websiteLimit: number;
   price?: string;
   features: string[];
+  usageLimits: {
+    dailyAnalysisLimit: number | null; // null = unlimited
+    rateLimitPerWindow: number;
+    isUnlimited: boolean;
+  };
 }
 
 export class SubscriptionTiers {
@@ -14,7 +19,12 @@ export class SubscriptionTiers {
       'Basic AEO analysis',
       'Manual scans only',
       'Basic insights'
-    ]
+    ],
+    usageLimits: {
+      dailyAnalysisLimit: 2,
+      rateLimitPerWindow: 2,
+      isUnlimited: false
+    }
   };
 
   static readonly INDIE: SubscriptionTier = {
@@ -27,7 +37,12 @@ export class SubscriptionTiers {
       'Weekly recurring scans',
       'Detailed insights',
       'Export reports'
-    ]
+    ],
+    usageLimits: {
+      dailyAnalysisLimit: 10,
+      rateLimitPerWindow: 5,
+      isUnlimited: false
+    }
   };
 
   static readonly PROFESSIONAL: SubscriptionTier = {
@@ -41,7 +56,12 @@ export class SubscriptionTiers {
       'AI-powered insights',
       'Priority support',
       'Custom reports'
-    ]
+    ],
+    usageLimits: {
+      dailyAnalysisLimit: null,
+      rateLimitPerWindow: 999,
+      isUnlimited: true
+    }
   };
 
   static readonly ENTERPRISE: SubscriptionTier = {
@@ -56,7 +76,12 @@ export class SubscriptionTiers {
       'Dedicated support',
       'White-label reports',
       'API access'
-    ]
+    ],
+    usageLimits: {
+      dailyAnalysisLimit: null,
+      rateLimitPerWindow: 999,
+      isUnlimited: true
+    }
   };
 
   static readonly ALL_TIERS = [
@@ -118,5 +143,17 @@ export class SubscriptionTiers {
       default:
         return false;
     }
+  }
+
+  /**
+   * Get usage limits for a tier
+   */
+  static getUsageLimits(tierName: string): {
+    dailyAnalysisLimit: number | null; // null = unlimited
+    rateLimitPerWindow: number;
+    isUnlimited: boolean;
+  } {
+    const tier = SubscriptionTiers.getTier(tierName);
+    return tier.usageLimits;
   }
 }

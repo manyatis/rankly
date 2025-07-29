@@ -113,10 +113,20 @@ export default function Dashboard() {
 
   const fetchWebsiteLimitInfo = async () => {
     try {
-      const response = await fetch('/api/dashboard/website-limit-check');
+      const response = await fetch('/api/usage-check?checkWebsiteLimit=true');
       if (response.ok) {
         const data = await response.json();
-        setWebsiteLimitInfo(data);
+        // Map the consolidated response to the expected format
+        if (data.websites) {
+          setWebsiteLimitInfo({
+            canAddWebsite: data.websites.canAdd,
+            currentCount: data.websites.currentCount,
+            limit: data.websites.limit,
+            remainingSlots: data.websites.remaining,
+            tier: data.tier,
+            isUnlimited: data.websites.limit === -1
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching website limit info:', error);
