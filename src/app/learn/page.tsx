@@ -9,9 +9,6 @@ import Image from 'next/image';
 export default function LearnPage() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
-  const handleCreateAccount = () => {
-    setLoginModalOpen(true);
-  };
 
   const handleLogin = () => {
     setLoginModalOpen(false);

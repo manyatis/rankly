@@ -12,7 +12,6 @@ import PricingSection from '../components/home/PricingSection';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [currentDashboardSlide, setCurrentDashboardSlide] = useState(0);
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -39,173 +38,7 @@ export default function Home() {
   };
 
 
-  const solutions = [
-    {
-      title: "Agency & Freelance Pro",
-      description: "Complete AI engine analytics platform designed for SEO professionals managing multiple clients with automated report generation.",
-      features: ["Multi-client dashboards", "White-label reports", "API integration", "Priority support"]
-    },
-    {
-      title: "DIY Business Package",
-      description: "Perfect for small to medium businesses managing their own SEO strategy. Get AI-powered recommendations and easy-to-understand reports.",
-      features: ["Automated recommendations", "Simple reports", "Competitor tracking", "Self-service optimization"]
-    },
-    {
-      title: "Enterprise Solution",
-      description: "Advanced AI engine analytics for large organizations with custom integrations, dedicated support, and unlimited report generation.",
-      features: ["Custom integrations", "Unlimited reports", "Dedicated account manager", "Advanced analytics"]
-    }
-  ];
 
-  const dashboardSlides = [
-    {
-      title: "Main Dashboard",
-      subtitle: "Professional AI Engine Analytics Platform",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white">Rankly Dashboard</h3>
-                <p className="text-gray-400 text-sm">Professional AI Engine Analytics Platform</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1 overflow-x-auto">
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium bg-blue-600 text-white whitespace-nowrap">Overview</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">AI Visibility</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Conversations</div>
-              <div className="px-2 sm:px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-gray-300 whitespace-nowrap">Analytics</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">AI Visibility Score</div>
-                <div className="text-2xl font-bold text-white">78%</div>
-                <div className="text-green-400 text-xs">+12%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Brand Mentions</div>
-                <div className="text-2xl font-bold text-white">2,847</div>
-                <div className="text-green-400 text-xs">+8%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">AI Traffic</div>
-                <div className="text-2xl font-bold text-white">24.3K</div>
-                <div className="text-green-400 text-xs">+15%</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Industry Rank</div>
-                <div className="text-2xl font-bold text-white">#3</div>
-                <div className="text-green-400 text-xs">+2 positions</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Agent Analytics",
-      subtitle: "Monitor AI crawler activity and content optimization insights",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">Agent Analytics</h3>
-                <p className="text-gray-400 text-sm">Monitor AI crawler activity and content optimization insights</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Conversations</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Agent Analytics</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Insights</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-gray-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-blue-400">2,847</div>
-                <div className="text-sm text-gray-400 mb-1">Pages Crawled</div>
-                <div className="text-xs text-green-400">+23% this week</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-purple-400">456</div>
-                <div className="text-sm text-gray-400 mb-1">Content Citations</div>
-                <div className="text-xs text-green-400">+31% this week</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-orange-400">94%</div>
-                <div className="text-sm text-gray-400 mb-1">Indexing Success</div>
-                <div className="text-xs text-yellow-400">Stable</div>
-              </div>
-              <div className="bg-gray-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-green-400">78%</div>
-                <div className="text-sm text-gray-400 mb-1">Content Quality</div>
-                <div className="text-xs text-green-400">+8% improvement</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Competitive Intelligence",
-      subtitle: "Deep dive into your competitive landscape across AI platforms",
-      component: (
-        <div className="bg-gray-800 rounded-xl overflow-hidden">
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">Competitive Intelligence</h3>
-                <p className="text-gray-400 text-sm">Deep dive into your competitive landscape across AI platforms</p>
-              </div>
-            </div>
-            <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Overview</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Analytics</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white">Competitors</div>
-              <div className="px-3 py-2 rounded-md text-sm font-medium text-gray-300">Insights</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-4">Competitive Ranking</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-white">1</span>
-                      </div>
-                      <span className="text-gray-300 text-sm">HubSpot</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-medium text-sm">92%</div>
-                      <div className="text-green-400 text-xs">+3%</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-white">2</span>
-                      </div>
-                      <span className="text-blue-300 text-sm font-medium">Your Company</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-blue-300 font-medium text-sm">78%</div>
-                      <div className="text-green-400 text-xs">+12%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-  ];
 
 
   const dashboardPreviewSlides = [
@@ -327,14 +160,6 @@ export default function Home() {
     }
   ];
 
-  // Auto-cycle through slides
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % dashboardSlides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [dashboardSlides.length]);
 
 
   useEffect(() => {
