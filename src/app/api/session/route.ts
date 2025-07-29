@@ -1,8 +1,7 @@
 
 import { getUser } from '../../../lib/auth';
-import { PrismaClient } from '../../../generated/prisma';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export const runtime = 'nodejs';
 

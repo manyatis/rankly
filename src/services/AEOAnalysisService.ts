@@ -4,8 +4,8 @@ import { RankingEngine, ScoringFactors, CompetitorInfo } from '../engines/Rankin
 import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
 import { PromptFormationService } from './PromptFormationService';
 import { WebsiteAnalysisService, type WebsiteAnalysisResult } from './WebsiteAnalysisService';
-import { PrismaClient } from '../generated/prisma';
 import { randomUUID } from 'crypto';
+import { prisma } from '@/lib/prisma';
 
 export interface AIProvider {
   name: string;
@@ -28,6 +28,7 @@ export interface ProviderScoringResult {
 
 export interface AnalysisRequest {
   businessName: string;
+  businessId: number;
   industry: string;
   location?: string;
   websiteUrl?: string;
@@ -64,7 +65,6 @@ export interface AuthValidationResult {
 
 export class AEOAnalysisService {
   private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '5');
-  private static readonly prisma = new PrismaClient();
 
   private static getModelTypeFromProvider(provider: AIProvider): ModelType {
     const providerNameToType: Record<string, ModelType> = {
@@ -349,7 +349,7 @@ export class AEOAnalysisService {
 
   private static async saveAeoScore(
     userId: number, 
-    businessName: string, 
+    businessId: number, 
     keywords: string[], 
     result: ProviderScoringResult
   ): Promise<void> {
@@ -357,19 +357,19 @@ export class AEOAnalysisService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      await this.prisma.aeoScore.upsert({
+      await prisma.aeoScore.upsert({
         where: {
-          userId_date_businessName: {
+          userId_date_businessId: {
             userId,
             date: today,
-            businessName
+            businessId
           }
         },
         create: {
           userId,
           date: today,
           score: result.aeoScore,
-          businessName,
+          businessId,
           keywords,
           visibility: result.overallVisibility,
           ranking: result.factors.ranking,
@@ -387,7 +387,6 @@ export class AEOAnalysisService {
         }
       });
 
-      console.debug(`✅ Saved AEO score for ${businessName}: ${result.aeoScore}/100`);
     } catch (error) {
       console.error('❌ Failed to save AEO score:', error);
       // Don't throw error - this shouldn't break the analysis
@@ -469,7 +468,7 @@ export class AEOAnalysisService {
     const user = authResult.user!;
     if (user.id && results.length > 0) {
       try {
-        const userRecord = await this.prisma.user.findUnique({
+        const userRecord = await prisma.user.findUnique({
           where: { email: user.email },
           select: { plan: true, id: true }
         });
@@ -511,17 +510,13 @@ export class AEOAnalysisService {
           const averageRank = ranks.length > 0 ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) : null;
 
           // Use database transaction to ensure both records are created together
-          await this.prisma.$transaction(async (tx) => {
+          await prisma.$transaction(async (tx) => {
             // Save input history
             await tx.inputHistory.create({
               data: {
                 userId: userRecord.id,
                 runUuid,
-                businessName: request.businessName,
-                industry: request.industry,
-                location: request.location || null,
-                websiteUrl: request.websiteUrl || null,
-                businessDescription: request.marketDescription,
+                businessId: request.businessId,
                 keywords: request.keywords,
                 prompts,
               }
@@ -531,8 +526,8 @@ export class AEOAnalysisService {
             await tx.rankingHistory.create({
               data: {
                 userId: userRecord.id,
+                businessId: request.businessId,
                 runUuid,
-                businessName: request.businessName,
                 openaiRank,
                 claudeRank,
                 perplexityRank,
@@ -548,7 +543,7 @@ export class AEOAnalysisService {
           // Save AEO scores for professional+ users (legacy format for backward compatibility)
           if (userRecord.plan === 'professional' || userRecord.plan === 'enterprise') {
             const bestResult = results[0];
-            await this.saveAeoScore(userRecord.id, request.businessName, request.keywords, bestResult);
+            await this.saveAeoScore(userRecord.id, request.businessId, request.keywords, bestResult);
           }
         }
       } catch (error) {

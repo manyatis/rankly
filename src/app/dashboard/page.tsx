@@ -1,361 +1,304 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '../../hooks/useAuth';
-import Navbar from '../../components/Navbar';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartOptions
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import LoginModal from '@/components/LoginModal';
+import TrendsTab from '@/components/dashboard/TrendsTab';
+import AIInsightsTab from '@/components/dashboard/AIInsightsTab';
+import BusinessInfoTab from '@/components/dashboard/BusinessInfoTab';
+import PromptsTab from '@/components/dashboard/PromptsTab';
+import ExecuteTab from '@/components/dashboard/ExecuteTab';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-interface AeoScore {
+interface Organization {
   id: number;
-  date: string;
-  score: number;
-  businessName: string;
-  keywords: string[];
-  visibility: number;
-  ranking: number;
-  relevance: number;
-  accuracy: number;
-  createdAt: string;
-  updatedAt: string;
+  name: string;
+  domain?: string;
 }
 
-function DashboardContent() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [scores, setScores] = useState<AeoScore[]>([]);
-  const [businessName, setBusinessName] = useState('');
-  const [fetchLoading, setFetchLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [days, setDays] = useState(30);
+interface Business {
+  id: number;
+  websiteName: string;
+  websiteUrl?: string;
+  industry?: string;
+  location?: string;
+  description?: string;
+}
+
+export default function Dashboard() {
+  const { data: session, status } = useSession();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
+  const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'prompts' | 'execute'>('trends');
+  const [loading, setLoading] = useState(true);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check authentication and plan access
-    if (!loading && !user) {
-      router.push('/');
-      return;
+    if (session?.user) {
+      fetchOrganizations();
     }
-
-    if (user && user.plan !== 'professional' && user.plan !== 'enterprise') {
-      router.push('/');
-      return;
-    }
-
-    // Get business name from URL params
-    const business = searchParams.get('business');
-    if (business) {
-      setBusinessName(business);
-    }
-  }, [user, loading, router, searchParams]);
+  }, [session]);
 
   useEffect(() => {
-    if (businessName && user) {
-      fetchScores();
+    if (selectedOrganization) {
+      fetchBusinesses(selectedOrganization);
     }
-  }, [businessName, days, user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedOrganization]);
 
-  const fetchScores = async () => {
-    if (!businessName.trim()) return;
+  // Automatically switch to execute tab when no businesses exist
+  useEffect(() => {
+    if (businesses.length === 0 && activeTab !== 'execute') {
+      setActiveTab('execute');
+    }
+  }, [businesses.length, activeTab]);
 
-    setFetchLoading(true);
-    setError(null);
-
+  const fetchOrganizations = async () => {
     try {
-      const response = await fetch(`/api/aeo-scores?businessName=${encodeURIComponent(businessName)}&days=${days}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch scores');
+      const response = await fetch('/api/dashboard/organizations');
+      if (response.ok) {
+        const data = await response.json();
+        setOrganizations(data.organizations);
+        if (data.organizations.length > 0) {
+          setSelectedOrganization(data.organizations[0].id);
+        }
+      } else {
+        console.error('Failed to fetch organizations:', response.status);
       }
-
-      const data = await response.json();
-      setScores(data);
-    } catch (err: unknown) {
-      console.error('Error fetching scores:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch scores');
+    } catch (error) {
+      console.error('Error fetching organizations:', error);
     } finally {
-      setFetchLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    if (businessName.trim()) {
-      fetchScores();
+  const fetchBusinesses = async (orgId: number) => {
+    try {
+      const response = await fetch(`/api/dashboard/businesses?organizationId=${orgId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBusinesses(data.businesses);
+        if (data.businesses.length > 0) {
+          setSelectedBusiness(data.businesses[0].id);
+        } else {
+          setSelectedBusiness(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching businesses:', error);
     }
   };
 
-  // Prepare chart data
-  const chartData = {
-    labels: scores.map(score => {
-      const date = new Date(score.date);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }),
-    datasets: [
-      {
-        label: 'AEO Score',
-        data: scores.map(score => score.score),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: 'Visibility %',
-        data: scores.map(score => score.visibility),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-      },
-      {
-        label: 'Ranking Score',
-        data: scores.map(score => score.ranking),
-        borderColor: 'rgb(245, 101, 101)',
-        backgroundColor: 'rgba(245, 101, 101, 0.1)',
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-      }
-    ]
+  const handleOrganizationChange = (orgId: number) => {
+    setSelectedOrganization(orgId);
+    setSelectedBusiness(null);
   };
 
-  const chartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: `AEO Performance for ${businessName}`,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        title: {
-          display: true,
-          text: 'Score'
-        }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Date'
-        }
-      }
-    },
+  const handleBusinessChange = (businessId: number) => {
+    setSelectedBusiness(businessId);
   };
 
-  if (loading) {
+  const selectedOrgName = organizations.find(org => org.id === selectedOrganization)?.name || 'Select Organization';
+  const selectedBusinessName = businesses.find(biz => biz.id === selectedBusiness)?.websiteName || 'Select Business';
+
+  const tabs = [
+    { id: 'trends', name: 'Trends', icon: '📈', description: 'View ranking trends over time' },
+    { id: 'insights', name: 'AI Insights', icon: '🧠', description: 'AI-generated recommendations' },
+    { id: 'business', name: 'Business Info', icon: '🏢', description: 'Manage business details' },
+    { id: 'prompts', name: 'Prompts', icon: '💬', description: 'Review prompt history' },
+    { id: 'execute', name: 'Execute Analysis', icon: '🔍', description: 'Run new AEO analysis' },
+  ] as const;
+
+  if (status === 'loading' || (session?.user && loading)) {
     return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!user || (user.plan !== 'professional' && user.plan !== 'enterprise')) {
+  if (status === 'unauthenticated') {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-900">
         <Navbar />
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard Access Required</h1>
-            <p className="text-gray-600 mb-8">
-              The AEO Dashboard is available for Professional and Enterprise plans only.
+        <div className="flex items-center justify-center py-20">
+          <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-8 text-center border border-gray-700">
+            <div className="text-6xl mb-6">🔐</div>
+            <h1 className="text-2xl font-bold text-white mb-4">Login Required</h1>
+            <p className="text-gray-300 mb-6">
+              You need to be logged in to access the dashboard. Please sign in to continue.
             </p>
             <button
-              onClick={() => router.push('/')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => setLoginModalOpen(true)}
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Upgrade Your Plan
+              Sign in with Google
             </button>
+            <p className="text-sm text-gray-400 mt-4">
+              New users will be automatically registered upon first login.
+            </p>
           </div>
         </div>
+        <Footer />
+        <LoginModal
+          isOpen={loginModalOpen}
+          onClose={() => setLoginModalOpen(false)}
+          onSuccess={() => setLoginModalOpen(false)}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">AEO Performance Dashboard</h1>
-          <p className="text-gray-600">
-            Track your AEO score over time and monitor your AI Engine Optimization performance.
-          </p>
-        </div>
-
-        {/* Search Controls */}
-        <div className="bg-white border rounded-lg p-6 mb-8">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-64">
-              <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                Business Name
+      <div className="flex-1 flex">
+        {/* Sidebar */}
+        <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+          {/* Header with Dropdowns */}
+          <div className="p-6 border-b border-gray-700">
+            {/* Organization Dropdown */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Organization
               </label>
-              <input
-                type="text"
-                id="businessName"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Enter your business name..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              />
+              <div className="relative">
+                <select
+                  value={selectedOrganization || ''}
+                  onChange={(e) => handleOrganizationChange(parseInt(e.target.value))}
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                >
+                  {organizations.length === 0 ? (
+                    <option value="">No organizations</option>
+                  ) : (
+                    organizations.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        {org.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
-            
+
+            {/* Business Dropdown */}
             <div>
-              <label htmlFor="days" className="block text-sm font-medium text-gray-700 mb-2">
-                Time Range
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Business / Website
               </label>
-              <select
-                id="days"
-                value={days}
-                onChange={(e) => setDays(parseInt(e.target.value))}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={7}>Last 7 days</option>
-                <option value={14}>Last 14 days</option>
-                <option value={30}>Last 30 days</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedBusiness || ''}
+                  onChange={(e) => handleBusinessChange(parseInt(e.target.value))}
+                  disabled={businesses.length === 0}
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {businesses.length === 0 ? (
+                    <option value="">No businesses available</option>
+                  ) : (
+                    <>
+                      <option value="">Select a business</option>
+                      {businesses.map((business) => (
+                        <option key={business.id} value={business.id}>
+                          {business.websiteName}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <button
-              onClick={handleSearch}
-              disabled={!businessName.trim() || fetchLoading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 transition-colors"
-            >
-              {fetchLoading ? 'Loading...' : 'Search'}
-            </button>
+          {/* Navigation Tabs */}
+          <div className="flex-1 p-6">
+            <div className="space-y-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  disabled={!selectedBusiness && tab.id !== 'execute'}
+                  className={`w-full flex items-start p-4 rounded-lg text-left transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white'
+                      : !selectedBusiness && tab.id !== 'execute'
+                      ? 'text-gray-500 cursor-not-allowed bg-gray-700/50'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                  <span className="mr-3 text-2xl">{tab.icon}</span>
+                  <div>
+                    <div className="font-medium">{tab.name}</div>
+                    <div className="text-sm opacity-75">{tab.description}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Current Selection Info */}
+          <div className="p-6 border-t border-gray-700 bg-gray-800/50">
+            <div className="text-xs text-gray-400 space-y-1">
+              <div className="flex justify-between">
+                <span>Organization:</span>
+                <span className="text-gray-300 font-medium truncate ml-2">{selectedOrgName}</span>
+              </div>
+              {selectedBusiness && (
+                <div className="flex justify-between">
+                  <span>Business:</span>
+                  <span className="text-gray-300 font-medium truncate ml-2">{selectedBusinessName}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
-            <p className="text-red-600">{error}</p>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 p-8">
+            {!selectedBusiness && businesses.length > 0 ? (
+              <div className="text-center py-20">
+                <div className="text-gray-500 text-6xl mb-6">📊</div>
+                <h2 className="text-3xl font-semibold text-white mb-4">No Business Selected</h2>
+                <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                  Select a business from the sidebar to view its analytics and manage settings.
+                </p>
+              </div>
+            ) : (
+              <div className="h-full">
+                {activeTab === 'trends' && <TrendsTab businessId={selectedBusiness} />}
+                {activeTab === 'insights' && <AIInsightsTab businessId={selectedBusiness} />}
+                {activeTab === 'business' && <BusinessInfoTab businessId={selectedBusiness} />}
+                {activeTab === 'prompts' && <PromptsTab businessId={selectedBusiness} />}
+                {activeTab === 'execute' && <ExecuteTab businessId={selectedBusiness} />}
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Chart */}
-        {scores.length > 0 && (
-          <div className="bg-white border rounded-lg p-6 mb-8">
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        )}
-
-        {/* Summary Stats */}
-        {scores.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Latest Score</h3>
-              <p className="text-3xl font-bold text-blue-600">
-                {scores[scores.length - 1]?.score || 0}
-              </p>
-            </div>
-            
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Average Score</h3>
-              <p className="text-3xl font-bold text-green-600">
-                {Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length)}
-              </p>
-            </div>
-            
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Highest Score</h3>
-              <p className="text-3xl font-bold text-purple-600">
-                {Math.max(...scores.map(s => s.score))}
-              </p>
-            </div>
-            
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Data Points</h3>
-              <p className="text-3xl font-bold text-gray-600">
-                {scores.length}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* No Data State */}
-        {!fetchLoading && scores.length === 0 && businessName && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Found</h3>
-            <p className="text-gray-600 mb-4">
-              No AEO scores found for &quot;{businessName}&quot; in the last {days} days.
-            </p>
-            <button
-              onClick={() => router.push('/aeo-score')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Run AEO Analysis
-            </button>
-          </div>
-        )}
-
-        {/* Getting Started */}
-        {!businessName && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-            <h3 className="text-lg font-medium text-blue-900 mb-2">Welcome to Your AEO Dashboard</h3>
-            <p className="text-blue-700 mb-4">
-              Enter your business name above to view your AEO performance over time.
-            </p>
-            <p className="text-sm text-blue-600">
-              Data is automatically saved when you run AEO analyses. Start by running an analysis to see your first data point.
-            </p>
-          </div>
-        )}
+        </div>
       </div>
+
+      <Footer />
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={() => setLoginModalOpen(false)}
+      />
     </div>
-  );
-}
-
-export default function DashboardPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    }>
-      <DashboardContent />
-    </Suspense>
   );
 }

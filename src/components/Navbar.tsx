@@ -41,7 +41,8 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
             {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
-            <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium">Dashboard</Link>
+            <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium">Try the scoring tool</Link>
+            <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium">Dashboard</Link>
             <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium">Learn</Link>
             <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium">Pricing</Link>
             {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
@@ -114,10 +115,8 @@ export default function Navbar() {
               <div className="flex flex-col p-6 space-y-6 mt-16">
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
-                <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Report Generator</Link>
-                {user && (user.plan === 'professional' || user.plan === 'enterprise') && (
-                  <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Dashboard</Link>
-                )}
+                <Link href="/aeo-score" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Try the scoring tool</Link>
+                <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Dashboard</Link>
                 <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn More</Link>
                 <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}

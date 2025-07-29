@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SquareClient } from 'square';
 import { randomUUID } from 'crypto';
 import { getUser } from '../../../../lib/auth';
-import { PrismaClient } from '../../../../../src/generated/prisma';
+import { prisma } from '@/lib/prisma';
 
 // Initialize Square client
 const client = new SquareClient({
@@ -11,7 +11,6 @@ const client = new SquareClient({
 });
 
 const { payments } = client;
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,9 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { PrismaClient } from '../generated/prisma';
+import { prisma } from './prisma';
 
-const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -23,10 +22,16 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!existingUser) {
+            // Create user with their own organization in a single transaction
             existingUser = await prisma.user.create({
               data: {
                 email: user.email,
-                name: user.name || profile?.name
+                name: user.name || profile?.name,
+                organization: {
+                  create: {
+                    name: 'My Org'
+                  }
+                }
               }
             });
           } else {
@@ -37,6 +42,23 @@ export const authOptions: NextAuthOptions = {
                 name: user.name || profile?.name || existingUser.name
               }
             });
+
+            // If existing user doesn't have an organization, create one
+            if (!existingUser.organizationId) {
+              const defaultOrg = await prisma.organization.create({
+                data: {
+                  name: 'My Org',
+                  domain: null
+                }
+              });
+
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: {
+                  organizationId: defaultOrg.id
+                }
+              });
+            }
           }
 
           // Check if account already exists
