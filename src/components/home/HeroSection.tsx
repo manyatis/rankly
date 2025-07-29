@@ -13,7 +13,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
             Analyze Your Site&apos;s AI Visibility
           </h1>
           <p className="text-lg text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed">
-            Get 1 site analysis free - See how your website ranks across all major AI engines and get actionable optimization recommendations.
+            Track 1 site free - See how your website ranks across all major AI engines and get actionable optimization recommendations.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
             <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-base sm:text-lg">
@@ -23,7 +23,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
               onClick={onCreateAccount}
               className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg cursor-pointer"
             >
-              View Dashboard
+              Sign up free
             </button>
           </div>
 

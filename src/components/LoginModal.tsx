@@ -32,7 +32,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError('');
     try {
       if (provider === 'Google') {
-        await signIn('google', { callbackUrl: '/api/auth/callback' });
+        // Get current URL to redirect back to after login
+        const currentUrl = window.location.href;
+        await signIn('google', { callbackUrl: currentUrl });
         onClose(); // Close modal after initiating Google sign-in
       } else {
         // TODO: Implement other social providers

@@ -4,7 +4,12 @@ interface WebsiteEntryStepProps {
   isExtractingInfo: boolean;
   handleExtractWebsiteInfo: () => void;
   user: { email: string } | null;
-  usageInfo: { canUse: boolean } | null;
+  usageInfo: { 
+    canUse: boolean; 
+    usageCount: number; 
+    maxUsage: number | string; 
+    tier: string;
+  } | null;
   analyzeWebsiteRateLimit: {
     canUse: boolean;
     waitMinutes: number;
@@ -63,17 +68,45 @@ export default function WebsiteEntryStep({
             )}
           </button>
           
-          {/* Rate limit error message */}
-          {!analyzeWebsiteRateLimit.canUse && user?.email && (
-            <div className="flex items-center space-x-2 text-sm">
-              <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-red-400">
-                Too frequent. Try again in {analyzeWebsiteRateLimit.waitMinutes} minute{analyzeWebsiteRateLimit.waitMinutes !== 1 ? 's' : ''}.
-              </span>
-            </div>
-          )}
+          {/* Usage and rate limit messages */}
+          <div className="flex flex-col space-y-2">
+            {/* Daily usage limit message */}
+            {usageInfo && !usageInfo.canUse && user?.email && (
+              <div className="flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-red-400">
+                  Daily limit reached ({usageInfo.usageCount}/{usageInfo.maxUsage} used). 
+                  {usageInfo.tier === 'free' && ' Upgrade for unlimited access.'}
+                </span>
+              </div>
+            )}
+            
+            {/* Rate limit message */}
+            {!analyzeWebsiteRateLimit.canUse && user?.email && (
+              <div className="flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-red-400">
+                  Too frequent. Try again in {analyzeWebsiteRateLimit.waitMinutes} minute{analyzeWebsiteRateLimit.waitMinutes !== 1 ? 's' : ''}.
+                </span>
+              </div>
+            )}
+            
+            {/* Usage status for available users */}
+            {usageInfo && usageInfo.canUse && user?.email && usageInfo.maxUsage !== 'unlimited' && (
+              <div className="flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-blue-400">
+                  {typeof usageInfo.maxUsage === 'number' ? (usageInfo.maxUsage - usageInfo.usageCount) : 'Unlimited'} analyses remaining today
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

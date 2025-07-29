@@ -49,6 +49,7 @@ model Business {
     aeoScores      AeoScore[]
     inputHistory   InputHistory[]
     rankingHistory RankingHistory[]
+    aiInsights     AIInsight[]
 
     
     @@unique([websiteName, organizationId])
@@ -83,6 +84,7 @@ model User {
     aeoScores         AeoScore[]
     inputHistory      InputHistory[]
     rankingHistory    RankingHistory[]
+    aiInsights        AIInsight[]
     
     @@index([organizationId])
 }
@@ -188,5 +190,49 @@ model RankingHistory {
   
   @@index([userId, createdAt])
   @@index([businessId])
+  @@index([runUuid])
+}
+
+// AI Insights - stores AI-generated recommendations and insights
+model AIInsight {
+  id               String      @id @default(cuid())
+  userId           Int
+  businessId       Int
+  runUuid          String?     // UUID linking to analysis run that generated this insight
+  
+  // Core insight data
+  title            String
+  description      String      @db.Text
+  category         String      // "Content", "Technical", "Authority", "Structure"
+  criticality      String      // "critical", "high", "medium", "low"
+  impact           String      // "high", "medium", "low"
+  effort           String      // "quick", "moderate", "significant"
+  priority         String      // "high", "medium", "low"
+  
+  // AI metadata
+  aiProvider       String?     // Which AI model generated this insight
+  confidence       Int?        // Confidence score 0-100
+  
+  // Insight status tracking
+  status           String      @default("new") // "new", "in_progress", "completed", "dismissed"
+  
+  // Structured recommendations array
+  recommendations  String[]    // Array of specific action items
+  
+  // Metrics and scoring
+  currentScore     Int?        // Current score for this area (0-100)
+  potentialImprovement Int?    // Potential point improvement
+  affectedQueries  Int?        // Number of queries this affects
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  
+  // Relations
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business         Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, businessId])
+  @@index([businessId, createdAt])
+  @@index([status])
   @@index([runUuid])
 }

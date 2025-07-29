@@ -1,4 +1,5 @@
 import { ModelFactory } from '../lib/ai-models';
+import { AIInsightsService } from './AIInsightsService';
 
 export interface WebsiteAnalysisRequest {
   url: string;
@@ -37,6 +38,24 @@ export interface WebsiteAnalysisResult {
 
 export class WebsiteAnalysisService {
   private static readonly DEFAULT_RECOMMENDATION_LIMIT = 3;
+
+  /**
+   * Analyze website and generate AI insights 
+   */
+  static async analyzeWebsiteWithInsights(
+    request: WebsiteAnalysisRequest,
+    userId: number,
+    businessId: number,
+    runUuid?: string
+  ): Promise<WebsiteAnalysisResult> {
+    const result = await this.analyzeWebsite(request);
+    
+    // Generate and store AI insights in background
+    AIInsightsService.generateAndStoreInsights(result, userId, businessId, runUuid)
+      .catch(error => console.warn('Failed to generate insights:', error));
+    
+    return result;
+  }
 
   static async analyzeWebsite(request: WebsiteAnalysisRequest): Promise<WebsiteAnalysisResult> {
     const { url, businessName, industry, recommendationLimit = this.DEFAULT_RECOMMENDATION_LIMIT } = request;

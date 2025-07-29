@@ -52,7 +52,7 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
               onClick={onCreateAccount}
               className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
             >
-              Start Free Analysis
+              Create Account
             </button>
           </div>
 

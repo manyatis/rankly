@@ -32,20 +32,24 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50 safe-top">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 sm:py-3">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 text-lg sm:text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-            <Image src="/lucy.png" alt="Rankly" width={20} height={20} className="sm:w-6 sm:h-6" />
-            <span>Rankly</span>
+          {/* Logo - Left */}
+          <Link href="/" className="flex items-center space-x-2 text-base sm:text-lg font-medium text-white hover:text-gray-300 transition-colors">
+            <Image src="/lucy.png" alt="Rankly" width={18} height={18} className="sm:w-5 sm:h-5" />
+            <span>rankly</span>
           </Link>
-          <div className="hidden md:flex items-center space-x-8">
-            {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Analytics</Link> */}
-            {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Solutions</Link> */}
-            <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium">Analyze Site</Link>
-            <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-medium">API</Link>
-            <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium">Learn</Link>
-            <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium">Pricing</Link>
-            {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">About Us</Link> */}
+          
+          {/* Center Navigation */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Dashboard</Link>
+            <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">API</Link>
+            <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Learn</Link>
+            <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Pricing</Link>
+          </div>
+          
+          {/* Right side - Auth */}
+          <div className="hidden md:flex items-center">
             {loading ? (
               <div className="flex items-center space-x-4">
                 <div className="animate-pulse">
@@ -59,9 +63,9 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center space-x-2 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors cursor-pointer"
+                  className="flex items-center space-x-2 bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-700 transition-colors cursor-pointer"
                 >
-                  <span className="text-gray-300 font-medium">{user.email.split("@")[0]}</span>
+                  <span className="text-gray-300 font-normal text-sm">{user.email.split("@")[0]}</span>
                   <svg className={`w-4 h-4 text-gray-400 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -94,14 +98,14 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setLoginModalOpen(true)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
+                className="bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors font-normal text-sm cursor-pointer"
               >
                 Login
               </button>
             )}
           </div>
-          <button className='md:hidden p-2 text-gray-300 hover:text-white transition-colors' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button className='md:hidden p-1.5 text-gray-300 hover:text-white transition-colors' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -115,10 +119,10 @@ export default function Navbar() {
               <div className="flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 mt-14 sm:mt-16">
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
-                <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analyze Site</Link>
-                <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>API</Link>
-                <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Learn More</Link>
-                <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Pricing</Link>
+                <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Dashboard</Link>
+                <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>API</Link>
+                <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Learn More</Link>
+                <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Pricing</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}
                 {loading ? (
                   <div className="space-y-4">
@@ -133,12 +137,12 @@ export default function Navbar() {
                   <div className="space-y-4">
                     <div className="bg-gray-800 rounded-lg p-4 border border-gray-600">
                       <div className="mb-3">
-                        <div className="text-sm font-medium text-gray-200">{user.email.split("@")[0]}</div>
+                        <div className="text-sm font-normal text-gray-200">{user.email.split("@")[0]}</div>
                         <div className="text-xs text-gray-400 truncate">{user.email}</div>
                       </div>
                       <button
                         onClick={handleLogout}
-                        className="w-full bg-red-900/20 text-red-400 px-4 py-2 rounded-lg hover:bg-red-900/30 transition-colors font-medium text-sm cursor-pointer"
+                        className="w-full bg-red-900/20 text-red-400 px-4 py-2 rounded-lg hover:bg-red-900/30 transition-colors font-normal text-sm cursor-pointer"
                       >
                         Sign out
                       </button>
@@ -151,7 +155,7 @@ export default function Navbar() {
                         setLoginModalOpen(true);
                         closeMobileMenu();
                       }}
-                      className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md text-center cursor-pointer"
+                      className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-normal shadow-md text-center cursor-pointer"
                     >
                       Login
                     </button>

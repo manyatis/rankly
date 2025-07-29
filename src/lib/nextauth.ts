@@ -102,7 +102,12 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ baseUrl }) {
+    async redirect({ url, baseUrl }) {
+      // If url is relative, make it absolute using baseUrl
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // If url is same domain, allow it
+      else if (new URL(url).origin === baseUrl) return url;
+      // Otherwise redirect to base URL
       return baseUrl;
     },
   },

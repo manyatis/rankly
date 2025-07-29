@@ -7,6 +7,7 @@ import ResultsStep from './execute-steps/ResultsStep';
 
 interface ExecuteTabProps {
   businessId: number | null;
+  onBusinessCreated?: () => void;
 }
 
 interface AIProvider {
@@ -74,7 +75,7 @@ function parseKeywords(keywordString: string): string[] {
     .slice(0, 10);
 }
 
-export default function ExecuteTab({ businessId }: ExecuteTabProps) {
+export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTabProps) {
   // const router = useRouter();
   const { user } = useAuth();
   
@@ -245,7 +246,7 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     setTimeout(() => {
       setCurrentWorkflowStep(nextStep);
       setIsTransitioning(false);
-    }, 300);
+    }, 100);
   };
 
   // Handle website information extraction
@@ -391,6 +392,9 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
 
         const { business } = await createResponse.json();
         targetBusinessId = business.id;
+        
+        // Trigger dashboard refresh after business creation
+        onBusinessCreated?.();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to create business');
         return;
@@ -510,11 +514,11 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white">Execute AEO Analysis</h2>
+        <h2 className="text-2xl font-bold text-white">Execute Analysis</h2>
         <p className="text-gray-400 mt-1">
           {businessId 
             ? "Run a new AEO analysis for this business"
-            : "Create a new business and run your first AEO analysis"
+            : "Create a new business and run your first analysis"
           }
         </p>
       </div>

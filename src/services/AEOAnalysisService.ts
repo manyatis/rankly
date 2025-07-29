@@ -416,6 +416,9 @@ export class AEOAnalysisService {
       throw new Error(usageResult.error || 'Usage limit exceeded');
     }
 
+    // Generate a unique UUID for this analysis run early
+    const runUuid = randomUUID();
+    
     // Run parallel analysis
     const analysisPromises = [];
 
@@ -426,12 +429,27 @@ export class AEOAnalysisService {
     let websiteAnalysisPromise = null;
     if (request.websiteUrl) {
       console.debug(`🌐 Website analysis enabled for: ${request.websiteUrl}`);
-      websiteAnalysisPromise = WebsiteAnalysisService.analyzeWebsite({
-        url: request.websiteUrl,
-        businessName: request.businessName,
-        industry: request.industry,
-        recommendationLimit: 3 // Default to 3 recommendations as requested
+      const userRecord = await prisma.user.findUnique({
+        where: { email: authResult.user!.email },
+        select: { id: true }
       });
+      
+      if (userRecord) {
+        websiteAnalysisPromise = WebsiteAnalysisService.analyzeWebsiteWithInsights({
+          url: request.websiteUrl,
+          businessName: request.businessName,
+          industry: request.industry,
+          recommendationLimit: 3 // Default to 3 recommendations as requested
+        }, userRecord.id, request.businessId, runUuid);
+      } else {
+        // Fallback to regular analysis if user not found
+        websiteAnalysisPromise = WebsiteAnalysisService.analyzeWebsite({
+          url: request.websiteUrl,
+          businessName: request.businessName,
+          industry: request.industry,
+          recommendationLimit: 3
+        });
+      }
       analysisPromises.push(websiteAnalysisPromise);
     }
 
@@ -474,8 +492,7 @@ export class AEOAnalysisService {
         });
 
         if (userRecord) {
-          // Generate a unique UUID for this analysis run
-          const runUuid = randomUUID();
+          // Use the runUuid generated earlier
           
           // Determine the prompts used (custom prompts or generated ones)
           let prompts: string[] = [];

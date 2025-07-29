@@ -130,7 +130,7 @@ export default function AnalyticsFeatures({
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/dashboard" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
-                Start Free Analysis
+                Start your analysis today
               </Link>
               <button
                 onClick={onCreateAccount}

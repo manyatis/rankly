@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rankly",
+  title: "rankly",
   description: "AI Engine Ranking Reports",
   viewport: "width=device-width, initial-scale=1",
   icons: {

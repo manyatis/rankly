@@ -7,7 +7,12 @@ interface PromptReviewStepProps {
   isAnalyzing: boolean;
   progress: number;
   user: { email: string } | null;
-  usageInfo: { canUse: boolean } | null;
+  usageInfo: { 
+    canUse: boolean; 
+    usageCount: number; 
+    maxUsage: number | string; 
+    tier: string;
+  } | null;
 }
 
 export default function PromptReviewStep({
@@ -75,7 +80,7 @@ export default function PromptReviewStep({
               <button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !user || !usageInfo || (usageInfo && !usageInfo.canUse)}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors font-medium"
+                className="cursor-pointer bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {isAnalyzing ? (
                   <span className="flex items-center">
@@ -109,10 +114,35 @@ export default function PromptReviewStep({
                     Analyzing...
                   </span>
                 ) : (
-                  '🚀 Start AEO Analysis'
+                  'Start Analysis'
                 )}
               </button>
             </div>
+            
+            {/* Usage limit display */}
+            {usageInfo && !usageInfo.canUse && user?.email && (
+              <div className="flex items-center justify-center space-x-2 text-sm mt-3">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-red-400">
+                  Daily limit reached ({usageInfo.usageCount}/{usageInfo.maxUsage} used).
+                  {usageInfo.tier === 'free' && ' Upgrade for unlimited access.'}
+                </span>
+              </div>
+            )}
+            
+            {/* Usage status for available users */}
+            {usageInfo && usageInfo.canUse && user?.email && usageInfo.maxUsage !== 'unlimited' && (
+              <div className="flex items-center justify-center space-x-2 text-sm mt-2">
+                <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-blue-400">
+                  {typeof usageInfo.maxUsage === 'number' ? (usageInfo.maxUsage - usageInfo.usageCount) : 'Unlimited'} analyses remaining today
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
