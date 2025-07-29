@@ -39,7 +39,7 @@ export default function AEOPage() {
               >
                 Start Free
               </button>
-              <Link href="/aeo-score" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-medium text-lg border-2 border-blue-600">
+              <Link href="/dashboard" className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition-colors font-medium text-lg border-2 border-blue-600">
                 Check Your AEO Score
               </Link>
             </div>
@@ -291,7 +291,7 @@ export default function AEOPage() {
               >
                 Start Free
               </button>
-              <Link href="/aeo-score" className="bg-green-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-green-400 transition-colors shadow-md inline-block">
+              <Link href="/dashboard" className="bg-green-500 text-white px-8 py-3 rounded-md font-semibold hover:bg-green-400 transition-colors shadow-md inline-block">
                 Get Free AEO Score
               </Link>
             </div>

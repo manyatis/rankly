@@ -12,7 +12,7 @@ export default function Footer() {
           </div>
           <div className="flex space-x-6">
             <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
-            <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
+            <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
             <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link>
             <Link href="/#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link>
           </div>

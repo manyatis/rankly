@@ -129,7 +129,7 @@ export default function AnalyticsFeatures({
               See what people are asking AI about your industry and discover untapped opportunities with our free analytics tool.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/aeo-score" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
+              <Link href="/dashboard" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
                 Start Free Analysis
               </Link>
               <button

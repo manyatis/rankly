@@ -396,7 +396,7 @@ export default function LearnPage() {
             Don&apos;t let your competitors dominate AI search results. Start optimizing for the future of search today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/aeo-score" className="bg-blue-500 text-white px-8 py-4 rounded-lg hover:bg-blue-400 transition-colors font-medium text-lg border-2 border-white">
+            <Link href="/dashboard" className="bg-blue-500 text-white px-8 py-4 rounded-lg hover:bg-blue-400 transition-colors font-medium text-lg border-2 border-white">
               Get Your Rank
             </Link>
           </div>

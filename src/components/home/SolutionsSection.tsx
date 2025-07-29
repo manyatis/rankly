@@ -134,7 +134,7 @@ export default function SolutionsSection({
               Track how AI crawlers interact with your content and optimize for maximum visibility across all platforms.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/aeo-score" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
+              <Link href="/dashboard" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
                 Test Your Site Now
               </Link>
               <a href="#pricing" className="bg-gray-700 text-white border-2 border-gray-500 px-8 py-4 rounded-lg hover:bg-gray-600 transition-colors font-medium text-lg inline-block">

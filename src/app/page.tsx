@@ -725,7 +725,7 @@ export default function Home() {
           {/* CTA */}
           <div className="text-center mt-12">
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/aeo-score" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
+              <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
                 Test Your Site Free Now
               </Link>
             </div>
@@ -775,7 +775,7 @@ export default function Home() {
             </div>
             <div className="flex space-x-6">
               <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
-              <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
+              <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
               <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
             </div>
           </div>

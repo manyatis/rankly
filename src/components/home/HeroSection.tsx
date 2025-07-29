@@ -22,7 +22,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
             >
               Create an Account
             </button>
-            <Link href="/aeo-score" className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg">
+            <Link href="/dashboard" className="bg-white text-blue-600 border-2 border-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-base sm:text-lg">
               Try Free Rank Check
             </Link>
           </div>
