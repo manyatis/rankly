@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [websiteLimitInfo, setWebsiteLimitInfo] = useState<{
     canAddWebsite: boolean;
     currentCount: number;
@@ -58,13 +59,12 @@ export default function Dashboard() {
     }
   }, [selectedOrganization]);
 
-  // Automatically switch to appropriate tab based on business availability
+  // Automatically switch to execute tab only when no businesses exist
   useEffect(() => {
     if (businesses.length === 0 && activeTab !== 'execute') {
       setActiveTab('execute');
-    } else if (businesses.length > 0 && activeTab === 'execute') {
-      setActiveTab('trends'); // Default to trends when businesses exist
     }
+    // Remove the automatic switch to trends - let users stay on execute tab if they choose
   }, [businesses.length, activeTab]);
 
   const fetchOrganizations = async () => {
@@ -164,7 +164,7 @@ export default function Dashboard() {
         
         <div className="flex-1 flex">
           {/* Sidebar Skeleton */}
-          <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+          <div className="hidden lg:flex w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
             {/* Header with Dropdowns Skeleton */}
             <div className="p-6 border-b border-gray-700">
               <div className="mb-4">
@@ -211,7 +211,12 @@ export default function Dashboard() {
 
           {/* Main Content Skeleton */}
           <div className="flex-1 flex flex-col">
-            <div className="flex-1 p-8">
+            {/* Mobile header skeleton */}
+            <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-4 sticky top-14 sm:top-16 z-40">
+              <div className="h-6 bg-gray-600 rounded w-24 mx-auto animate-pulse"></div>
+            </div>
+            
+            <div className="flex-1 p-4 sm:p-6 lg:p-8">
               <div className="space-y-6">
                 {/* Header Skeleton */}
                 <div className="flex justify-between items-center">
@@ -254,8 +259,8 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gray-900">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-8 text-center border border-gray-700">
+        <div className="flex items-center justify-center py-12 sm:py-20 px-4">
+          <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 text-center border border-gray-700">
             <div className="text-6xl mb-6">🔐</div>
             <h1 className="text-2xl font-bold text-white mb-4">Login Required</h1>
             <p className="text-gray-300 mb-6">
@@ -263,7 +268,7 @@ export default function Dashboard() {
             </p>
             <button
               onClick={() => setLoginModalOpen(true)}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
             >
               Sign in with Google
             </button>
@@ -286,11 +291,33 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-900 flex flex-col">
       <Navbar />
       
-      <div className="flex-1 flex">
+      <div className="flex-1 flex relative">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        
         {/* Sidebar */}
-        <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+        <div className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-80 bg-gray-800 border-r border-gray-700 flex flex-col transition-transform duration-300 ease-in-out safe-top overflow-y-auto hide-scrollbar`}>
+          {/* Mobile close button */}
+          <div className="lg:hidden flex justify-end p-4 border-b border-gray-700">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 text-gray-400 hover:text-white cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
           {/* Header with Dropdowns */}
-          <div className="p-6 border-b border-gray-700">
+          <div className="p-4 sm:p-6 border-b border-gray-700">
             {/* Organization Dropdown */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -300,7 +327,7 @@ export default function Dashboard() {
                 <select
                   value={selectedOrganization || ''}
                   onChange={(e) => handleOrganizationChange(parseInt(e.target.value))}
-                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
                 >
                   {organizations.length === 0 ? (
                     <option value="">No organizations</option>
@@ -339,7 +366,7 @@ export default function Dashboard() {
                       setSelectedBusiness(null);
                     }
                   }}
-                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
                 >
                   {businesses.length === 0 ? (
                     websiteLimitInfo?.canAddWebsite ? (
@@ -377,19 +404,22 @@ export default function Dashboard() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             <div className="space-y-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSidebarOpen(false); // Close sidebar on mobile when tab is selected
+                  }}
                   disabled={!selectedBusiness && tab.id !== 'execute'}
                   className={`w-full flex items-start p-4 rounded-lg text-left transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white cursor-pointer'
                       : !selectedBusiness && tab.id !== 'execute'
                       ? 'text-gray-500 cursor-not-allowed bg-gray-700/50'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer'
                   }`}
                 >
                   <span className="mr-3 text-2xl">{tab.icon}</span>
@@ -403,7 +433,7 @@ export default function Dashboard() {
           </div>
 
           {/* Current Selection Info */}
-          <div className="p-6 border-t border-gray-700 bg-gray-800/50">
+          <div className="p-4 sm:p-6 border-t border-gray-700 bg-gray-800/50">
             <div className="text-xs text-gray-400 space-y-1">
               <div className="flex justify-between">
                 <span>Organization:</span>
@@ -428,13 +458,27 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-8">
+        <div className="flex-1 flex flex-col lg:ml-0">
+          {/* Mobile header bar */}
+          <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between sticky top-14 sm:top-16 z-40">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 text-gray-400 hover:text-white cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-white">Dashboard</h1>
+            <div className="w-10"> {/* Spacer for centering */}</div>
+          </div>
+          
+          <div className="flex-1 p-4 sm:p-6 lg:p-8">
             {!selectedBusiness && businesses.length > 0 ? (
-              <div className="text-center py-20">
-                <div className="text-gray-500 text-6xl mb-6">📊</div>
-                <h2 className="text-3xl font-semibold text-white mb-4">No Business Selected</h2>
-                <p className="text-gray-400 mb-8 max-w-md mx-auto">
+              <div className="text-center py-12 sm:py-20">
+                <div className="text-gray-500 text-4xl sm:text-6xl mb-4 sm:mb-6">📊</div>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white mb-4">No Business Selected</h2>
+                <p className="text-sm sm:text-base text-gray-400 mb-8 max-w-md mx-auto px-4">
                   Select a business from the sidebar to view its analytics and manage settings.
                 </p>
               </div>

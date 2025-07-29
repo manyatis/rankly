@@ -31,11 +31,11 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4">
+    <nav className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50 safe-top">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-            <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
+          <Link href="/" className="flex items-center space-x-2 text-lg sm:text-xl font-semibold text-white hover:text-gray-300 transition-colors">
+            <Image src="/lucy.png" alt="Rankly" width={20} height={20} className="sm:w-6 sm:h-6" />
             <span>Rankly</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
@@ -100,8 +100,8 @@ export default function Navbar() {
               </button>
             )}
           </div>
-          <button className='md:hidden p-2 text-gray-300 hover:text-white' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button className='md:hidden p-2 text-gray-300 hover:text-white transition-colors' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -111,8 +111,8 @@ export default function Navbar() {
           </button>
           <div className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <div className="absolute inset-0 bg-black opacity-50" onClick={closeMobileMenu} />
-            <div className={`absolute right-0 top-0 h-full w-64 bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-              <div className="flex flex-col p-6 space-y-6 mt-16">
+            <div className={`absolute right-0 top-0 h-full w-64 bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out safe-top safe-bottom ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+              <div className="flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 mt-14 sm:mt-16">
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
                 <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-medium text-lg" onClick={closeMobileMenu}>Dashboard</Link>

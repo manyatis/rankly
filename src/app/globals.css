@@ -25,6 +25,25 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Mobile responsive utilities */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile safe area utilities */
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* Modal animations */
 @keyframes modal-enter {
   from {

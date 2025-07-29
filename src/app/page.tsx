@@ -365,7 +365,7 @@ export default function Home() {
             </p> */}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
             <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">60%</div>
               <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of searches complete without clicks</p>
@@ -389,7 +389,7 @@ export default function Home() {
           </div>
 
           {/* Additional Impact Statistics Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
             <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
               <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600 mb-2">25%</div>
               <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">predicted drop in traditional search volume by 2026</p>
@@ -425,8 +425,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -440,7 +440,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -454,7 +454,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -468,7 +468,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,7 +482,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -496,7 +496,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-600">
+              <div className="bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-600">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -692,15 +692,15 @@ export default function Home() {
           </div>
 
           {/* Feature Highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <div className="text-center">
               <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Instant Report Generation</h3>
-              <p className="text-gray-300">Generate professional client reports in minutes. Perfect for freelance SEOs who need quick, comprehensive analysis.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Instant Report Generation</h3>
+              <p className="text-sm sm:text-base text-gray-300">Generate professional client reports in minutes. Perfect for freelance SEOs who need quick, comprehensive analysis.</p>
             </div>
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -708,8 +708,8 @@ export default function Home() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">AI-Powered Recommendations</h3>
-              <p className="text-gray-300">Our multi-agentic AI analyzes your rankings and automatically generates actionable optimization strategies.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">AI-Powered Recommendations</h3>
+              <p className="text-sm sm:text-base text-gray-300">Our multi-agentic AI analyzes your rankings and automatically generates actionable optimization strategies.</p>
             </div>
             <div className="text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -717,8 +717,8 @@ export default function Home() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">DIY-Friendly Interface</h3>
-              <p className="text-gray-300">Easy-to-use platform designed for businesses managing their own SEO without technical expertise required.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">DIY-Friendly Interface</h3>
+              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for businesses managing their own SEO without technical expertise required.</p>
             </div>
           </div>
 
