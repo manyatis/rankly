@@ -5,7 +5,7 @@ import { AIInsightsService } from '@/services/AIInsightsService';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { insightId: string } }
+  { params }: { params: Promise<{ insightId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { insightId } = params;
+    const { insightId } = await params;
     const body = await request.json();
     const { status } = body;
 

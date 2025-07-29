@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { ModelFactory } from '../lib/ai-models';
-import type { AnalysisRecommendation, WebsiteAnalysisResult } from './WebsiteAnalysisService';
+import type { WebsiteAnalysisResult } from './WebsiteAnalysisService';
 
 export interface AIInsightData {
   title: string;
@@ -128,25 +128,28 @@ Format as JSON array:
 ]`;
 
     try {
-      const response = await ModelFactory.queryModel(aiProvider, prompt);
+      const response = await ModelFactory.queryModel(aiProvider as 'openai' | 'anthropic' | 'perplexity', prompt);
       const parsed = JSON.parse(response);
       
       if (Array.isArray(parsed)) {
-        return parsed.map((insight: any) => ({
-          title: insight.title || 'Strategic Insight',
-          description: insight.description || 'AI-generated strategic recommendation',
-          category: insight.category || 'Strategy',
-          criticality: insight.criticality || 'medium',
-          impact: insight.impact || 'medium',
-          effort: insight.effort || 'moderate',
-          priority: insight.priority || 'medium',
+        return parsed.map((insight: unknown) => {
+          const insightObj = insight as Record<string, unknown>;
+          return {
+          title: (insightObj.title as string) || 'Strategic Insight',
+          description: (insightObj.description as string) || 'AI-generated strategic recommendation',
+          category: (insightObj.category as string) || 'Strategy',
+          criticality: (insightObj.criticality as 'critical' | 'high' | 'medium' | 'low') || 'medium',
+          impact: (insightObj.impact as 'high' | 'medium' | 'low') || 'medium',
+          effort: (insightObj.effort as 'quick' | 'moderate' | 'significant') || 'moderate',
+          priority: (insightObj.priority as 'high' | 'medium' | 'low') || 'medium',
           aiProvider,
-          confidence: insight.confidence || 80,
-          recommendations: Array.isArray(insight.recommendations) ? insight.recommendations : [],
+          confidence: (insightObj.confidence as number) || 80,
+          recommendations: Array.isArray(insightObj.recommendations) ? insightObj.recommendations as string[] : [],
           currentScore: analysisResult.aeoOptimization.currentScore,
-          potentialImprovement: insight.potentialImprovement || 10,
-          affectedQueries: insight.affectedQueries || 25
-        }));
+          potentialImprovement: (insightObj.potentialImprovement as number) || 10,
+          affectedQueries: (insightObj.affectedQueries as number) || 25
+          };
+        });
       }
     } catch (error) {
       console.warn('⚠️ Failed to generate strategic insights:', error);
