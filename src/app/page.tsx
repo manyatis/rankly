@@ -333,21 +333,14 @@ export default function Home() {
               {/* Screenshot Container */}
               <div className="relative">
                 <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg">
-                  {/* Placeholder for dashboard screenshot - replace with actual screenshot */}
-                  <div className="aspect-video bg-gray-900 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-2">Real Dashboard Preview</h3>
-                      <p className="text-gray-400 text-sm max-w-md mx-auto">
-                        See your website&apos;s AI visibility across all major search engines with actionable optimization recommendations.
-                      </p>
-                      {/* Note: Replace this placeholder with: <Image src="/dashboard-screenshot.png" alt="Rankly Dashboard" width={1200} height={675} className="w-full h-auto" /> */}
-                    </div>
-                  </div>
+                  <Image 
+                    src="/dashboard.png" 
+                    alt="Rankly Dashboard - AI Visibility Analysis" 
+                    width={1200} 
+                    height={675} 
+                    className="w-full h-auto"
+                    priority
+                  />
                 </div>
               </div>
               
