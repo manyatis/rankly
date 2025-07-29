@@ -66,7 +66,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
   const updateInsightStatus = async (insightId: string, status: AIInsight['status']) => {
     try {
       const response = await fetch(`/api/dashboard/ai-insights/${insightId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

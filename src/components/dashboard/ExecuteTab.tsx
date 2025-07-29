@@ -423,15 +423,14 @@ export default function ExecuteTab({ businessId }: ExecuteTabProps) {
         credentials: 'include',
         body: JSON.stringify({
           businessName,
-          businessId: businessId,
+          businessId: targetBusinessId,
           industry,
           location: location.trim() || undefined,
           websiteUrl: websiteUrl.trim() || undefined,
           marketDescription: businessDescription,
           keywords: parseKeywords(keywords),
           providers: aiProviders,
-          customPrompts: editablePrompts,
-          businessId: targetBusinessId
+          customPrompts: editablePrompts
         }),
       });
 

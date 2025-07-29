@@ -282,11 +282,11 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="h-full">
-                {activeTab === 'trends' && <TrendsTab businessId={selectedBusiness} />}
-                {activeTab === 'insights' && <AIInsightsTab businessId={selectedBusiness} />}
-                {activeTab === 'business' && <BusinessInfoTab businessId={selectedBusiness} />}
-                {activeTab === 'prompts' && <PromptsTab businessId={selectedBusiness} />}
-                {activeTab === 'execute' && <ExecuteTab businessId={selectedBusiness} />}
+                {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} />}
+                {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
+                {activeTab === 'business' && selectedBusiness && <BusinessInfoTab businessId={selectedBusiness} />}
+                {activeTab === 'prompts' && selectedBusiness && <PromptsTab businessId={selectedBusiness} />}
+                {activeTab === 'execute' && selectedBusiness && <ExecuteTab businessId={selectedBusiness} />}
               </div>
             )}
           </div>

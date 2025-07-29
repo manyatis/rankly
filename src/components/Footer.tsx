@@ -14,7 +14,7 @@ export default function Footer() {
             <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
             <Link href="/aeo-score" className="text-gray-400 hover:text-white transition-colors">Generate Report</Link>
             <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link>
-            <a href="/#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
+            <Link href="/#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
