@@ -257,8 +257,8 @@ export default function Dashboard() {
           {/* Main Content Skeleton */}
           <div className="flex-1 flex flex-col">
             {/* Mobile header skeleton */}
-            <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-4 sticky top-14 sm:top-16 z-40">
-              <div className="h-6 bg-gray-600 rounded w-24 mx-auto animate-pulse"></div>
+            <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-2 sm:p-3 sticky top-12 sm:top-14 z-40">
+              <div className="h-4 sm:h-5 bg-gray-600 rounded w-20 mx-auto animate-pulse"></div>
             </div>
             
             <div className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -350,12 +350,12 @@ export default function Dashboard() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-80 bg-gray-800 border-r border-gray-700 flex flex-col transition-transform duration-300 ease-in-out safe-top overflow-y-auto hide-scrollbar`}>
           {/* Mobile close button */}
-          <div className="lg:hidden flex justify-end p-4 border-b border-gray-700">
+          <div className="lg:hidden flex justify-end p-2 sm:p-3 border-b border-gray-700">
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 text-gray-400 hover:text-white cursor-pointer"
+              className="p-1.5 text-gray-400 hover:text-white cursor-pointer"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -505,17 +505,19 @@ export default function Dashboard() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col lg:ml-0">
           {/* Mobile header bar */}
-          <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between sticky top-14 sm:top-16 z-40">
+          <div className="lg:hidden bg-gray-800 border-b border-gray-700 p-2 sm:p-3 flex items-center justify-between sticky top-12 sm:top-14 z-40">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 text-gray-400 hover:text-white cursor-pointer"
+              className="p-1.5 text-gray-400 hover:text-white cursor-pointer"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-white">Dashboard</h1>
-            <div className="w-10"> {/* Spacer for centering */}</div>
+            <h1 className="text-sm sm:text-base font-medium text-white">
+              {tabs.find(tab => tab.id === activeTab)?.name || 'Dashboard'}
+            </h1>
+            <div className="w-7 sm:w-8"> {/* Spacer for centering */}</div>
           </div>
           
           <div className="flex-1 p-4 sm:p-6 lg:p-8">
