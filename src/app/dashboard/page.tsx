@@ -12,6 +12,7 @@ import PromptsTab from '@/components/dashboard/PromptsTab';
 import ExecuteTab from '@/components/dashboard/ExecuteTabSimple';
 import CompetitorsTab from '@/components/dashboard/CompetitorsTab';
 import LinkWebsiteTab from '@/components/dashboard/LinkWebsiteTab';
+import AutomationSetupTab from '@/components/dashboard/AutomationSetupTab';
 
 interface Organization {
   id: number;
@@ -34,7 +35,7 @@ export default function Dashboard() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'prompts' | 'execute' | 'link-website'>('trends');
+  const [activeTab, setActiveTab] = useState<'automation' | 'trends' | 'insights' | 'business' | 'competitors' | 'prompts' | 'execute' | 'link-website'>('automation');
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -153,7 +154,7 @@ export default function Dashboard() {
     if (selectedOrganization) {
       fetchBusinesses(selectedOrganization).then(() => {
         setSelectedBusiness(businessId);
-        setActiveTab('trends');
+        setActiveTab('automation');
         setTimeout(() => setInitialLoadComplete(true), 200);
       });
     }
@@ -164,6 +165,16 @@ export default function Dashboard() {
   const selectedBusinessName = businesses.find(biz => biz.id === selectedBusiness)?.websiteName || 'Select Business';
 
   const tabs = [
+    { 
+      id: 'automation', 
+      name: 'Automation Setup', 
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ), 
+      description: 'Configure recurring scans' 
+    },
     { 
       id: 'trends', 
       name: 'Trends', 
@@ -584,6 +595,7 @@ export default function Dashboard() {
                     businessId={selectedBusiness} 
                   />
                 )}
+                {activeTab === 'automation' && selectedBusiness && <AutomationSetupTab businessId={selectedBusiness} />}
                 {activeTab === 'link-website' && (
                   <LinkWebsiteTab 
                     onWebsiteLinked={handleWebsiteLinked}

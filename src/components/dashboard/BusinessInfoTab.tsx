@@ -18,6 +18,7 @@ interface Business {
   userId: number;
 }
 
+
 interface BusinessInfoTabProps {
   businessId: number;
   onBusinessUnlinked?: () => void;
@@ -36,14 +37,14 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
     setError(null);
 
     try {
-      const response = await fetch(`/api/dashboard/business/${businessId}`);
+      const businessResponse = await fetch(`/api/dashboard/business/${businessId}`);
       
-      if (!response.ok) {
+      if (!businessResponse.ok) {
         throw new Error('Failed to fetch business information');
       }
 
-      const data = await response.json();
-      setBusiness(data.business);
+      const businessData = await businessResponse.json();
+      setBusiness(businessData.business);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch business information');
     } finally {
@@ -105,6 +106,7 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
     }
   };
 
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -150,16 +152,21 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
   }
 
   if (error) {
+    const isSuccessMessage = error.startsWith('✅');
     return (
-      <div className="bg-red-900/20 border border-red-700 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-red-300 mb-2">Error Loading Business Information</h3>
-        <p className="text-red-400">{error}</p>
-        <button
-          onClick={fetchBusinessInfo}
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-        >
-          Retry
-        </button>
+      <div className={`${isSuccessMessage ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'} border rounded-lg p-6`}>
+        <h3 className={`text-lg font-medium ${isSuccessMessage ? 'text-green-300' : 'text-red-300'} mb-2`}>
+          {isSuccessMessage ? 'Success' : 'Error Loading Business Information'}
+        </h3>
+        <p className={`${isSuccessMessage ? 'text-green-400' : 'text-red-400'}`}>{error}</p>
+        {!isSuccessMessage && (
+          <button
+            onClick={fetchBusinessInfo}
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        )}
       </div>
     );
   }
@@ -289,66 +296,6 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
         </div>
       </div>
 
-      {/* Recurring Scans */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-white mb-4">Recurring Scans</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Status</p>
-              <p className="text-sm text-gray-400">Automatically run AEO analysis on a schedule</p>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-sm ${business.recurringScans ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}`}>
-              {business.recurringScans ? 'Enabled' : 'Disabled'}
-            </span>
-          </div>
-
-          {business.recurringScans && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Scan Frequency
-                </label>
-                <p className="text-gray-100 bg-gray-700 px-3 py-2 rounded-md capitalize">
-                  {business.scanFrequency || 'Not set'}
-                </p>
-              </div>
-
-              {business.nextScanDate && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Next Scan
-                  </label>
-                  <p className="text-gray-100 bg-gray-700 px-3 py-2 rounded-md">
-                    {new Date(business.nextScanDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-            <div className="flex items-start">
-              <svg className="w-5 h-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <p className="text-blue-300 font-medium text-sm">Premium Feature</p>
-                <p className="text-blue-200 text-sm mt-1">
-                  Recurring scans are available for Professional and Enterprise subscribers. 
-                  <a href="#" className="underline hover:text-blue-100">Upgrade your plan</a> to enable automated AEO monitoring.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Metadata */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">

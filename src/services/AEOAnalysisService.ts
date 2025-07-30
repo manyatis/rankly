@@ -536,6 +536,38 @@ export class AEOAnalysisService {
       throw new Error(usageResult.error || 'Usage limit exceeded');
     }
 
+    const userId = authResult.user!.id;
+    if (!userId) {
+      throw new Error('User ID is required for analysis');
+    }
+
+    const result = await this.executeAnalysis(request, parseInt(userId));
+    result.usageInfo = authResult.usageInfo; // Add usage info for regular analysis
+    return result;
+  }
+
+  /**
+   * Run analysis for cron jobs (bypasses authentication and usage limits)
+   */
+  static async runAnalysisForCron(request: AnalysisRequest, userId: number): Promise<AnalysisResult> {
+    console.info(`\n🚀 === CRON AEO ANALYSIS REQUEST ===`);
+
+    // Validate request structure only (skip auth for cron)
+    const requestValidation = this.validateRequest(request);
+    if (!requestValidation.isValid) {
+      throw new Error(requestValidation.error || 'Invalid request');
+    }
+
+    console.log("\n🚀 === Cron request validated!")
+
+    return await this.executeAnalysis(request, userId);
+  }
+
+  /**
+   * Execute the actual analysis logic (shared between regular and cron analysis)
+   */
+  private static async executeAnalysis(request: AnalysisRequest, userId: number): Promise<AnalysisResult> {
+
     // Generate a unique UUID for this analysis run early
     const runUuid = randomUUID();
     
@@ -581,7 +613,7 @@ export class AEOAnalysisService {
     if (request.websiteUrl) {
       console.debug(`🌐 Website analysis enabled for: ${request.websiteUrl}`);
       const userRecord = await prisma.user.findUnique({
-        where: { email: authResult.user!.email },
+        where: { id: userId },
         select: { id: true }
       });
       
@@ -634,11 +666,10 @@ export class AEOAnalysisService {
     const overallCompetitorAnalysis = this.aggregateCompetitors(results);
 
     // Persist both input and ranking results to database with linked UUID
-    const user = authResult.user!;
-    if (user.id && results.length > 0) {
+    if (userId && results.length > 0) {
       try {
         const userRecord = await prisma.user.findUnique({
-          where: { email: user.email },
+          where: { id: userId },
           select: { plan: true, id: true }
         });
 
@@ -875,7 +906,7 @@ export class AEOAnalysisService {
       results,
       overallCompetitorAnalysis,
       websiteAnalysis,
-      usageInfo: authResult.usageInfo
+      usageInfo: undefined // No usage info for cron jobs
     };
   }
 }

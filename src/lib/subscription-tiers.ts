@@ -39,7 +39,7 @@ export class SubscriptionTiers {
       'Export reports'
     ],
     usageLimits: {
-      dailyAnalysisLimit: 10,
+      dailyAnalysisLimit: 3,
       rateLimitPerWindow: 5,
       isUnlimited: false
     }

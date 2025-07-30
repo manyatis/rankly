@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from './nextauth';
 import { prisma } from './prisma';
+import { SubscriptionTiers } from './subscription-tiers';
 
 
 export async function getUser() {
@@ -14,14 +15,19 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
   });
 
   if (!user) {
-    return { canUse: false, usageCount: 0, maxUsage: 2, tier: 'free' };
+    const freeLimit = SubscriptionTiers.FREE.usageLimits.dailyAnalysisLimit!;
+    return { canUse: false, usageCount: 0, maxUsage: freeLimit, tier: 'free' };
   }
 
+  // Get tier-specific usage limits
+  const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+  
   // Professional and Enterprise users get unlimited usage
-  if (user.plan === 'professional' || user.plan === 'enterprise') {
+  if (usageLimits.isUnlimited) {
     return { canUse: true, usageCount: user.dailyUsageCount, maxUsage: 'unlimited', tier: user.plan };
   }
 
+  const dailyLimit = usageLimits.dailyAnalysisLimit!;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -38,11 +44,11 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
         lastUsageDate: new Date()
       }
     });
-    return { canUse: true, usageCount: 0, maxUsage: 2, tier: user.plan };
+    return { canUse: true, usageCount: 0, maxUsage: dailyLimit, tier: user.plan };
   }
 
-  const canUse = user.dailyUsageCount < 2;
-  return { canUse, usageCount: user.dailyUsageCount, maxUsage: 2, tier: user.plan };
+  const canUse = user.dailyUsageCount < dailyLimit;
+  return { canUse, usageCount: user.dailyUsageCount, maxUsage: dailyLimit, tier: user.plan };
 }
 
 export async function incrementUsage(email: string): Promise<boolean> {
@@ -55,8 +61,11 @@ export async function incrementUsage(email: string): Promise<boolean> {
       return false;
     }
 
+    // Get tier-specific usage limits
+    const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+
     // Professional and Enterprise users get unlimited usage
-    if (user.plan === 'professional' || user.plan === 'enterprise') {
+    if (usageLimits.isUnlimited) {
       // Still increment for tracking, but always allow usage
       await prisma.user.update({
         where: { id: user.id },
@@ -68,6 +77,7 @@ export async function incrementUsage(email: string): Promise<boolean> {
       return true;
     }
 
+    const dailyLimit = usageLimits.dailyAnalysisLimit!;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -86,7 +96,7 @@ export async function incrementUsage(email: string): Promise<boolean> {
       }
     });
 
-    return newCount <= 3;
+    return newCount <= dailyLimit;
   } catch (error) {
     console.error('Error incrementing usage:', error);
     return false;
@@ -131,11 +141,15 @@ export async function checkRateLimit(
     return { canUse: false, remainingUses: 0, resetTime: null, waitMinutes: 0 };
   }
 
+  // Get tier-specific rate limits
+  const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+
   // Professional and Enterprise users get unlimited usage
-  if (user.plan === 'professional' || user.plan === 'enterprise') {
+  if (usageLimits.isUnlimited) {
     return { canUse: true, remainingUses: 999, resetTime: null, waitMinutes: 0 };
   }
 
+  const rateLimit = usageLimits.rateLimitPerWindow;
   const now = new Date();
   
   let count: number;
@@ -151,17 +165,17 @@ export async function checkRateLimit(
 
   // If no reset time set or reset time has passed, reset the counter
   if (!resetTime || now >= resetTime) {
-    return { canUse: true, remainingUses: 1, resetTime: null, waitMinutes: 0 };
+    return { canUse: true, remainingUses: rateLimit - 1, resetTime: null, waitMinutes: 0 };
   }
 
   // If within the 5-minute window
-  if (count >= 2) {
+  if (count >= rateLimit) {
     const waitMs = resetTime.getTime() - now.getTime();
     const waitMinutes = Math.ceil(waitMs / (60 * 1000));
     return { canUse: false, remainingUses: 0, resetTime, waitMinutes };
   }
 
-  return { canUse: true, remainingUses: 2 - count, resetTime, waitMinutes: 0 };
+  return { canUse: true, remainingUses: rateLimit - count, resetTime, waitMinutes: 0 };
 }
 
 export async function incrementRateLimit(
@@ -177,11 +191,15 @@ export async function incrementRateLimit(
       return false;
     }
 
+    // Get tier-specific rate limits
+    const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+
     // Professional and Enterprise users get unlimited usage
-    if (user.plan === 'professional' || user.plan === 'enterprise') {
+    if (usageLimits.isUnlimited) {
       return true;
     }
 
+    const rateLimit = usageLimits.rateLimitPerWindow;
     const now = new Date();
     const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
     
@@ -210,7 +228,7 @@ export async function incrementRateLimit(
     }
 
     // If within window and under limit, increment
-    if (count < 2) {
+    if (count < rateLimit) {
       const updateData = action === 'analyzeWebsite' 
         ? { analyzeWebsiteCount: count + 1 }
         : { generatePromptsCount: count + 1 };
