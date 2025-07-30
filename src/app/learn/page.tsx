@@ -141,7 +141,7 @@ export default function LearnPage() {
               </div>
               <h3 className="text-xl font-semibold mb-4 text-white">SEO Still Drives Discovery</h3>
               <p className="text-gray-300 leading-relaxed">
-                Traditional SEO ensures your content is discoverable by both search engines and AI systems. Strong SEO creates the foundation for AI visibility.
+                Traditional SEO ensures your content is discoverable by both search engines and AI systems. Strong SEO creates the foundation for online visibility.
               </p>
             </div>
 

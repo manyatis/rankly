@@ -39,7 +39,7 @@ const pricingPlans: Record<string, PricingPlan> = {
     features: [
       'Access to all models',
       '5 usage per day',
-      'Weekly/daily automatic email reports'
+      'Weekly/daily automatic reports generation'
     ],
     description: 'Perfect for individual developers and small projects'
   },
@@ -52,7 +52,7 @@ const pricingPlans: Record<string, PricingPlan> = {
       'Unlimited AEO analysis',
       'Advanced analytics dashboard',
       'Competitor tracking',
-      'Weekly/daily automatic email reports'
+      'Weekly/daily automatic reports generation'
     ],
     description: 'Ideal for growing businesses and agencies'
   },

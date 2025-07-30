@@ -10,7 +10,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-            Analyze Your Site&apos;s AI Visibility
+            Analyze Your Site&apos;s Visibility
           </h1>
           <p className="text-lg text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed">
             Track 1 site free - See how your website ranks across all major AI engines and get actionable optimization recommendations.

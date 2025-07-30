@@ -189,7 +189,7 @@ export class RankingEngine {
     let analysis = '';
     
     if (aeoScore >= 80) {
-      analysis = `Excellent AEO performance! ${businessName} appears in ${mentionedQueries}/${totalQueries} AI queries with high relevance. Strong AI visibility across multiple query types.`;
+      analysis = `Excellent AEO performance! ${businessName} appears in ${mentionedQueries}/${totalQueries} AI queries with high relevance. Strong visibility across multiple query types.`;
     } else if (aeoScore >= 60) {
       analysis = `Good AEO score. ${businessName} appears in ${mentionedQueries}/${totalQueries} queries. Focus on improving content structure and online presence for better AI recognition.`;
     } else if (aeoScore >= 40) {

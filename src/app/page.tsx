@@ -9,6 +9,7 @@ import LoginModal from '../components/LoginModal';
 import { useAuth } from '../hooks/useAuth';
 import HeroSection from '../components/home/HeroSection';
 import PricingSection from '../components/home/PricingSection';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -318,7 +319,7 @@ export default function Home() {
           <div className="text-center mb-16">
             {/* <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2> */}
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Get your first site analysis free to see how your website ranks across AI engines. Perfect for businesses wanting to understand their AI visibility 
+              Get your first site analysis free to see how your website ranks across AI engines. Perfect for businesses wanting to understand their visibility 
               and get actionable optimization recommendations.
             </p>
           </div>
@@ -335,7 +336,7 @@ export default function Home() {
                 <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg">
                   <Image 
                     src="/dashboard.png" 
-                    alt="Rankly Dashboard - AI Visibility Analysis" 
+                    alt="Rankly Dashboard - Visibility Analysis" 
                     width={1200} 
                     height={675} 
                     className="w-full h-auto"
@@ -346,7 +347,7 @@ export default function Home() {
               
               {/* Dashboard Title */}
               <div className="text-center mt-6">
-                <h3 className="text-xl font-bold text-white mb-1">Complete AI Visibility Analysis</h3>
+                <h3 className="text-xl font-bold text-white mb-1">Complete Visibility Analysis</h3>
                 <p className="text-gray-400 text-sm">Track your performance across ChatGPT, Claude, Perplexity, and more</p>
               </div>
             </div>
@@ -361,7 +362,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Free Site Analysis</h3>
-              <p className="text-sm sm:text-base text-gray-300">Get your first comprehensive site analysis at no cost. Perfect for businesses wanting to understand their AI visibility.</p>
+              <p className="text-sm sm:text-base text-gray-300">Get your first comprehensive site analysis at no cost. Perfect for businesses wanting to understand their visibility.</p>
             </div>
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -379,7 +380,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Simple Analysis Process</h3>
-              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for business owners to understand their AI visibility without technical expertise required.</p>
+              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for business owners to understand their visibility without technical expertise required.</p>
             </div>
           </div>
 
@@ -411,7 +412,7 @@ export default function Home() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to Analyze Your Site&apos;s AI Visibility?
+            Ready to Analyze Your Site&apos;s Visibility?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Get your first site analysis free. See how your website ranks across all major AI engines and discover 
@@ -421,30 +422,12 @@ export default function Home() {
             onClick={handleCreateAccount}
             className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg cursor-pointer"
           >
-            Start Free Analysis
+            Create Free Account
           </button>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
-              <span className="text-xl font-semibold">Rankly</span>
-            </div>
-            <div className="flex space-x-6">
-              <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn More</Link>
-              <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Analyze Site</Link>
-              <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 American Code LLC. All rights reserved. Free AI visibility analysis for your website.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <LoginModal
         isOpen={loginModalOpen}
