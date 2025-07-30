@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { RecurringScansService } from '@/services/RecurringScansService';
 
 // GET - Get all recurring scans for the authenticated user
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

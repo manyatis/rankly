@@ -4,7 +4,7 @@ import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { subscriptionsApi } from '@/lib/square';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);

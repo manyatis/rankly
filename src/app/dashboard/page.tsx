@@ -129,12 +129,13 @@ export default function Dashboard() {
     }
   };
 
-  const _refreshBusinesses = async () => {
-    if (selectedOrganization) {
-      await fetchBusinesses(selectedOrganization);
-      await fetchWebsiteLimitInfo();
-    }
-  };
+  // Commented out unused function - kept for potential future use
+  // const refreshBusinesses = async () => {
+  //   if (selectedOrganization) {
+  //     await fetchBusinesses(selectedOrganization);
+  //     await fetchWebsiteLimitInfo();
+  //   }
+  // };
 
   const handleOrganizationChange = (orgId: number) => {
     setSelectedOrganization(orgId);

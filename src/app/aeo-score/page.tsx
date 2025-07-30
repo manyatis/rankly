@@ -109,7 +109,7 @@ export default function AEOScorePage() {
   const [keywords, setKeywords] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<ScoringResult[]>([]);
-  const [_overallCompetitors, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
+  const [, setOverallCompetitors] = useState<CompetitorInfo[]>([]);
   const [websiteAnalysis, setWebsiteAnalysis] = useState<WebsiteAnalysisResult | null>(null);
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);

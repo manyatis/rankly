@@ -102,12 +102,12 @@ export default function PaymentForm({
     return () => {
       // Cleanup Square resources if needed
       const cardContainer = cardContainerRef.current;
-      if (card && cardContainer) {
+      if (cardContainer) {
         // Square cards don't have explicit cleanup, but we can clear the container
         cardContainer.innerHTML = '';
       }
     };
-  }, [onError]);
+  }, [onError, card]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

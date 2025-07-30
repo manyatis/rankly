@@ -79,8 +79,8 @@ export async function GET(
 }
 
 export async function PUT(
-  _request: NextRequest,
-  _context: { params: Promise<{ businessId: string }> }
+  _request: NextRequest, // eslint-disable-line @typescript-eslint/no-unused-vars
+  { params: _params }: { params: Promise<{ businessId: string }> } // eslint-disable-line @typescript-eslint/no-unused-vars
 ) {
   // Business information is now immutable - editing disabled
   return NextResponse.json(

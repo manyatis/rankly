@@ -40,7 +40,7 @@ interface ResultsStepProps {
 
 export default function ResultsStep({
   results,
-  overallCompetitors: _overallCompetitors,
+  overallCompetitors: _overallCompetitors, // eslint-disable-line @typescript-eslint/no-unused-vars
   queryIndexes,
   setQueryIndexes
 }: ResultsStepProps) {

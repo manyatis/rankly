@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to check sync status and get users to downgrade
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     // Verify authentication  
     const session = await getServerSession(authOptions);

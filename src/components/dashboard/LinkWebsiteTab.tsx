@@ -72,7 +72,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo }: Li
       { progress: 95, message: '💾 Saving results to your dashboard...', duration: 1000 },
     ];
 
-    const _currentStepIndex = 0;
+    // const currentStepIndex = 0; // Unused - kept for potential future use
     const startTime = Date.now();
 
     // Update progress based on realistic timing

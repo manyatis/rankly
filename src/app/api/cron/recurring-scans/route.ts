@@ -4,7 +4,7 @@ import { AEOAnalysisService } from '@/services/AEOAnalysisService';
 import { SubscriptionTiers } from '@/lib/subscription-tiers';
 
 // Vercel cron job to run recurring scans
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     // // Verify this is a legitimate cron request
     // const authHeader = request.headers.get('authorization');
