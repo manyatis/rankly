@@ -116,13 +116,24 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          usePointStyle: true,
+          padding: 15,
+          font: {
+            size: 11
+          }
+        }
       },
       title: {
         display: true,
         text: `Ranking Trends - Last ${timeRange} Days`,
+        font: {
+          size: 14
+        }
       },
     },
     scales: {
@@ -131,15 +142,31 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         max: 100,
         title: {
           display: true,
-          text: 'Ranking Score'
+          text: 'Score'
+        },
+        ticks: {
+          font: {
+            size: 11
+          }
         }
       },
       x: {
         title: {
           display: true,
           text: 'Date'
+        },
+        ticks: {
+          font: {
+            size: 10
+          },
+          maxRotation: 45,
+          minRotation: 0
         }
       }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
     },
   };
 
@@ -164,7 +191,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         </div>
 
         {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
               <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
@@ -203,7 +230,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
         <div>
           <h2 className="text-2xl font-bold text-white">Ranking Trends</h2>
           <p className="text-gray-400 mt-1">Track your AEO performance over time</p>
@@ -222,7 +249,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
 
       {/* Stats Cards */}
       {latestData && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
             <h3 className="text-sm font-medium text-gray-400 mb-1">Average Rank</h3>
             <div className="flex items-center">
@@ -299,8 +326,10 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
 
       {/* Chart */}
       {rankingData.length > 0 ? (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <Line data={chartData} options={chartOptions} />
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-6">
+          <div className="h-64 sm:h-80 lg:h-96">
+            <Line data={chartData} options={chartOptions} />
+          </div>
         </div>
       ) : (
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-12 text-center">

@@ -99,6 +99,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
                 controls 
                 muted
                 autoPlay
+                playsInline
                 className="w-full h-auto min-h-[300px] sm:min-h-[350px] lg:min-h-[400px]"
                 poster="/video-poster.jpg"
               >

@@ -514,7 +514,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white">Execute Analysis</h2>
+        <h2 className="text-2xl font-bold text-white">Manual Analysis</h2>
         <p className="text-gray-400 mt-1">
           {businessId 
             ? "Run a new AEO analysis for this business"

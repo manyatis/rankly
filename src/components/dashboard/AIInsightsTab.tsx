@@ -197,7 +197,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -256,9 +256,9 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-300">Criticality:</label>
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+          <label className="text-sm text-gray-300 sm:whitespace-nowrap">Criticality:</label>
           <select
             value={filterCriticality}
             onChange={(e) => setFilterCriticality(e.target.value)}
@@ -272,8 +272,8 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
           </select>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <label className="text-sm text-gray-300">Status:</label>
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+          <label className="text-sm text-gray-300 sm:whitespace-nowrap">Status:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -306,15 +306,15 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
           {filteredInsights.map((insight) => (
             <div
               key={insight.id}
-              className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors"
+              className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6 hover:border-gray-600 transition-colors"
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-3 sm:space-y-0">
                 <div className="flex items-start space-x-3">
                   <div className="mt-1">{getCriticalityIcon(insight.criticality)}</div>
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white">{insight.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCriticalityColor(insight.criticality)}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
+                      <h3 className="text-lg font-semibold text-white mb-1 sm:mb-0">{insight.title}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border self-start ${getCriticalityColor(insight.criticality)}`}>
                         {insight.criticality.charAt(0).toUpperCase() + insight.criticality.slice(1)}
                       </span>
                     </div>
@@ -322,7 +322,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
                     
                     {/* Metrics */}
                     {(insight.currentScore !== undefined || insight.potentialImprovement !== undefined || insight.affectedQueries !== undefined) && (
-                      <div className="flex space-x-4 mb-3 text-sm">
+                      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-1 sm:space-y-0 mb-3 text-sm">
                         {insight.currentScore !== undefined && (
                           <div className="text-gray-400">
                             Current Score: <span className="text-white font-medium">{insight.currentScore}/100</span>
@@ -354,31 +354,31 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
                     )}
 
                     {/* Meta Information */}
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Category: {insight.category}</span>
-                      <span>•</span>
-                      <span>Impact: {insight.impact}</span>
-                      <span>•</span>
-                      <span>Effort: {insight.effort}</span>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                      <span className="whitespace-nowrap">Category: {insight.category}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">Impact: {insight.impact}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">Effort: {insight.effort}</span>
                       {insight.aiProvider && (
                         <>
-                          <span>•</span>
-                          <span>Source: {insight.aiProvider}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="whitespace-nowrap">Source: {insight.aiProvider}</span>
                         </>
                       )}
                       {insight.confidence !== undefined && (
                         <>
-                          <span>•</span>
-                          <span>Confidence: {insight.confidence}%</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="whitespace-nowrap">Confidence: {insight.confidence}%</span>
                         </>
                       )}
-                      <span>•</span>
-                      <span>{new Date(insight.createdAt).toLocaleDateString()}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">{new Date(insight.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 self-start sm:self-auto">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(insight.status)}`}>
                     {insight.status.replace('_', ' ').charAt(0).toUpperCase() + insight.status.replace('_', ' ').slice(1)}
                   </span>
@@ -390,7 +390,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
                       </svg>
                     </button>
                     
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                    <div className="absolute right-0 sm:right-0 left-0 sm:left-auto top-full mt-2 w-full sm:w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                       <div className="p-2">
                         <button
                           onClick={() => updateInsightStatus(insight.id, 'in_progress')}
