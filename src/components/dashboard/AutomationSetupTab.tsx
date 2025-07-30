@@ -436,12 +436,12 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
                       Upgrade to enable automated AEO monitoring and never miss important ranking changes.
                     </p>
                     <div className="flex space-x-4">
-                      <a
-                        href="/payment"
-                        className="bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 transition-colors font-medium"
+                      <button
+                        disabled
+                        className="bg-gray-600 text-gray-400 px-6 py-2 rounded-md cursor-not-allowed font-medium"
                       >
-                        Upgrade Plan
-                      </a>
+                        Coming Soon
+                      </button>
                       <a
                         href="/learn"
                         className="text-orange-300 hover:text-orange-200 underline font-medium px-4 py-2"
@@ -513,16 +513,6 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
             </div>
             <p className="text-gray-400 text-sm">Weekly/monthly PDF reports delivered to your inbox</p>
           </div>
-
-          {/* <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-4 opacity-60">
-            <div className="flex items-center mb-2">
-              <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              <h4 className="text-white font-medium">Competitor Monitoring</h4>
-            </div>
-            <p className="text-gray-400 text-sm">Automatically track competitor AEO performance changes</p>
-          </div> */}
 
           <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-4 opacity-60">
             <div className="flex items-center mb-2">

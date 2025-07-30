@@ -2,6 +2,7 @@ export interface SubscriptionTier {
   name: string;
   websiteLimit: number;
   price?: string;
+  priceCents?: number; // Price in cents for Square
   features: string[];
   usageLimits: {
     dailyAnalysisLimit: number | null; // null = unlimited
@@ -30,13 +31,14 @@ export class SubscriptionTiers {
   static readonly INDIE: SubscriptionTier = {
     name: 'Indie',
     websiteLimit: 3,
-    price: '$19/month',
+    price: '$20/month',
+    priceCents: 2000, // $20.00 in cents
     features: [
       '3 websites',
       'Advanced AEO analysis',
-      'Weekly recurring scans',
+      'Recurring scans (daily/weekly/monthly)',
       'Detailed insights',
-      'Export reports'
+      'Query results visibility'
     ],
     usageLimits: {
       dailyAnalysisLimit: 3,
@@ -48,14 +50,16 @@ export class SubscriptionTiers {
   static readonly PROFESSIONAL: SubscriptionTier = {
     name: 'Professional',
     websiteLimit: 10,
-    price: '$49/month',
+    price: '$75/month',
+    priceCents: 7500, // $75.00 in cents
     features: [
       '10 websites',
       'Premium AEO analysis',
+      'Unlimited manual scans',
       'Daily recurring scans',
       'AI-powered insights',
-      'Priority support',
-      'Custom reports'
+      'Competitor tracking',
+      'Priority support'
     ],
     usageLimits: {
       dailyAnalysisLimit: null,
@@ -67,12 +71,14 @@ export class SubscriptionTiers {
   static readonly ENTERPRISE: SubscriptionTier = {
     name: 'Enterprise',
     websiteLimit: -1, // -1 represents unlimited
-    price: 'Contact us',
+    price: '$250/month',
+    priceCents: 25000, // $250.00 in cents
     features: [
       'Unlimited websites',
       'Enterprise AEO analysis',
       'Custom scan frequency',
       'Advanced AI insights',
+      'Expert consultation',
       'Dedicated support',
       'White-label reports',
       'API access'

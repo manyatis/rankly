@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers.
+Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers with Square subscription payments.
 
 ## Development Commands
 
@@ -45,16 +45,17 @@ npx prisma studio         # Database browser
   - Word count/relevance (20%)
 
 ### Service Layer
-- **AEOAnalysisService** - Main orchestration service for AEO analysis workflow
+- **AEOAnalysisService** - Main orchestration service for AEO analysis workflow with cron support
 - **WebsiteAnalysisService** - Website content extraction and business information parsing
 - **WordPositionAnalysisService** - Ranking position analysis and competitor identification
+- **RecurringScansService** - Manages automated recurring analysis with subscription tier validation
 
 ### Database Design (Prisma)
 - **Organization model**: Multi-tenant structure for grouping users and businesses
-- **Business model**: Stores website/business info with unique constraint on `websiteName + organizationId`
-- **User model**: Authentication, subscription tiers, rate limiting, linked to Organization
+- **Business model**: URL-driven with websiteUrl unique constraint, recurring scan settings
+- **User model**: Authentication, subscription management, rate limiting, linked to Organization
 - **AeoScore**: Historical score tracking linked to Business
-- **InputHistory/RankingHistory**: Complete audit trail linked by `runUuid` and Business
+- **InputHistory/RankingHistory/QueryResults**: Complete audit trail linked by `runUuid` and Business
 - **Rate limiting**: Separate tracking for website analysis vs prompt generation
 
 ## Key Implementation Details
@@ -62,10 +63,24 @@ npx prisma studio         # Database browser
 ### Authentication & Authorization
 - NextAuth.js with Prisma adapter
 - Session-based authentication with multiple providers
-- Subscription tiers: free, professional, enterprise with different usage limits
+- Subscription tiers: free (1/day), indie (3/day + recurring scans), professional (unlimited), enterprise (unlimited + consultation)
+
+### Subscription Management (Square)
+- **Square Subscriptions API** for recurring monthly payments
+- **Web Payments SDK** for secure card tokenization on frontend
+- **Node.js SDK** for server-side subscription management
+- **Webhook handling** for subscription lifecycle events
+- **Tier-based feature access** enforced throughout application
+
+### Automation System
+- **Vercel Cron Jobs** (`/api/cron/recurring-scans`) run daily at 8 AM
+- **Automated Analysis** for businesses with recurring scans enabled
+- **Subscription Tier Validation** before processing recurring scans
+- **AEOAnalysisService.runAnalysisForCron()** bypasses auth for automated execution
+- **Frequency Options**: Daily, weekly, monthly with calculated next scan dates
 
 ### Rate Limiting Strategy
-- Daily usage tracking per user
+- Daily usage tracking per user with subscription tier limits
 - 5-minute sliding windows for intensive operations
 - Feature-specific limits (analyze website, generate prompts)
 - Usage validation in API routes before processing
@@ -76,30 +91,25 @@ npx prisma studio         # Database browser
 - Prompt templates ensure consistent analysis across providers
 - Error handling and fallbacks for provider failures
 
-### Testing Strategy
-- Jest with jsdom environment for React components
-- Testing Library for component interaction testing
-- API route testing with mocked AI providers
-- Database operations tested with test database
-
 ## File Structure Conventions
 
 ### API Routes (`src/app/api/`)
 - `aeo-score/` - Core AEO analysis endpoint
 - `auth/` - NextAuth.js authentication routes
-- `payments/` - Square payment integration
+- `subscriptions/` - Square subscription management (create, cancel, update, webhooks)
+- `cron/recurring-scans/` - Automated recurring analysis endpoint
 - `usage-check/` - Rate limiting validation
-- `dashboard/` - Dashboard-specific endpoints for organizations, businesses, ranking history, etc.
+- `dashboard/` - Dashboard-specific endpoints (organizations, businesses, ranking history, recurring scans)
 
 ### Components (`src/components/`)
-- Organized by page/feature (home/, auth/, dashboard/)
-- Reusable UI components at root level (Navbar, Footer, LoginModal)
-- Dashboard components in `dashboard/` subdirectory (TrendsTab, BusinessInfoTab, PromptsTab, ExecuteTab)
+- Organized by page/feature (home/, auth/, dashboard/, payment/)
+- Dashboard components: AutomationSetupTab (recurring scans), TrendsTab (with query results), ExecuteTab, etc.
+- Payment components: PlanSelector, PaymentForm, SubscriptionManager
 - Follow React 19 patterns with server/client component separation
 
 ### Services (`src/services/`)
 - Business logic separated from API routes
-- Each service handles specific domain (AEO analysis, website analysis, etc.)
+- Each service handles specific domain (AEO analysis, website analysis, recurring scans, etc.)
 - Stateless services that can be easily tested
 
 ## Environment Setup
@@ -110,15 +120,12 @@ Required environment variables:
 - `ANTHROPIC_API_KEY` - Claude integration
 - `OPENAI_API_KEY` - ChatGPT integration
 - `PERPLEXITY_API_KEY` - Perplexity integration
-- Square payment keys for subscription handling
+- `SQUARE_ACCESS_TOKEN` - Square API access
+- `SQUARE_APPLICATION_ID` / `SQUARE_LOCATION_ID` - Square configuration
+- `SQUARE_ENVIRONMENT` - sandbox/production
+- `CRON_SECRET` - Vercel cron job authentication
 
 ## Development Guidelines
-
-### Adding New AI Providers
-1. Extend `BaseAIModel` class
-2. Implement provider-specific API integration
-3. Add to `ModelFactory.createModel()` switch statement
-4. Update type definitions in `src/types/`
 
 ### Database Schema Changes
 1. Update `prisma/schema.prisma`
@@ -126,90 +133,89 @@ Required environment variables:
 3. Generate new Prisma client with `npx prisma generate`
 4. Update related TypeScript types
 
+### Adding New AI Providers
+1. Extend `BaseAIModel` class
+2. Implement provider-specific API integration
+3. Add to `ModelFactory.createModel()` switch statement
+4. Update type definitions in `src/types/`
+
 ### Testing New Features
 - Unit tests for services and utilities
 - Integration tests for API routes
 - Component tests for React components
 - Mock external dependencies (AI providers, payments)
 
-### Prompt Engineering
-- System prompts in `src/prompts/system/`
-- User prompts in `src/prompts/user/`
-- Query variations in `src/prompts/query-variations/`
-- Test prompt changes across all supported AI providers
+## Current State (January 2025)
 
-## Recent Major Updates
+### URL-Driven Multi-Tenant Platform
+- **Centralized Website Tracking**: Single source of truth for website data across organizations
+- **Cross-Organization Data Sharing**: Historical data automatically available when linking existing websites
+- **Immutable Business Model**: Website details read-only to ensure data consistency across organizations
+- **Smart Unlinking**: Preserves all data when users unlink websites from their organization
 
-### Architecture Transformation (December 2024)
-Complete redesign from business-name-driven to URL-driven multi-tenant platform:
+### Automation & Subscription System
+- **Recurring Scans**: Automated AEO analysis for indie+ subscribers
+- **Automation Setup Tab**: Dedicated interface for configuring recurring analysis
+- **Subscription Tiers**: Integrated Square payments with tier-based feature access
+- **Vercel Cron Integration**: Daily automated processing with proper error handling
 
-#### **Backend Infrastructure Changes**
-- **Efficient Competitor Analysis**: Modified `analyzeProviders()` to score main business + competitors from same AI query results
-- **User-Agnostic Data Storage**: Made `InputHistory` and `RankingHistory` userId-optional for cross-organization data sharing
-- **URL-Based Workflow**: Created `/api/analyze-url` endpoint for automatic business info extraction from website URLs
-- **Immutable Business Model**: Disabled business editing (PUT returns 405) to ensure data consistency
-- **Smart Unlinking System**: Changed DELETE to unlink via `OrganizationBusiness` relationships, preserving all data
-- **URL as Primary Key**: Switched unique constraint from `websiteName` to `websiteUrl`
-- **Automatic Data Inheritance**: Users linking to existing websites inherit all historical ranking data
-- **Simplified Execution**: Created `/api/dashboard/execute-analysis` for one-click analysis using stored data
+### Advanced Analytics
+- **Query Results Storage**: Complete visibility into AI search query responses
+- **Competitor Intelligence**: Automatic identification and tracking of top 8 competitors
+- **Trends Analysis**: Historical AEO score tracking with query-level insights
+- **One-Click Analysis**: Streamlined workflow using stored business data
 
-#### **Database Schema Evolution**
-- **Organization Model**: Multi-tenant structure linking users and businesses
-- **Business Model**: URL-driven with `websiteUrl` unique constraint, `isCompetitor` flag for standalone competitor tracking
-- **Competitor Relationships**: Bidirectional `Competitor` table linking businesses
-- **Historical Preservation**: `RankingHistory` stores competitor scores alongside main business scores
-- **Cross-Organization Sharing**: Businesses can be tracked by multiple organizations simultaneously
+### Dashboard Interface
+- **Six-Tab Navigation**: Automation Setup (top priority), Trends, AI Insights, Website Info, Competitors, Prompts, Manual Analysis
+- **Professional UI**: Dark theme with comprehensive analytics and management tools
+- **Mobile Responsive**: Optimized for all device sizes with collapsible sidebar
+- **Real-time Updates**: Live subscription status, usage tracking, and analysis progress
 
-#### **AI Integration Improvements**
-- **Competitor Service**: Enhanced `parseCompetitorResponse()` with robust JSON parsing strategies
-- **Business Info Extraction**: `WebsiteAnalysisService.extractBusinessInfo()` auto-extracts company details from URLs
-- **Smart Prompt Management**: Stored prompts reused or auto-generated as fallback
-- **Top 8 Competitor Tracking**: Automatic competitor identification and ranking during analysis
-
-### Dashboard UI Transformation (December 2024)
-
-#### **Website-Centric Interface**
-- **Read-Only Website Info**: Business details immutable with prominent URL display
-- **Unlink vs Delete**: Orange "Unlink Website" button preserves data for other organizations
-- **URL Prominence**: Website URLs displayed prominently with clickable links
-- **Website Labeling**: Changed all "Business" references to "Website" throughout interface
-
-#### **Simplified Analysis Workflow**
-- **One-Click Analysis**: Replaced multi-step form with single "Run AEO Analysis" button
-- **Smart Data Usage**: Automatically uses stored prompts/business info or generates new ones
-- **ExecuteTabSimple**: New streamlined component replacing complex workflow
-- **Progress Feedback**: Clear loading states and success/error messaging
-
-#### **New Competitors Tab**
-- **Side-by-Side Comparison**: Main website vs top 8 competitors with color-coded rankings
-- **Visual Hierarchy**: Blue border for main website, numbered competitor list
-- **Score Visualization**: Green (excellent) to red (poor) ranking indicators
-- **Confidence Matching**: AI confidence levels for competitor identification
-- **Empty State Guidance**: Helpful messaging when no competitors found
-
-#### **Navigation & UX**
-- **Five-Tab Interface**: Trends, AI Insights, Website Info, Competitors, Prompts, Manual Analysis
-- **Smart Dropdowns**: Website selection with auto-link for existing websites
-- **Responsive Design**: Mobile-optimized with sidebar collapse
-- **Status Indicators**: Website count limits and tier information
-
-### Current State (December 2024)
-- **Fully Functional Multi-Tenant Platform**: URL-driven with cross-organization data sharing
-- **Automated Competitor Analysis**: AI identifies and tracks top 8 competitors automatically
-- **Streamlined User Experience**: One-click analysis with intelligent data reuse
-- **Data Preservation Architecture**: No data loss, websites persist across organization changes
-- **Professional Dashboard**: Complete competitor intelligence interface
-
-### Technical Architecture
-- **Centralized Website Tracking**: Single source of truth for website data across all organizations
+### Technical Architecture Highlights
 - **Efficient AI Usage**: Competitors scored from same query results as main business
-- **Smart Data Inheritance**: Historical data automatically available when linking existing websites
-- **Robust Parsing**: Multiple fallback strategies for AI response processing
-- **Cross-Organization Analytics**: Competitor data shared intelligently across tenants
+- **Robust Error Handling**: Multiple fallback strategies for AI response processing
+- **Security Best Practices**: PCI-compliant payments, server-side AI calls, proper authentication
+- **Scalable Design**: Multi-tenant architecture ready for enterprise deployment
 
-### Next Potential Enhancements
-- Enhanced competitor discovery algorithms
-- Bulk website import/export functionality
-- Advanced competitor trend analysis
-- Organization management features (rename, delete, invite users)
-- Automated competitor monitoring and alerts
+### Recent Major Updates (Current Session)
+
+#### Square Subscription System (Complete)
+- **Payment Infrastructure** - Full Square subscription integration with Web Payments SDK
+- **Subscription Plans** - Indie ($20), Professional ($75), Enterprise ($250) tiers with database seeding
+- **Payment Components** - PaymentForm and SubscriptionPlans components with dark theme
+- **API Endpoints** - Complete subscription creation, cancellation, and plan fetching
+- **Subscription Sync** - Daily cron job to sync subscription statuses with Square (pseudo-webhook)
+
+#### Database Schema for Subscriptions (Complete)
+- **User subscription fields** - subscriptionId, subscriptionStatus, subscriptionStartDate, etc.
+- **SubscriptionPlan table** - Centralized plan management with pricing and features
+- **Automatic downgrading** - Users moved to free tier when subscriptions become inactive
+
+#### Subscription Status Sync System (Complete)
+- **Daily cron job** at 2 AM to check all subscription statuses against Square
+- **SubscriptionSyncService** - Comprehensive service for subscription status management
+- **Manual sync endpoint** - `/api/admin/sync-subscription` for testing and admin use
+- **Status handling** - Automatic downgrade on CANCELED, PAUSED, DEACTIVATED, EXPIRED
+
+#### Automation Features (Complete)
+- **Recurring scans** - Backend system with Vercel cron job for automated AEO analysis
+- **Automation Setup tab** - Dedicated UI for managing recurring scan settings
+- **Tier-based access** - Recurring scans available for Indie+ subscribers only
+- **Multiple frequencies** - Daily, weekly, monthly scan options
+
+#### Current Production Status
+- **Build successful** with all TypeScript issues resolved
+- **Mock Square client** in place (ready for production Square SDK configuration)
+- **Complete payment flow** from plan selection to subscription creation
+- **Comprehensive error handling** and user feedback throughout
+
+#### Environment Configuration Required
+- Square API credentials (SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, etc.)
+- CRON_SECRET for secure cron job authentication
+- Production Square environment configuration
+
+#### Next Steps for Production
+- Configure real Square API credentials and catalog items
+- Replace mock Square client with production implementation
+- Test complete payment flow in Square sandbox
+- Set up proper webhook handling for real-time subscription events

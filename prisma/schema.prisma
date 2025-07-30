@@ -77,7 +77,16 @@ model User {
     dailyUsageCount   Int             @default(0)
     lastUsageDate     DateTime?
     subscriptionTier  String          @default("free") // "free", "professional", "enterprise"
-    plan              String          @default("free") // "free", "professional", "enterprise"
+    plan              String          @default("free") // "free", "indie", "professional", "enterprise"
+    
+    // Subscription management
+    subscriptionId        String?         // Square subscription ID
+    subscriptionStatus    String?         // "active", "past_due", "canceled", "paused"
+    subscriptionStartDate DateTime?       // When subscription started
+    subscriptionEndDate   DateTime?       // When subscription ends (for canceled subscriptions)
+    cardOnFileId          String?         // Square card ID for recurring payments
+    customerId            String?         // Square customer ID
+    
     // Rate limiting fields for 5-minute windows
     analyzeWebsiteCount     Int       @default(0)  // Count of analyze website button uses
     analyzeWebsiteResetTime DateTime? // When the 5-minute window resets
@@ -320,4 +329,18 @@ model QueryResult {
   @@index([businessId])
   @@index([runUuid])
   @@index([aiProvider])
+}
+
+model SubscriptionPlan {
+  id              Int       @id @default(autoincrement())
+  planId          String    @unique   // "indie", "professional", "enterprise"
+  name            String                // "Indie", "Professional", "Enterprise"
+  priceCents      Int                   // Price in cents (e.g., 2000 for $20.00)
+  billingPeriod   String    @default("MONTHLY") // "MONTHLY", "YEARLY"
+  features        String[]              // Array of feature descriptions
+  description     String?               // Plan description
+  squarePlanId    String?               // Square catalog subscription plan ID
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

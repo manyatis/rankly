@@ -24,7 +24,7 @@ export default function Home() {
     setLoginModalOpen(false);
   };
 
-  const handlePlanSelection = (planId: string) => {
+  const handlePlanSelection = () => {
     if (loading) return;
 
     if (!user) {
@@ -33,8 +33,8 @@ export default function Home() {
       return;
     }
 
-    // If user is logged in, redirect to payment page
-    router.push(`/payment?plan=${planId}`);
+    // Redirect to dashboard - payment flow will be rebuilt
+    router.push('/dashboard');
   };
 
 
