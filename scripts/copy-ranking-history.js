@@ -31,45 +31,42 @@ async function copyRankingHistoryData() {
     console.log('\n=== Template record to copy ===');
     console.log(JSON.stringify(templateRecord, null, 2));
     
-    // Helper function to generate trending data with gentle variations
+    // Helper function to generate FUDGED HIGH RANKINGS! 🚀
     function generateTrendingData(baseValue, day, totalDays, minValue = 15) {
-      // Create a gentle wave pattern with some randomness
-      const wavePosition = (day / totalDays) * Math.PI * 2; // Two complete cycles over 30 days
-      const waveVariation = Math.sin(wavePosition) * 8; // ±8 point variation
-      const randomVariation = (Math.random() - 0.5) * 6; // ±3 point random variation
-      
-      const newValue = Math.round(baseValue + waveVariation + randomVariation);
-      
-      // Keep values within reasonable bounds (don't go below minValue or above 100)
-      return Math.max(minValue, Math.min(100, newValue));
+      // FUDGED: Always generate high scores between 85-98!
+      const highScore = 85 + Math.random() * 13; // Random between 85-98
+      return Math.round(highScore);
     }
     
     // Generate 30 days of data going backwards from today
     const today = new Date();
     const records = [];
     
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 1; i <= 31; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       
-      // Generate trending values for each metric
-      const openaiRank = templateRecord.openaiRank ? generateTrendingData(templateRecord.openaiRank, i, 30, 10) : null;
-      const claudeRank = templateRecord.claudeRank && templateRecord.claudeRank > 0 ? generateTrendingData(templateRecord.claudeRank, i, 30, 15) : 0; // Keep at 0 if original was 0
-      const perplexityRank = templateRecord.perplexityRank && templateRecord.perplexityRank > 0 ? generateTrendingData(templateRecord.perplexityRank, i, 30, 15) : 0; // Keep at 0 if original was 0
-      const websiteScore = templateRecord.websiteScore ? generateTrendingData(templateRecord.websiteScore, i, 30, 50) : null;
+      // Generate DIFFERENT STARTING POINTS, SAME CADENCE! 📈
+      // All end at 99, but start at different points to create multiple lines
+      const trendMultiplier = (31 - i) / 30; // 1.0 for today, 0.033 for day 30
       
-      // Generate average rank around 17 (as per template) with its own trending pattern
-      const averageRank = generateTrendingData(17, i, 30, 10);
+      const openaiRank = 45 + (trendMultiplier * 54); // 45 to 99 slow rise
+      const claudeRank = 35 + (trendMultiplier * 64); // 35 to 99 slow rise  
+      const perplexityRank = 55 + (trendMultiplier * 44); // 55 to 99 slow rise
+      const websiteScore = 25 + (trendMultiplier * 74); // 25 to 99 slow rise
+      
+      // Generate slow rising average rank from middle point
+      const averageRank = 40 + (trendMultiplier * 59); // 40 to 99 slow rise
       
       records.push({
         userId: templateRecord.userId,
         businessId: templateRecord.businessId,
         runUuid: null, // Don't duplicate runUuid as it should be unique
-        openaiRank: openaiRank,
-        claudeRank: claudeRank,
-        perplexityRank: perplexityRank,
-        averageRank: averageRank,
-        websiteScore: websiteScore,
+        openaiRank: Math.round(openaiRank),
+        claudeRank: Math.round(claudeRank),
+        perplexityRank: Math.round(perplexityRank),
+        averageRank: Math.round(averageRank),
+        websiteScore: Math.round(websiteScore),
         hasWebsiteAnalysis: templateRecord.hasWebsiteAnalysis,
         createdAt: date
       });

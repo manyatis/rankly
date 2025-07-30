@@ -49,6 +49,7 @@ export default function Home() {
 
       <HeroSection onCreateAccount={handleCreateAccount} />
 
+
       {/* Statistics Section */}
       <div className="bg-gray-900 py-12 sm:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
