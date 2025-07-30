@@ -20,7 +20,11 @@ export async function GET(request: Request) {
       include: {
         organization: {
           include: {
-            businesses: true
+            businesses: {
+              include: {
+                business: true
+              }
+            }
           }
         }
       }

@@ -19,7 +19,7 @@ model Organization {
     
     // Relations
     users       User[]
-    businesses  Business[]
+    businesses  OrganizationBusiness[]
     
     @@index([name])
 }
@@ -28,11 +28,14 @@ model Business {
     id             Int          @id @default(autoincrement())
     websiteName    String       // e.g., "example.com" or business display name
     websiteUrl     String?      // Full URL
-    organizationId Int
-    userId         Int          // User who created this business
+    userId         Int?         // User who created this business (nullable for competitor businesses)
     industry       String?
     location       String?
     description    String?      @db.Text
+    isCompetitor   Boolean      @default(false)  // True if this is a competitor business
+    
+    // Analysis settings
+    useLocationInAnalysis Boolean @default(true)  // Whether to include location in analysis queries
     
     // Recurring scan settings
     recurringScans Boolean      @default(false)  // Whether recurring scans are enabled
@@ -44,18 +47,23 @@ model Business {
     updatedAt      DateTime     @updatedAt
     
     // Relations
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+    organizations  OrganizationBusiness[]
     aeoScores      AeoScore[]
     inputHistory   InputHistory[]
     rankingHistory RankingHistory[]
     aiInsights     AIInsight[]
-
+    queryResults   QueryResult[]
     
-    @@unique([websiteName, organizationId])
-    @@index([organizationId])
+    // Competitor relationships
+    competitorOf   Competitor[] @relation("BusinessCompetitors")
+    competitors    Competitor[] @relation("CompetitorBusinesses")
+    
+    @@unique([websiteUrl])  // URL is now the primary unique identifier
     @@index([userId])
     @@index([websiteName])
+    @@index([websiteUrl])  // Index on URL for fast lookup
+    @@index([isCompetitor])
 }
 
 model User {
@@ -85,6 +93,7 @@ model User {
     inputHistory      InputHistory[]
     rankingHistory    RankingHistory[]
     aiInsights        AIInsight[]
+    queryResults      QueryResult[]
     
     @@index([organizationId])
 }
@@ -149,7 +158,7 @@ model AeoScore {
 // Input History - stores business information and prompts used
 model InputHistory {
   id                  Int       @id @default(autoincrement())
-  userId              Int
+  userId              Int?      // Optional - for userId agnostic tracking
   businessId          Int
   runUuid             String?   @unique // UUID linking this input to its ranking results
   keywords            String[]  // Array of keywords
@@ -157,7 +166,7 @@ model InputHistory {
   createdAt           DateTime  @default(now())
   
   // Relations
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   business            Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   
   @@index([userId, createdAt])
@@ -168,9 +177,10 @@ model InputHistory {
 // Ranking History - stores search engine ranks and website analysis scores
 model RankingHistory {
   id                Int       @id @default(autoincrement())
-  userId            Int
+  userId            Int?      // Optional - for userId agnostic tracking
   businessId        Int
-  runUuid           String?   @unique // UUID linking this result to its input
+  date              DateTime  // Date for daily uniqueness (date only, no time)
+  runUuid           String?   // UUID linking this result to its input (no longer unique since we upsert)
   
   // Search Engine Rankings (AEO scores across providers)
   openaiRank        Int?      // OpenAI ranking/score
@@ -183,13 +193,15 @@ model RankingHistory {
   hasWebsiteAnalysis Boolean  @default(false)
   
   createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   
   // Relations
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   
+  @@unique([businessId, date]) // One ranking per business per day
   @@index([userId, createdAt])
-  @@index([businessId])
+  @@index([businessId, date])
   @@index([runUuid])
 }
 
@@ -198,6 +210,7 @@ model AIInsight {
   id               String      @id @default(cuid())
   userId           Int
   businessId       Int
+  date             DateTime    // Date for daily uniqueness (date only, no time)
   runUuid          String?     // UUID linking to analysis run that generated this insight
   
   // Core insight data
@@ -231,8 +244,80 @@ model AIInsight {
   user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   business         Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
   
+  @@unique([userId, businessId, date, category]) // One insight per user/business/day/category
   @@index([userId, businessId])
-  @@index([businessId, createdAt])
+  @@index([businessId, date])
   @@index([status])
   @@index([runUuid])
+}
+
+// Junction table to link Organizations to Businesses
+model OrganizationBusiness {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  businessId     Int
+  role           String       @default("owner") // "owner", "viewer", etc.
+  createdAt      DateTime     @default(now())
+  
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationId, businessId])
+  @@index([organizationId])
+  @@index([businessId])
+}
+
+// Competitor relationships between businesses
+model Competitor {
+  id           Int      @id @default(autoincrement())
+  businessId   Int      // The main business
+  competitorId Int      // The competitor business
+  
+  // Competitor metadata
+  identifiedBy String?  // How this competitor was identified ("ai", "manual", "import")
+  confidence   Float?   // Confidence score from AI identification (0.0 to 1.0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  business     Business @relation("BusinessCompetitors", fields: [businessId], references: [id], onDelete: Cascade)
+  competitor   Business @relation("CompetitorBusinesses", fields: [competitorId], references: [id], onDelete: Cascade)
+  
+  @@unique([businessId, competitorId])
+  @@index([businessId])
+  @@index([competitorId])
+}
+
+// Query Results - stores individual query results showing mention status and rankings
+model QueryResult {
+  id                Int       @id @default(autoincrement())
+  userId            Int?      // Optional - for userId agnostic tracking
+  businessId        Int
+  runUuid           String?   // UUID linking to the analysis run
+  
+  // Query information
+  query             String    @db.Text // The query that was run
+  aiProvider        String    // "openai", "claude", "perplexity"
+  
+  // Response details
+  response          String    @db.Text // Full AI response
+  mentioned         Boolean   // Whether the business was mentioned
+  rankPosition      Int?      // Position in the response (1-based, null if not mentioned)
+  relevanceScore    Int?      // Relevance score (0-100)
+  
+  // Analysis metadata
+  wordCount         Int?      // Number of words in response
+  businessDensity   Float?    // How prominently the business was featured
+  
+  createdAt         DateTime  @default(now())
+  
+  // Relations
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([businessId])
+  @@index([runUuid])
+  @@index([aiProvider])
 }

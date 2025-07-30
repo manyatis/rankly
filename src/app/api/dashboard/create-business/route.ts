@@ -54,21 +54,49 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Check for duplicate website name within the organization
-    const existingBusiness = await prisma.business.findFirst({
-      where: {
-        websiteName: websiteName.trim(),
-        organizationId: user.organizationId
-      }
-    });
-
-    if (existingBusiness) {
-      return NextResponse.json({ 
-        error: 'A business with this website name already exists in your organization' 
-      }, { status: 400 });
+    // Check for duplicate website URL globally (since businesses are now URL-driven)
+    let existingBusiness = null;
+    if (websiteUrl?.trim()) {
+      existingBusiness = await prisma.business.findUnique({
+        where: {
+          websiteUrl: websiteUrl.trim()
+        }
+      });
     }
 
-    // Create the business and increment organization website count
+    if (existingBusiness) {
+      // Check if this business is already linked to this organization
+      const existingLink = await prisma.organizationBusiness.findUnique({
+        where: {
+          organizationId_businessId: {
+            organizationId: user.organizationId!,
+            businessId: existingBusiness.id
+          }
+        }
+      });
+
+      if (existingLink) {
+        return NextResponse.json({ 
+          error: 'This website is already tracked in your organization' 
+        }, { status: 400 });
+      } else {
+        // Business exists but not linked to this organization - allow linking
+        await prisma.organizationBusiness.create({
+          data: {
+            organizationId: user.organizationId!,
+            businessId: existingBusiness.id,
+            role: 'owner'
+          }
+        });
+
+        return NextResponse.json({ 
+          message: 'Website linked to your organization successfully',
+          business: existingBusiness
+        });
+      }
+    }
+
+    // Create the business and link to organization
     const business = await prisma.$transaction(async (tx) => {
       // Create the business
       const newBusiness = await tx.business.create({
@@ -78,17 +106,17 @@ export async function POST(request: NextRequest) {
           industry: industry?.trim() || null,
           location: location?.trim() || null,
           description: description?.trim(),
-          organizationId: user.organizationId!,
           userId: user.id,
-        },
-        include: {
-          organization: true,
-          user: {
-            select: {
-              name: true,
-              email: true
-            }
-          }
+          isCompetitor: false
+        }
+      });
+
+      // Link business to organization
+      await tx.organizationBusiness.create({
+        data: {
+          organizationId: user.organizationId!,
+          businessId: newBusiness.id,
+          role: 'owner'
         }
       });
 
@@ -98,7 +126,25 @@ export async function POST(request: NextRequest) {
         data: { websiteCount: { increment: 1 } }
       });
 
-      return newBusiness;
+      // Return business with organization link
+      const businessWithOrg = await tx.business.findUnique({
+        where: { id: newBusiness.id },
+        include: {
+          organizations: {
+            include: {
+              organization: true
+            }
+          },
+          user: {
+            select: {
+              name: true,
+              email: true
+            }
+          }
+        }
+      });
+
+      return businessWithOrg;
     });
 
     return NextResponse.json({ business }, { status: 201 });

@@ -138,33 +138,78 @@ Required environment variables:
 - Query variations in `src/prompts/query-variations/`
 - Test prompt changes across all supported AI providers
 
-## Recent Major Updates (Latest Session)
+## Recent Major Updates
 
-### Dashboard Implementation (Complete)
-- **New dashboard page** at `/dashboard` with dark theme matching home page
-- **Multi-tenant organization system** - Each user gets "My Org" on signup
-- **Business management** - Create/edit businesses within organizations
-- **Four main tabs**: Trends (ranking history), Business Info, Prompts (history), Execute (new analysis)
+### Architecture Transformation (December 2024)
+Complete redesign from business-name-driven to URL-driven multi-tenant platform:
 
-### Database Schema Restructure (Complete)
-- **Added Organization table** - Groups users and businesses
-- **Added Business table** - Stores website info with unique constraint per organization
-- **Updated all related tables** - AeoScore, InputHistory, RankingHistory now reference Business
-- **Automatic organization creation** - New users get "My Org" created on first login via NextAuth callback
+#### **Backend Infrastructure Changes**
+- **Efficient Competitor Analysis**: Modified `analyzeProviders()` to score main business + competitors from same AI query results
+- **User-Agnostic Data Storage**: Made `InputHistory` and `RankingHistory` userId-optional for cross-organization data sharing
+- **URL-Based Workflow**: Created `/api/analyze-url` endpoint for automatic business info extraction from website URLs
+- **Immutable Business Model**: Disabled business editing (PUT returns 405) to ensure data consistency
+- **Smart Unlinking System**: Changed DELETE to unlink via `OrganizationBusiness` relationships, preserving all data
+- **URL as Primary Key**: Switched unique constraint from `websiteName` to `websiteUrl`
+- **Automatic Data Inheritance**: Users linking to existing websites inherit all historical ranking data
+- **Simplified Execution**: Created `/api/dashboard/execute-analysis` for one-click analysis using stored data
 
-### Authentication & User Flow (Complete)
-- **Improved login experience** - Dashboard shows proper login modal instead of redirect
-- **Auto-organization assignment** - Users automatically get "My Org" on signup
-- **Consistent navigation** - Added "Dashboard2" to navbar, Footer component for all pages
+#### **Database Schema Evolution**
+- **Organization Model**: Multi-tenant structure linking users and businesses
+- **Business Model**: URL-driven with `websiteUrl` unique constraint, `isCompetitor` flag for standalone competitor tracking
+- **Competitor Relationships**: Bidirectional `Competitor` table linking businesses
+- **Historical Preservation**: `RankingHistory` stores competitor scores alongside main business scores
+- **Cross-Organization Sharing**: Businesses can be tracked by multiple organizations simultaneously
 
-### Current State & Next Steps
-- **Dashboard is functional** with organization/business dropdowns and tab navigation
-- **Execute Analysis buttons** have debugging console logs to track functionality
-- **All components use dark theme** consistent with rest of application
-- **Database migration completed** - All existing data properly linked to new structure
+#### **AI Integration Improvements**
+- **Competitor Service**: Enhanced `parseCompetitorResponse()` with robust JSON parsing strategies
+- **Business Info Extraction**: `WebsiteAnalysisService.extractBusinessInfo()` auto-extracts company details from URLs
+- **Smart Prompt Management**: Stored prompts reused or auto-generated as fallback
+- **Top 8 Competitor Tracking**: Automatic competitor identification and ranking during analysis
 
-### Known Issues & Potential Next Steps
-- May need to test Execute Analysis button functionality and AEO score integration
-- Could add business creation directly from dashboard sidebar for better UX
-- Might want to add organization management (rename, delete, invite users)
-- Consider adding bulk business import/export functionality
+### Dashboard UI Transformation (December 2024)
+
+#### **Website-Centric Interface**
+- **Read-Only Website Info**: Business details immutable with prominent URL display
+- **Unlink vs Delete**: Orange "Unlink Website" button preserves data for other organizations
+- **URL Prominence**: Website URLs displayed prominently with clickable links
+- **Website Labeling**: Changed all "Business" references to "Website" throughout interface
+
+#### **Simplified Analysis Workflow**
+- **One-Click Analysis**: Replaced multi-step form with single "Run AEO Analysis" button
+- **Smart Data Usage**: Automatically uses stored prompts/business info or generates new ones
+- **ExecuteTabSimple**: New streamlined component replacing complex workflow
+- **Progress Feedback**: Clear loading states and success/error messaging
+
+#### **New Competitors Tab**
+- **Side-by-Side Comparison**: Main website vs top 8 competitors with color-coded rankings
+- **Visual Hierarchy**: Blue border for main website, numbered competitor list
+- **Score Visualization**: Green (excellent) to red (poor) ranking indicators
+- **Confidence Matching**: AI confidence levels for competitor identification
+- **Empty State Guidance**: Helpful messaging when no competitors found
+
+#### **Navigation & UX**
+- **Five-Tab Interface**: Trends, AI Insights, Website Info, Competitors, Prompts, Manual Analysis
+- **Smart Dropdowns**: Website selection with auto-link for existing websites
+- **Responsive Design**: Mobile-optimized with sidebar collapse
+- **Status Indicators**: Website count limits and tier information
+
+### Current State (December 2024)
+- **Fully Functional Multi-Tenant Platform**: URL-driven with cross-organization data sharing
+- **Automated Competitor Analysis**: AI identifies and tracks top 8 competitors automatically
+- **Streamlined User Experience**: One-click analysis with intelligent data reuse
+- **Data Preservation Architecture**: No data loss, websites persist across organization changes
+- **Professional Dashboard**: Complete competitor intelligence interface
+
+### Technical Architecture
+- **Centralized Website Tracking**: Single source of truth for website data across all organizations
+- **Efficient AI Usage**: Competitors scored from same query results as main business
+- **Smart Data Inheritance**: Historical data automatically available when linking existing websites
+- **Robust Parsing**: Multiple fallback strategies for AI response processing
+- **Cross-Organization Analytics**: Competitor data shared intelligently across tenants
+
+### Next Potential Enhancements
+- Enhanced competitor discovery algorithms
+- Bulk website import/export functionality
+- Advanced competitor trend analysis
+- Organization management features (rename, delete, invite users)
+- Automated competitor monitoring and alerts

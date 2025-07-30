@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 
-
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -53,8 +52,8 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Fetch ranking history for the business
-    const rankings = await prisma.rankingHistory.findMany({
+    // Fetch query results for the business
+    const queryResults = await prisma.queryResult.findMany({
       where: {
         businessId: businessId,
         createdAt: {
@@ -63,24 +62,45 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'asc'
+        createdAt: 'desc'
       },
       select: {
         id: true,
+        query: true,
+        aiProvider: true,
+        response: true,
+        mentioned: true,
+        rankPosition: true,
+        relevanceScore: true,
+        wordCount: true,
+        businessDensity: true,
         createdAt: true,
-        openaiRank: true,
-        claudeRank: true,
-        perplexityRank: true,
-        averageRank: true,
-        websiteScore: true,
-        hasWebsiteAnalysis: true
+        runUuid: true
       }
     });
 
-    return NextResponse.json({ rankings });
+    // Group by runUuid to organize by analysis runs
+    const groupedResults = queryResults.reduce((acc, result) => {
+      const runId = result.runUuid || 'unknown';
+      if (!acc[runId]) {
+        acc[runId] = [];
+      }
+      acc[runId].push(result);
+      return acc;
+    }, {} as Record<string, typeof queryResults>);
+
+    return NextResponse.json({ 
+      queryResults,
+      groupedResults,
+      totalQueries: queryResults.length,
+      mentionedQueries: queryResults.filter(q => q.mentioned).length,
+      averagePosition: queryResults
+        .filter(q => q.mentioned && q.rankPosition)
+        .reduce((sum, q, _, arr) => sum + (q.rankPosition! / arr.length), 0) || null
+    });
 
   } catch (error) {
-    console.error('Error fetching ranking history:', error);
+    console.error('Error fetching query results:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

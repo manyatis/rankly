@@ -8,6 +8,14 @@ export interface WebsiteAnalysisRequest {
   recommendationLimit?: number;
 }
 
+export interface BusinessInfoExtraction {
+  businessName: string;
+  industry: string;
+  description: string;
+  location?: string;
+  keywords: string[];
+}
+
 export interface AnalysisRecommendation {
   category: string;
   title: string;
@@ -38,6 +46,86 @@ export interface WebsiteAnalysisResult {
 
 export class WebsiteAnalysisService {
   private static readonly DEFAULT_RECOMMENDATION_LIMIT = 3;
+
+  /**
+   * Extract business information from a website URL
+   */
+  static async extractBusinessInfo(url: string): Promise<BusinessInfoExtraction> {
+    try {
+      console.log(`🔍 Extracting business information from: ${url}`);
+      
+      // Fetch website content
+      const content = await this.fetchWebsiteContent(url);
+      const title = this.extractTitle(content);
+      
+      // Use AI to extract business information
+      const prompt = `Analyze this website content and extract business information:
+
+URL: ${url}
+Title: ${title}
+Content (first 2000 chars): ${content.substring(0, 2000)}
+
+Extract and return ONLY a JSON object with:
+{
+  "businessName": "The main business/company name",
+  "industry": "Primary industry category (e.g., Technology, Healthcare, E-commerce)",
+  "description": "Brief 1-2 sentence description of what the business does",
+  "location": "Location if mentioned (city, state/country) or null",
+  "keywords": ["3-5 relevant keywords describing the business/services"]
+}
+
+Rules:
+- businessName should be the core brand name WITHOUT generic prefixes OR suffixes
+- Remove PREFIXES like: The, A, An (e.g., "The Apple Store" → "Apple Store", "A Better Way Consulting" → "Better Way Consulting")  
+- Remove SUFFIXES like: LLC, Inc, Corp, Ltd, Company, Co, Golf, Club, Services, Solutions, Group, Enterprises, Associates, Partners, Consulting, etc.
+- Examples: "The V Tee Golf" → "V Tee", "A Better Marketing LLC" → "Better Marketing", "Smith & Associates Inc" → "Smith & Associates"
+- Keep only the distinctive brand/company identifier
+- industry should be broad category, not specific niche
+- description should be concise and professional
+- keywords should be search-relevant terms
+- Return only the JSON object, no additional text`;
+
+      const response = await ModelFactory.queryModel('openai', prompt);
+      
+      // Parse the response
+      let businessInfo: BusinessInfoExtraction;
+      try {
+        // Try to extract JSON from the response
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          businessInfo = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (parseError) {
+        console.warn('Failed to parse AI response, using fallback:', parseError);
+        // Fallback extraction
+        businessInfo = {
+          businessName: title || new URL(url).hostname.replace('www.', ''),
+          industry: 'Technology',
+          description: `Business website at ${url}`,
+          location: undefined,
+          keywords: ['business', 'services', 'company']
+        };
+      }
+
+      console.log(`✅ Extracted business info:`, businessInfo);
+      return businessInfo;
+      
+    } catch (error) {
+      console.error('❌ Error extracting business info:', error);
+      
+      // Return fallback information
+      const hostname = new URL(url).hostname.replace('www.', '');
+      return {
+        businessName: hostname,
+        industry: 'Technology',
+        description: `Business website at ${url}`,
+        location: undefined,
+        keywords: ['business', 'services', hostname.split('.')[0]]
+      };
+    }
+  }
 
   /**
    * Analyze website and generate AI insights 

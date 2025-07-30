@@ -35,15 +35,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied to organization' }, { status: 403 });
     }
 
-    // Fetch businesses for the organization
-    const businesses = await prisma.business.findMany({
+    // Fetch businesses for the organization using junction table
+    const organizationBusinesses = await prisma.organizationBusiness.findMany({
       where: {
         organizationId: organizationId
       },
+      include: {
+        business: true
+      },
       orderBy: {
-        websiteName: 'asc'
+        business: {
+          websiteName: 'asc'
+        }
       }
     });
+
+    const businesses = organizationBusinesses.map(ob => ob.business);
 
     return NextResponse.json({ businesses });
 

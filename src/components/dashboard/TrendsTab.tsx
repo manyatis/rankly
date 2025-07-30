@@ -31,12 +31,26 @@ interface RankingData {
   websiteScore?: number;
 }
 
+interface QueryResultData {
+  id: number;
+  query: string;
+  aiProvider: string;
+  response: string;
+  mentioned: boolean;
+  rankPosition?: number;
+  relevanceScore?: number;
+  wordCount?: number;
+  businessDensity?: number;
+  createdAt: string;
+}
+
 interface TrendsTabProps {
   businessId: number;
 }
 
 export default function TrendsTab({ businessId }: TrendsTabProps) {
   const [rankingData, setRankingData] = useState<RankingData[]>([]);
+  const [queryResults, setQueryResults] = useState<QueryResultData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<7 | 14 | 30>(30);
@@ -46,16 +60,31 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
     setError(null);
 
     try {
-      const response = await fetch(
+      // Fetch main business ranking data
+      const rankingResponse = await fetch(
         `/api/dashboard/ranking-history?businessId=${businessId}&days=${timeRange}`
       );
       
-      if (!response.ok) {
+      if (!rankingResponse.ok) {
         throw new Error('Failed to fetch ranking data');
       }
 
-      const data = await response.json();
-      setRankingData(data.rankings);
+      const rankingData = await rankingResponse.json();
+      setRankingData(rankingData.rankings);
+
+      // Fetch query results
+      const queryResponse = await fetch(
+        `/api/dashboard/query-results?businessId=${businessId}&days=${timeRange}`
+      );
+      
+      if (queryResponse.ok) {
+        const queryData = await queryResponse.json();
+        setQueryResults(queryData.queryResults || []);
+      } else {
+        // If query results fail, continue without them
+        console.warn('Failed to fetch query results');
+        setQueryResults([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch ranking data');
     } finally {
@@ -69,50 +98,57 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
     }
   }, [businessId, timeRange, fetchRankingData]);
 
-  const chartData = {
-    labels: rankingData.map(item => {
+  // Generate chart data dynamically including competitors
+  const generateChartData = () => {
+    const labels = rankingData.map(item => {
       const date = new Date(item.createdAt);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }),
-    datasets: [
+    });
+
+    const datasets = [
       {
         label: 'Average Rank',
-        data: rankingData.map(item => item.averageRank || 0),
+        data: rankingData.map(item => item.averageRank || null),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 2,
+        borderWidth: 4,
         fill: false,
         tension: 0.4,
       },
       {
-        label: 'OpenAI Rank',
-        data: rankingData.map(item => item.openaiRank || 0),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        borderWidth: 2,
+        label: 'OpenAI',
+        data: rankingData.map(item => item.openaiRank || null),
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderWidth: 3,
         fill: false,
         tension: 0.4,
       },
       {
-        label: 'Claude Rank',
-        data: rankingData.map(item => item.claudeRank || 0),
-        borderColor: 'rgb(139, 69, 19)',
-        backgroundColor: 'rgba(139, 69, 19, 0.1)',
-        borderWidth: 2,
+        label: 'Claude',
+        data: rankingData.map(item => item.claudeRank || null),
+        borderColor: 'rgb(251, 146, 60)',
+        backgroundColor: 'rgba(251, 146, 60, 0.1)',
+        borderWidth: 3,
         fill: false,
         tension: 0.4,
       },
       {
-        label: 'Perplexity Rank',
-        data: rankingData.map(item => item.perplexityRank || 0),
-        borderColor: 'rgb(245, 101, 101)',
-        backgroundColor: 'rgba(245, 101, 101, 0.1)',
-        borderWidth: 2,
+        label: 'Perplexity',
+        data: rankingData.map(item => item.perplexityRank || null),
+        borderColor: 'rgb(248, 113, 113)',
+        backgroundColor: 'rgba(248, 113, 113, 0.1)',
+        borderWidth: 3,
         fill: false,
         tension: 0.4,
       }
-    ]
+    ];
+
+    return { labels, datasets };
   };
+
+
+  const chartData = generateChartData();
 
   const chartOptions = {
     responsive: true,
@@ -170,6 +206,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
     },
   };
 
+  // Get latest and previous data for summary cards
   const latestData = rankingData[rankingData.length - 1];
   const previousData = rankingData[rankingData.length - 2];
 
@@ -233,18 +270,23 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
         <div>
           <h2 className="text-2xl font-bold text-white">Ranking Trends</h2>
-          <p className="text-gray-400 mt-1">Track your AEO performance over time</p>
+          <p className="text-gray-400 mt-1">
+            Track your AEO performance over time
+          </p>
         </div>
         
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(parseInt(e.target.value) as 7 | 14 | 30)}
-          className="px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={14}>Last 14 days</option>
-          <option value={30}>Last 30 days</option>
-        </select>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(parseInt(e.target.value) as 7 | 14 | 30)}
+            className="px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={7}>Last 7 days</option>
+            <option value={14}>Last 14 days</option>
+            <option value={30}>Last 30 days</option>
+          </select>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -324,6 +366,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         </div>
       )}
 
+
       {/* Chart */}
       {rankingData.length > 0 ? (
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-6">
@@ -345,6 +388,123 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
           <p className="text-sm text-gray-500">
             Run an AEO analysis to start tracking performance trends.
           </p>
+        </div>
+      )}
+
+      {/* Query Results Section */}
+      {queryResults.length > 0 && (
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-medium text-white">Query Analysis</h3>
+              <p className="text-gray-400 text-sm mt-1">
+                Detailed results from {queryResults.length} queries across AI platforms
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-400">
+                {Math.round((queryResults.filter(q => q.mentioned).length / queryResults.length) * 100)}%
+              </div>
+              <div className="text-xs text-gray-400">Mentioned</div>
+            </div>
+          </div>
+
+          {/* Query Results Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gray-700 rounded-lg p-4 text-center">
+              <div className="text-xl font-bold text-green-400">
+                {queryResults.filter(q => q.mentioned).length}
+              </div>
+              <div className="text-sm text-gray-400">Mentioned</div>
+            </div>
+            <div className="bg-gray-700 rounded-lg p-4 text-center">
+              <div className="text-xl font-bold text-red-400">
+                {queryResults.filter(q => !q.mentioned).length}
+              </div>
+              <div className="text-sm text-gray-400">Not Mentioned</div>
+            </div>
+            <div className="bg-gray-700 rounded-lg p-4 text-center">
+              <div className="text-xl font-bold text-blue-400">
+                {queryResults.filter(q => q.mentioned && q.rankPosition).length > 0 
+                  ? Math.round(queryResults
+                      .filter(q => q.mentioned && q.rankPosition)
+                      .reduce((sum, q) => sum + q.rankPosition!, 0) / 
+                    queryResults.filter(q => q.mentioned && q.rankPosition).length)
+                  : 'N/A'
+                }
+              </div>
+              <div className="text-sm text-gray-400">Avg Position</div>
+            </div>
+          </div>
+
+          {/* Individual Query Results */}
+          <div className="space-y-3">
+            <h4 className="text-md font-medium text-white mb-3">Recent Queries</h4>
+            {queryResults.slice(0, 10).map((query) => (
+              <div key={query.id} className="border border-gray-600 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1 pr-4">
+                    <p className="text-white font-medium mb-1">{query.query}</p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        query.aiProvider === 'openai' ? 'bg-green-900 text-green-300' :
+                        query.aiProvider === 'claude' ? 'bg-orange-900 text-orange-300' :
+                        query.aiProvider === 'perplexity' ? 'bg-red-900 text-red-300' :
+                        'bg-gray-700 text-gray-300'
+                      }`}>
+                        {query.aiProvider.toUpperCase()}
+                      </span>
+                      <span className="text-gray-400">
+                        {new Date(query.createdAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {query.mentioned ? (
+                      <div>
+                        <div className="text-green-400 font-medium">✓ Mentioned</div>
+                        {query.rankPosition && (
+                          <div className="text-xs text-gray-400">Position {query.rankPosition}</div>
+                        )}
+                        {query.relevanceScore && (
+                          <div className="text-xs text-gray-400">Relevance {query.relevanceScore}%</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-red-400 font-medium">✗ Not Mentioned</div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Response Preview */}
+                <details className="group">
+                  <summary className="cursor-pointer text-sm text-blue-400 hover:text-blue-300 mb-2 group-open:mb-3">
+                    View AI Response ({query.wordCount} words)
+                  </summary>
+                  <div className="bg-gray-900 rounded-md p-3 text-sm text-gray-300 max-h-32 overflow-y-auto">
+                    {query.response.length > 300 ? 
+                      query.response.substring(0, 300) + '...' : 
+                      query.response
+                    }
+                  </div>
+                </details>
+              </div>
+            ))}
+            
+            {queryResults.length > 10 && (
+              <div className="text-center py-4">
+                <p className="text-gray-400 text-sm">
+                  Showing 10 of {queryResults.length} queries. 
+                  <span className="text-blue-400"> View more in detailed analysis.</span>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

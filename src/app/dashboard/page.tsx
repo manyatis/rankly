@@ -9,7 +9,9 @@ import TrendsTab from '@/components/dashboard/TrendsTab';
 import AIInsightsTab from '@/components/dashboard/AIInsightsTab';
 import BusinessInfoTab from '@/components/dashboard/BusinessInfoTab';
 import PromptsTab from '@/components/dashboard/PromptsTab';
-import ExecuteTab from '@/components/dashboard/ExecuteTabNew';
+import ExecuteTab from '@/components/dashboard/ExecuteTabSimple';
+import CompetitorsTab from '@/components/dashboard/CompetitorsTab';
+import LinkWebsiteTab from '@/components/dashboard/LinkWebsiteTab';
 
 interface Organization {
   id: number;
@@ -32,7 +34,7 @@ export default function Dashboard() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'prompts' | 'execute'>('trends');
+  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'prompts' | 'execute' | 'link-website'>('trends');
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -95,7 +97,7 @@ export default function Dashboard() {
         } else {
           setSelectedBusiness(null);
           setInitialLoadComplete(true);
-          setActiveTab('execute')
+          setActiveTab('link-website')
         }
       }
     } catch (error) {
@@ -126,7 +128,7 @@ export default function Dashboard() {
     }
   };
 
-  const refreshBusinesses = async () => {
+  const _refreshBusinesses = async () => {
     if (selectedOrganization) {
       await fetchBusinesses(selectedOrganization);
       await fetchWebsiteLimitInfo();
@@ -144,6 +146,18 @@ export default function Dashboard() {
     setInitialLoadComplete(false);
     // Brief delay to allow tab component to start loading
     setTimeout(() => setInitialLoadComplete(true), 200);
+  };
+
+  const handleWebsiteLinked = (businessId: number) => {
+    // Refresh businesses list and select the new one
+    if (selectedOrganization) {
+      fetchBusinesses(selectedOrganization).then(() => {
+        setSelectedBusiness(businessId);
+        setActiveTab('trends');
+        setTimeout(() => setInitialLoadComplete(true), 200);
+      });
+    }
+    fetchWebsiteLimitInfo();
   };
 
   const selectedOrgName = organizations.find(org => org.id === selectedOrganization)?.name || 'Select Organization';
@@ -172,13 +186,23 @@ export default function Dashboard() {
     },
     { 
       id: 'business', 
-      name: 'Business Info', 
+      name: 'Website Info', 
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0-9c-5 0-9 4-9 9s4 9 9 9" />
         </svg>
       ), 
-      description: 'Manage business details' 
+      description: 'View website details' 
+    },
+    { 
+      id: 'competitors', 
+      name: 'Competitors', 
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ), 
+      description: 'Compare competitor rankings' 
     },
     { 
       id: 'prompts', 
@@ -199,6 +223,16 @@ export default function Dashboard() {
         </svg>
       ), 
       description: 'Run new AEO analysis' 
+    },
+    { 
+      id: 'link-website', 
+      name: 'Link Website', 
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+      ), 
+      description: 'Add new website for tracking' 
     },
   ] as const;
 
@@ -414,23 +448,19 @@ export default function Dashboard() {
                   className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
                 >
                   {businesses.length === 0 ? (
-                    websiteLimitInfo?.canAddWebsite ? (
-                      <option value="add-new">Add a new business</option>
-                    ) : (
-                      <option value="" disabled>
-                        Website limit reached ({websiteLimitInfo?.tier} - {websiteLimitInfo?.limit} website{websiteLimitInfo?.limit !== 1 ? 's' : ''})
-                      </option>
-                    )
+                    <option value="" disabled>
+                      No websites linked
+                    </option>
                   ) : (
                     <>
-                      {/* <option value="">Select a business</option> */}
+                      {/* <option value="">Select a website</option> */}
                       {businesses.map((business) => (
                         <option key={business.id} value={business.id}>
                           {business.websiteName}
                         </option>
                       ))}
                       {websiteLimitInfo?.canAddWebsite ? (
-                        <option value="add-new">+ Add a new business</option>
+                        <option value="add-new">+ Add a new website</option>
                       ) : (
                         <option value="" disabled>
                           --- Limit reached ({websiteLimitInfo?.tier} - {websiteLimitInfo?.limit} website{websiteLimitInfo?.limit !== 1 ? 's' : ''}) ---
@@ -446,6 +476,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Navigation Tabs */}
@@ -458,11 +489,11 @@ export default function Dashboard() {
                     setActiveTab(tab.id);
                     setSidebarOpen(false); // Close sidebar on mobile when tab is selected
                   }}
-                  disabled={!selectedBusiness && tab.id !== 'execute'}
+                  disabled={!selectedBusiness && tab.id !== 'execute' && tab.id !== 'link-website'}
                   className={`w-full flex items-start p-4 rounded-lg text-left transition-colors ${
                     activeTab === tab.id
                       ? 'bg-blue-600 text-white cursor-pointer'
-                      : !selectedBusiness && tab.id !== 'execute'
+                      : !selectedBusiness && tab.id !== 'execute' && tab.id !== 'link-website'
                       ? 'text-gray-500 cursor-not-allowed bg-gray-700/50'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer'
                   }`}
@@ -486,7 +517,7 @@ export default function Dashboard() {
               </div>
               {selectedBusiness && (
                 <div className="flex justify-between">
-                  <span>Business:</span>
+                  <span>Website:</span>
                   <span className="text-gray-300 font-medium truncate ml-2">{selectedBusinessName}</span>
                 </div>
               )}
@@ -524,9 +555,9 @@ export default function Dashboard() {
             {!selectedBusiness && businesses.length > 0 ? (
               <div className="text-center py-12 sm:py-20">
                 <div className="text-gray-500 text-4xl sm:text-6xl mb-4 sm:mb-6">📊</div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white mb-4">No Business Selected</h2>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white mb-4">No Website Selected</h2>
                 <p className="text-sm sm:text-base text-gray-400 mb-8 max-w-md mx-auto px-4">
-                  Select a business from the sidebar to view its analytics and manage settings.
+                  Select a website from the sidebar to view its analytics and manage settings.
                 </p>
               </div>
             ) : (
@@ -536,7 +567,7 @@ export default function Dashboard() {
                 {activeTab === 'business' && selectedBusiness && (
                   <BusinessInfoTab 
                     businessId={selectedBusiness} 
-                    onBusinessDeleted={() => {
+                    onBusinessUnlinked={() => {
                       // Refresh businesses list, website limit info, and reset selection
                       if (selectedOrganization) {
                         fetchBusinesses(selectedOrganization);
@@ -546,11 +577,17 @@ export default function Dashboard() {
                     }} 
                   />
                 )}
+                {activeTab === 'competitors' && selectedBusiness && <CompetitorsTab businessId={selectedBusiness} />}
                 {activeTab === 'prompts' && selectedBusiness && <PromptsTab businessId={selectedBusiness} />}
                 {activeTab === 'execute' && (
                   <ExecuteTab 
                     businessId={selectedBusiness} 
-                    onBusinessCreated={refreshBusinesses}
+                  />
+                )}
+                {activeTab === 'link-website' && (
+                  <LinkWebsiteTab 
+                    onWebsiteLinked={handleWebsiteLinked}
+                    websiteLimitInfo={websiteLimitInfo}
                   />
                 )}
               </div>

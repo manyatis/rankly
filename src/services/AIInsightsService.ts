@@ -178,7 +178,7 @@ Format as JSON array:
   }
 
   /**
-   * Store insights in the database
+   * Store insights in the database using upsert to prevent duplicates
    */
   private static async storeInsights(
     insights: AIInsightData[],
@@ -186,28 +186,58 @@ Format as JSON array:
     businessId: number,
     runUuid?: string
   ): Promise<void> {
-    const insightsToCreate = insights.map(insight => ({
-      userId,
-      businessId,
-      runUuid,
-      title: insight.title,
-      description: insight.description,
-      category: insight.category,
-      criticality: insight.criticality,
-      impact: insight.impact,
-      effort: insight.effort,
-      priority: insight.priority,
-      aiProvider: insight.aiProvider,
-      confidence: insight.confidence,
-      recommendations: insight.recommendations,
-      currentScore: insight.currentScore,
-      potentialImprovement: insight.potentialImprovement,
-      affectedQueries: insight.affectedQueries
-    }));
+    // Create date for daily uniqueness (start of day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    await prisma.aIInsight.createMany({
-      data: insightsToCreate
-    });
+    // Use individual upserts to handle the unique constraint per category per day
+    for (const insight of insights) {
+      await prisma.aIInsight.upsert({
+        where: {
+          userId_businessId_date_category: {
+            userId,
+            businessId,
+            date: today,
+            category: insight.category
+          }
+        },
+        create: {
+          userId,
+          businessId,
+          date: today,
+          runUuid,
+          title: insight.title,
+          description: insight.description,
+          category: insight.category,
+          criticality: insight.criticality,
+          impact: insight.impact,
+          effort: insight.effort,
+          priority: insight.priority,
+          aiProvider: insight.aiProvider,
+          confidence: insight.confidence,
+          recommendations: insight.recommendations,
+          currentScore: insight.currentScore,
+          potentialImprovement: insight.potentialImprovement,
+          affectedQueries: insight.affectedQueries
+        },
+        update: {
+          runUuid,
+          title: insight.title,
+          description: insight.description,
+          criticality: insight.criticality,
+          impact: insight.impact,
+          effort: insight.effort,
+          priority: insight.priority,
+          aiProvider: insight.aiProvider,
+          confidence: insight.confidence,
+          recommendations: insight.recommendations,
+          currentScore: insight.currentScore,
+          potentialImprovement: insight.potentialImprovement,
+          affectedQueries: insight.affectedQueries,
+          updatedAt: new Date()
+        }
+      });
+    }
   }
 
   /**

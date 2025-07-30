@@ -1,1 +1,2 @@
 export { AEOAnalysisService, type AnalysisRequest, type AnalysisResult, type AIProvider, type ProviderScoringResult } from './AEOAnalysisService';
+export { WebsiteAnalysisService, type BusinessInfoExtraction } from './WebsiteAnalysisService';

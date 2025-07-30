@@ -30,7 +30,11 @@ export async function GET(
     const business = await prisma.business.findUnique({
       where: { id: businessId },
       include: {
-        organization: true,
+        organizations: {
+          include: {
+            organization: true
+          }
+        },
         user: {
           select: {
             name: true,
@@ -40,7 +44,7 @@ export async function GET(
       }
     });
 
-    if (!business || business.organization.id !== user.organizationId) {
+    if (!business || !business.organizations.some(org => org.organization.id === user.organizationId)) {
       return NextResponse.json({ error: 'Business not found or access denied' }, { status: 404 });
     }
 
@@ -75,112 +79,14 @@ export async function GET(
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ businessId: string }> }
+  _request: NextRequest,
+  _context: { params: Promise<{ businessId: string }> }
 ) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const businessId = parseInt((await params).businessId);
-    const body = await request.json();
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Verify business exists and user has access
-    const existingBusiness = await prisma.business.findUnique({
-      where: { id: businessId },
-      include: { organization: true }
-    });
-
-    if (!existingBusiness || existingBusiness.organization.id !== user.organizationId) {
-      return NextResponse.json({ error: 'Business not found or access denied' }, { status: 404 });
-    }
-
-    // Validate input
-    const { websiteName, websiteUrl, industry, location, description, recurringScans, scanFrequency } = body;
-
-    if (!websiteName?.trim()) {
-      return NextResponse.json({ error: 'Website name is required' }, { status: 400 });
-    }
-
-    // Check for duplicate website name within the organization (excluding current business)
-    const duplicateBusiness = await prisma.business.findFirst({
-      where: {
-        websiteName: websiteName.trim(),
-        organizationId: user.organizationId,
-        id: {
-          not: businessId
-        }
-      }
-    });
-
-    if (duplicateBusiness) {
-      return NextResponse.json({ 
-        error: 'A business with this website name already exists in your organization' 
-      }, { status: 400 });
-    }
-
-    // Calculate next scan date if recurring scans are enabled
-    let nextScanDate = null;
-    if (recurringScans && scanFrequency) {
-      const now = new Date();
-      switch (scanFrequency) {
-        case 'daily':
-          nextScanDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-          break;
-        case 'weekly':
-          nextScanDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-          break;
-        case 'monthly':
-          nextScanDate = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
-          break;
-      }
-    }
-
-    // Update business
-    const updatedBusiness = await prisma.business.update({
-      where: { id: businessId },
-      data: {
-        websiteName: websiteName.trim(),
-        websiteUrl: websiteUrl?.trim() || null,
-        industry: industry?.trim() || null,
-        location: location?.trim() || null,
-        description: description?.trim() || null,
-        recurringScans: recurringScans || false,
-        scanFrequency: recurringScans ? scanFrequency?.trim() || null : null,
-        nextScanDate: recurringScans ? nextScanDate : null,
-      },
-      include: {
-        organization: true,
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
-        }
-      }
-    });
-
-    return NextResponse.json({ business: updatedBusiness });
-
-  } catch (error) {
-    console.error('Error updating business:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  // Business information is now immutable - editing disabled
+  return NextResponse.json(
+    { error: 'Business information cannot be modified. Businesses are now immutable to ensure data consistency across organizations.' },
+    { status: 405 }
+  );
 }
 
 export async function DELETE(
@@ -208,31 +114,55 @@ export async function DELETE(
     // Verify business exists and user has access
     const existingBusiness = await prisma.business.findUnique({
       where: { id: businessId },
-      include: { organization: true }
+      include: { 
+        organizations: {
+          include: {
+            organization: true
+          }
+        }
+      }
     });
 
-    if (!existingBusiness || existingBusiness.organization.id !== user.organizationId) {
+    if (!existingBusiness || !existingBusiness.organizations.some(org => org.organization.id === user.organizationId)) {
       return NextResponse.json({ error: 'Business not found or access denied' }, { status: 404 });
     }
 
-    // Delete business and decrement organization website count
+    // Get the user's organization from the business relationships
+    const userOrganization = existingBusiness.organizations.find(org => org.organization.id === user.organizationId);
+
+    if (!userOrganization) {
+      return NextResponse.json({ error: 'Organization relationship not found' }, { status: 404 });
+    }
+
+    // Unlink business from organization instead of deleting
     await prisma.$transaction(async (tx) => {
-      // Delete business (this will cascade delete related records due to schema setup)
-      await tx.business.delete({
-        where: { id: businessId }
+      // Remove the organization-business relationship
+      await tx.organizationBusiness.delete({
+        where: {
+          organizationId_businessId: {
+            organizationId: userOrganization.organization.id,
+            businessId: businessId
+          }
+        }
       });
 
       // Decrement organization website count
       await tx.organization.update({
-        where: { id: existingBusiness.organization.id },
+        where: { id: userOrganization.organization.id },
         data: { websiteCount: { decrement: 1 } }
       });
+
+      // Note: The business remains in the database with all its ranking history
+      // This allows other organizations to track the same website and inherit the data
     });
 
-    return NextResponse.json({ success: true, message: 'Business deleted successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Business unlinked from your organization successfully. The business data is preserved for other organizations.' 
+    });
 
   } catch (error) {
-    console.error('Error deleting business:', error);
+    console.error('Error unlinking business:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

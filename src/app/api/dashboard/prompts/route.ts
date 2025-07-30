@@ -33,10 +33,16 @@ export async function GET(request: NextRequest) {
     // Verify user has access to this business
     const business = await prisma.business.findUnique({
       where: { id: businessId },
-      include: { organization: true }
+      include: { 
+        organizations: {
+          include: {
+            organization: true
+          }
+        }
+      }
     });
 
-    if (!business || business.organization.id !== user.organizationId) {
+    if (!business || !business.organizations.some(org => org.organization.id === user.organizationId)) {
       return NextResponse.json({ error: 'Access denied to business' }, { status: 403 });
     }
 

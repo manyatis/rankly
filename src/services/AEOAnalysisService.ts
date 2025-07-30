@@ -4,6 +4,7 @@ import { RankingEngine, ScoringFactors, CompetitorInfo } from '../engines/Rankin
 import { getUser, checkUsageLimit, incrementUsage } from '../lib/auth';
 import { PromptFormationService } from './PromptFormationService';
 import { WebsiteAnalysisService, type WebsiteAnalysisResult } from './WebsiteAnalysisService';
+import { CompetitorService } from './CompetitorService';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 
@@ -12,6 +13,14 @@ export interface AIProvider {
   model: string;
   color: string;
   type?: ModelType;
+}
+
+export interface CompetitorScore {
+  competitorId: number;
+  competitorName: string;
+  aeoScore: number;
+  factors: ScoringFactors;
+  overallVisibility: number;
 }
 
 export interface ProviderScoringResult {
@@ -24,6 +33,7 @@ export interface ProviderScoringResult {
   overallVisibility: number;
   competitorAnalysis: CompetitorInfo[];
   missedResponses: QueryResult[];
+  competitorScores?: CompetitorScore[];
 }
 
 export interface AnalysisRequest {
@@ -188,7 +198,7 @@ export class AEOAnalysisService {
     return { success: true };
   }
 
-  static async analyzeProviders(request: AnalysisRequest): Promise<ProviderScoringResult[]> {
+  static async analyzeProviders(request: AnalysisRequest, competitors: Array<{id: number; name: string}> = []): Promise<ProviderScoringResult[]> {
     const { businessName, industry, location, marketDescription, keywords, providers, customPrompts } = request;
 
     console.debug(`🏢 Business Name: "${businessName}"`);
@@ -197,6 +207,7 @@ export class AEOAnalysisService {
     console.debug(`📄 Market Description: "${marketDescription}"`);
     console.debug(`🔑 Keywords:`, keywords);
     console.debug(`🤖 Providers:`, providers.map((p: AIProvider) => p.name));
+    console.debug(`🏆 Competitors for analysis:`, competitors.length, competitors.map(c => `${c.name} (ID: ${c.id})`));
 
     let optimizedQueries: string[];
 
@@ -216,17 +227,19 @@ export class AEOAnalysisService {
           location,
           marketDescription,
           keywords
-        }, 3); // Generate 3 queries to match UI
+        }, this.MAX_QUERIES); // Generate queries using MAX_QUERIES setting
         optimizedQueries = promptResult.queries;
         console.debug(`✅ Generated ${optimizedQueries.length} optimized queries`);
       } catch (error) {
         console.warn(`⚠️ Failed to generate optimized prompts, using fallback:`, error);
-        // Fallback to default query generation (3 queries to match)
+        // Fallback to default query generation (using MAX_QUERIES)
         optimizedQueries = [
           `What are the best ${industry.toLowerCase()} companies?`,
           `Top ${industry.toLowerCase()} solutions for businesses`,
-          `How to choose a reliable ${industry.toLowerCase()} provider?`
-        ];
+          `How to choose a reliable ${industry.toLowerCase()} provider?`,
+          `Best ${industry.toLowerCase()} services for small businesses`,
+          `Which ${industry.toLowerCase()} company should I choose?`
+        ].slice(0, this.MAX_QUERIES);
       }
     }
 
@@ -242,6 +255,20 @@ export class AEOAnalysisService {
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 
+        // Also score all competitors using the same query results
+        const competitorScores = competitors.map(competitor => {
+          const competitorScoring = RankingEngine.calculateEnhancedAEOScore(queryResults, competitor.name);
+          return {
+            competitorId: competitor.id,
+            competitorName: competitor.name,
+            aeoScore: competitorScoring.aeoScore,
+            factors: competitorScoring.factors,
+            overallVisibility: competitorScoring.overallVisibility
+          };
+        });
+
+        console.debug(`📊 ${provider.name}: Main business score: ${scoring.aeoScore}/100, Competitor scores: ${competitorScores.map(c => `${c.competitorName}: ${c.aeoScore}`).join(', ')}`);
+
         const result: ProviderScoringResult = {
           provider,
           response: mainResponse,
@@ -251,7 +278,8 @@ export class AEOAnalysisService {
           queryVariations: queryResults,
           overallVisibility: scoring.overallVisibility,
           competitorAnalysis: scoring.competitorAnalysis,
-          missedResponses: scoring.missedResponses
+          missedResponses: scoring.missedResponses,
+          competitorScores // Add competitor scores to the result
         };
 
         console.debug(`✅ ${provider.name} analysis complete. Score: ${scoring.aeoScore}/100`);
@@ -277,7 +305,8 @@ export class AEOAnalysisService {
           queryVariations: [],
           overallVisibility: 0,
           competitorAnalysis: [],
-          missedResponses: []
+          missedResponses: [],
+          competitorScores: [] // Add empty competitor scores for failed providers
         };
       }
     });
@@ -345,6 +374,97 @@ export class AEOAnalysisService {
     });
 
     return aggregatedCompetitors;
+  }
+
+  /**
+   * Ranks competitor businesses using the same query prompts as the main business
+   */
+  static async rankCompetitors(
+    competitorBusinesses: Array<{id: number; name: string}>,
+    providers: AIProvider[],
+    optimizedQueries: string[],
+    userId: number,
+    runUuid: string
+  ): Promise<void> {
+    if (competitorBusinesses.length === 0) {
+      console.debug(`📊 No competitors to rank`);
+      return;
+    }
+
+    console.debug(`🏁 Starting competitor ranking for ${competitorBusinesses.length} competitors...`);
+
+    // Process each competitor
+    for (const competitor of competitorBusinesses) {
+      try {
+        console.debug(`🔍 Ranking competitor: ${competitor.name}`);
+
+        // Create analysis promises for all providers for this competitor
+        const competitorAnalysisPromises = providers.map(async (provider) => {
+          try {
+            const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
+            const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, competitor.name, optimizedQueries);
+            const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, competitor.name);
+
+            const providerName = provider.name.toLowerCase();
+            const rankScore = scoring.aeoScore;
+
+            return { provider: providerName, score: rankScore };
+          } catch (error) {
+            console.warn(`⚠️ Failed to analyze competitor ${competitor.name} with ${provider.name}:`, error);
+            return { provider: provider.name.toLowerCase(), score: 0 };
+          }
+        });
+
+        // Wait for all provider analyses for this competitor
+        const competitorResults = await Promise.all(competitorAnalysisPromises);
+
+        // Extract rankings by provider
+        let openaiRank: number | null = null;
+        let claudeRank: number | null = null;
+        let perplexityRank: number | null = null;
+
+        for (const result of competitorResults) {
+          if (result.provider.includes('openai')) {
+            openaiRank = result.score;
+          } else if (result.provider.includes('claude')) {
+            claudeRank = result.score;
+          } else if (result.provider.includes('perplexity')) {
+            perplexityRank = result.score;
+          }
+        }
+
+        // Calculate average rank
+        const ranks = [openaiRank, claudeRank, perplexityRank].filter(rank => rank !== null) as number[];
+        const averageRank = ranks.length > 0 ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) : null;
+
+        // Store competitor ranking results
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        await prisma.rankingHistory.create({
+          data: {
+            userId,
+            businessId: competitor.id,
+            date: today,
+            runUuid: `${runUuid}_competitor_${competitor.id}`, // Unique UUID for competitor ranking
+            openaiRank,
+            claudeRank,
+            perplexityRank,
+            averageRank,
+            websiteScore: null,
+            hasWebsiteAnalysis: false,
+          }
+        });
+
+        console.debug(`✅ Competitor ${competitor.name} ranked - Average: ${averageRank || 'N/A'}/100`);
+
+      } catch (error) {
+        console.warn(`⚠️ Failed to rank competitor ${competitor.name}:`, error);
+        // Continue with other competitors
+      }
+    }
+
+    console.debug(`🏆 Competitor ranking complete for ${competitorBusinesses.length} competitors`);
   }
 
   private static async saveAeoScore(
@@ -419,11 +539,42 @@ export class AEOAnalysisService {
     // Generate a unique UUID for this analysis run early
     const runUuid = randomUUID();
     
+    // Identify and store competitors (happens in background, doesn't affect user experience)
+    let competitorBusinesses: Array<{id: number; name: string}> = [];
+    try {
+      console.log(`🏆 COMPETITOR IDENTIFICATION START for ${request.businessName} (businessId: ${request.businessId})`);
+      
+      const competitors = await CompetitorService.identifyCompetitors({
+        businessName: request.businessName,
+        websiteUrl: request.websiteUrl,
+        description: request.marketDescription,
+        industry: request.industry,
+        location: request.location
+      });
+      
+      console.log(`🔍 AI identified ${competitors.length} competitors:`, competitors.map(c => c.name));
+      
+      if (competitors.length > 0) {
+        console.log(`💾 Storing ${competitors.length} competitors in database...`);
+        await CompetitorService.storeCompetitors(request.businessId, competitors);
+        console.log(`✅ Competitors stored successfully`);
+        
+        // Get stored competitor businesses for ranking
+        competitorBusinesses = await CompetitorService.getCompetitors(request.businessId);
+        console.log(`📊 Retrieved ${competitorBusinesses.length} competitor businesses for ranking:`, competitorBusinesses.map(c => `${c.name} (ID: ${c.id})`));
+      } else {
+        console.log(`ℹ️ No competitors identified for ${request.businessName}`);
+      }
+    } catch (error) {
+      console.error(`❌ Competitor identification failed:`, error);
+      // Don't fail the entire analysis if competitor identification fails
+    }
+    
     // Run parallel analysis
     const analysisPromises = [];
 
-    // 1. Run provider analysis
-    analysisPromises.push(this.analyzeProviders(request));
+    // 1. Run provider analysis with competitors
+    analysisPromises.push(this.analyzeProviders(request, competitorBusinesses));
 
     // 2. Run website analysis if URL provided
     let websiteAnalysisPromise = null;
@@ -528,10 +679,10 @@ export class AEOAnalysisService {
 
           // Use database transaction to ensure both records are created together
           await prisma.$transaction(async (tx) => {
-            // Save input history
+            // Save input history (userId optional for agnostic tracking)
             await tx.inputHistory.create({
               data: {
-                userId: userRecord.id,
+                userId: userRecord?.id || null,
                 runUuid,
                 businessId: request.businessId,
                 keywords: request.keywords,
@@ -539,11 +690,22 @@ export class AEOAnalysisService {
               }
             });
             
-            // Save ranking history with the same UUID
-            await tx.rankingHistory.create({
-              data: {
-                userId: userRecord.id,
+            // Create date for daily uniqueness (start of day)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Upsert main business ranking history - one per business per day
+            await tx.rankingHistory.upsert({
+              where: {
+                businessId_date: {
+                  businessId: request.businessId,
+                  date: today
+                }
+              },
+              create: {
+                userId: userRecord?.id || null,
                 businessId: request.businessId,
+                date: today,
                 runUuid,
                 openaiRank,
                 claudeRank,
@@ -551,10 +713,150 @@ export class AEOAnalysisService {
                 averageRank,
                 websiteScore: websiteAnalysis?.aeoOptimization?.currentScore || null,
                 hasWebsiteAnalysis: !!websiteAnalysis,
+              },
+              update: {
+                runUuid,
+                openaiRank,
+                claudeRank,
+                perplexityRank,
+                averageRank,
+                websiteScore: websiteAnalysis?.aeoOptimization?.currentScore || null,
+                hasWebsiteAnalysis: !!websiteAnalysis,
+                updatedAt: new Date(),
               }
             });
+
+            // Save individual query results for detailed analysis
+            for (const result of results) {
+              const providerName = result.provider.name.toLowerCase();
+              let aiProvider = 'unknown';
+              
+              if (providerName.includes('openai')) {
+                aiProvider = 'openai';
+              } else if (providerName.includes('claude')) {
+                aiProvider = 'claude';
+              } else if (providerName.includes('perplexity')) {
+                aiProvider = 'perplexity';
+              }
+
+              // Save each query result from this provider
+              for (const queryResult of result.queryVariations) {
+                await tx.queryResult.create({
+                  data: {
+                    userId: userRecord?.id || null,
+                    businessId: request.businessId,
+                    runUuid,
+                    query: queryResult.query,
+                    aiProvider,
+                    response: queryResult.response,
+                    mentioned: queryResult.mentioned,
+                    rankPosition: queryResult.rankPosition || null,
+                    relevanceScore: queryResult.relevanceScore || null,
+                    wordCount: queryResult.response.split(' ').length,
+                    businessDensity: queryResult.wordPositionData?.businessMentionDensity || null,
+                  }
+                });
+              }
+            }
+
+            // Save competitor ranking history - aggregate all providers for each competitor
+            console.debug(`🏆 Checking competitors: ${competitorBusinesses.length} competitor businesses found`);
+            if (competitorBusinesses.length > 0) {
+              console.debug(`💾 Processing competitor rankings for ${competitorBusinesses.length} competitors`);
+              
+              // Group competitor scores by competitor ID to create one record per competitor
+              const competitorRankings = new Map<number, { 
+                competitorId: number, 
+                openaiRank: number | null, 
+                claudeRank: number | null, 
+                perplexityRank: number | null 
+              }>();
+
+              // Collect all competitor scores across providers
+              for (const result of results) {
+                console.debug(`🔍 Checking provider ${result.provider.name} for competitor scores: ${result.competitorScores?.length || 0} scores found`);
+                if (result.competitorScores) {
+                  for (const competitorScore of result.competitorScores) {
+                    console.debug(`📊 Processing score for competitor ${competitorScore.competitorId}: ${competitorScore.aeoScore}`);
+                    const providerName = result.provider.name.toLowerCase();
+                    
+                    if (!competitorRankings.has(competitorScore.competitorId)) {
+                      competitorRankings.set(competitorScore.competitorId, {
+                        competitorId: competitorScore.competitorId,
+                        openaiRank: null,
+                        claudeRank: null,
+                        perplexityRank: null
+                      });
+                    }
+
+                    const competitorRanking = competitorRankings.get(competitorScore.competitorId)!;
+                    
+                    if (providerName.includes('openai')) {
+                      competitorRanking.openaiRank = competitorScore.aeoScore;
+                    } else if (providerName.includes('claude')) {
+                      competitorRanking.claudeRank = competitorScore.aeoScore;
+                    } else if (providerName.includes('perplexity')) {
+                      competitorRanking.perplexityRank = competitorScore.aeoScore;
+                    }
+                  }
+                }
+              }
+
+              // Create ranking history records for each competitor
+              console.debug(`📝 Creating ranking history records for ${competitorRankings.size} competitors`);
+              
+              for (const [competitorId, ranking] of competitorRankings) {
+                const ranks = [ranking.openaiRank, ranking.claudeRank, ranking.perplexityRank]
+                  .filter(rank => rank !== null) as number[];
+                const averageRank = ranks.length > 0 
+                  ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) 
+                  : null;
+
+                console.debug(`💾 Saving competitor ${competitorId} ranking: OpenAI=${ranking.openaiRank}, Claude=${ranking.claudeRank}, Perplexity=${ranking.perplexityRank}, Average=${averageRank}`);
+
+                try {
+                  // Upsert competitor ranking - one per competitor per day
+                  const competitorRankingRecord = await tx.rankingHistory.upsert({
+                    where: {
+                      businessId_date: {
+                        businessId: competitorId,
+                        date: today
+                      }
+                    },
+                    create: {
+                      userId: null, // Competitors are userId agnostic
+                      businessId: competitorId, // Use competitor's own business ID
+                      date: today,
+                      runUuid: `${runUuid}_competitor_${competitorId}`, // Link to main analysis run
+                      openaiRank: ranking.openaiRank,
+                      claudeRank: ranking.claudeRank,
+                      perplexityRank: ranking.perplexityRank,
+                      averageRank,
+                      websiteScore: null,
+                      hasWebsiteAnalysis: false,
+                    },
+                    update: {
+                      runUuid: `${runUuid}_competitor_${competitorId}`,
+                      openaiRank: ranking.openaiRank,
+                      claudeRank: ranking.claudeRank,
+                      perplexityRank: ranking.perplexityRank,
+                      averageRank,
+                      updatedAt: new Date(),
+                    }
+                  });
+                  
+                  console.debug(`✅ Successfully upserted competitor ${competitorId} ranking to database with record ID: ${competitorRankingRecord.id}`);
+                } catch (competitorInsertError) {
+                  console.error(`❌ Failed to upsert competitor ${competitorId} ranking:`, competitorInsertError);
+                  throw competitorInsertError; // Re-throw to fail the transaction
+                }
+              }
+            } else {
+              console.debug(`ℹ️ No competitors found for ranking storage`);
+            }
           });
 
+          console.debug(`✅ Database transaction completed successfully for analysis run ${runUuid}`);
           console.debug(`✅ Saved analysis run ${runUuid} for ${request.businessName} - Average: ${averageRank || 'N/A'}/100`);
 
           // Save AEO scores for professional+ users (legacy format for backward compatibility)

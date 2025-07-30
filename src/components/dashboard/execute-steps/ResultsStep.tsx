@@ -40,7 +40,7 @@ interface ResultsStepProps {
 
 export default function ResultsStep({
   results,
-  overallCompetitors,
+  overallCompetitors: _overallCompetitors,
   queryIndexes,
   setQueryIndexes
 }: ResultsStepProps) {
@@ -82,35 +82,6 @@ export default function ResultsStep({
         </button>
       </div>
 
-      {/* Overall Competitor Landscape */}
-      {overallCompetitors.length > 0 && (
-        <div className="bg-gray-700 rounded-lg p-6">
-          <h4 className="text-lg font-semibold text-white mb-4">🏆 Competitor Landscape</h4>
-          <p className="text-gray-400 mb-6">Competitors identified across all AI models during analysis</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {overallCompetitors.map((competitor, idx) => (
-              <div key={idx} className="bg-gray-800 rounded-lg p-4 border border-gray-600">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-white">{competitor.name}</span>
-                  <div className="text-right">
-                    <div className="text-sm font-medium text-blue-400">{competitor.mentions}</div>
-                    <div className="text-xs text-gray-400">mentions</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {overallCompetitors.length === 0 && (
-            <div className="text-center py-8 text-gray-400">
-              <div className="text-4xl mb-4">🎉</div>
-              <p>No significant competitors found across all AI models!</p>
-              <p className="text-sm mt-2">This could indicate a unique market position or niche focus.</p>
-            </div>
-          )}
-        </div>
-      )}
       
       <div className="space-y-6">
         {results.map((result, index) => {

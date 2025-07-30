@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const requestData: AnalysisRequest = await request.json();
     const result = await AEOAnalysisService.runAnalysis(requestData);
-    console.log("AEO Score API: ", result);
+    console.log("AEO Score API final result: ", result);
     return NextResponse.json(result);
   } catch (error) {
     console.error('❌ AEO Score API error:', error);
