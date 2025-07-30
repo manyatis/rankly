@@ -12,14 +12,14 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
           {/* Left Column - Text Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-              Analyze Your Site&apos;s Visibility
+              Improve Your Site&apos;s Visibility
             </h1>
             <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-              Track 1 site free - See how your website ranks across all major AI engines and get actionable optimization recommendations.
+             See how your website ranks across all major AI engines and get actionable optimization recommendations.
             </p>
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 sm:gap-4 mb-8 sm:mb-12">
               <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg text-base sm:text-lg">
-                Analyze Your Site Free
+                Analyze & Improve Your Site Free
               </Link>
               <button
                 onClick={onCreateAccount}
