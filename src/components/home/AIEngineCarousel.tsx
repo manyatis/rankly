@@ -58,19 +58,21 @@ export default function AIEngineCarousel() {
   const duplicatedEngines = [...aiEngines, ...aiEngines, ...aiEngines];
 
   return (
-    <div className="w-full overflow-hidden py-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div className="w-full overflow-hidden py-2 sm:py-4">
       <div className="relative">
         <div className="carousel-container">
           <div className="carousel-track">
             {duplicatedEngines.map((engine, index) => (
               <div
                 key={`${engine.name}-${index}`}
-                className="carousel-item flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-lg shadow-sm border border-gray-600 whitespace-nowrap"
+                className="carousel-item flex items-center space-x-1.5 sm:space-x-2 bg-gray-800 px-2 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg shadow-sm border border-gray-600 whitespace-nowrap"
               >
-                <div className={`w-6 h-6 ${engine.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
-                  {engine.icon}
+                <div className={`w-4 h-4 sm:w-6 sm:h-6 ${engine.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                  <div className="scale-75 sm:scale-100">
+                    {engine.icon}
+                  </div>
                 </div>
-                <span className="text-sm font-medium text-gray-300">{engine.name}</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-300">{engine.name}</span>
               </div>
             ))}
           </div>

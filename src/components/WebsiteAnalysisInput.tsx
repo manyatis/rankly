@@ -73,8 +73,8 @@ export default function WebsiteAnalysisInput({
   const sizeConfig = {
     small: {
       container: 'flex-col sm:flex-row gap-2',
-      input: 'px-3 py-2 text-sm',
-      button: 'px-4 py-2 text-sm'
+      input: 'px-3 py-2.5 text-sm',
+      button: 'px-4 py-2.5 text-sm'
     },
     medium: {
       container: 'flex-col sm:flex-row gap-3',
