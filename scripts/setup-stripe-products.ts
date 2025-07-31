@@ -1,5 +1,14 @@
-import { stripe } from '../src/lib/stripe-server';
+import Stripe from 'stripe';
 import { prisma } from '../src/lib/prisma';
+
+// Hardcode your Stripe secret key here
+const STRIPE_SECRET_KEY = 'sk_test_51Rqmd1RdBVc2VZ7lzF80zy8sqC39MQjm3DeO86sco56hRwflHmkSZ2LFmxFLVg9jNDxzkb4jsnbDD3MLSFUNxGFX00BPhdKtGJ';
+
+// Create Stripe instance with hardcoded key
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: '2025-07-30.basil',
+  typescript: true,
+});
 
 async function setupStripeProducts() {
   console.log('🔧 Setting up Stripe products and prices...');
@@ -86,10 +95,10 @@ async function setupStripeProducts() {
   }
 }
 
-// Add environment check
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('❌ STRIPE_SECRET_KEY environment variable is required');
-  console.log('Please add your Stripe secret key to .env file');
+// Validate key format
+if (!STRIPE_SECRET_KEY.startsWith('sk_')) {
+  console.error('❌ Invalid Stripe secret key format');
+  console.log('Stripe secret keys should start with sk_test_ or sk_live_');
   process.exit(1);
 }
 

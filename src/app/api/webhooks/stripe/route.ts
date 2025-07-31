@@ -34,7 +34,17 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionChange(event.data.object as Stripe.Subscription);
         break;
       
-      // Note: invoice events will be handled in a future update
+      case 'invoice.payment_succeeded':
+        await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        break;
+      
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+      
+      case 'invoice.payment_action_required':
+        console.log('⚠️ Payment requires additional action for invoice:', (event.data.object as Stripe.Invoice).id);
+        break;
       
       default:
         console.log(`🔔 Unhandled webhook event type: ${event.type}`);
@@ -132,5 +142,80 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   });
 
   console.log('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan || 'unchanged');
+}
+
+async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+  console.log('💳 Invoice payment succeeded:', invoice.id);
+  
+  // Only process subscription invoices
+  if (!invoice.subscription) {
+    console.log('ℹ️ Invoice not related to a subscription, skipping');
+    return;
+  }
+
+  // Find user by customer ID
+  const user = await prisma.user.findFirst({
+    where: { stripeCustomerId: invoice.customer as string }
+  });
+
+  if (!user) {
+    console.error('❌ User not found for customer:', invoice.customer);
+    return;
+  }
+
+  // Fetch the latest subscription status from Stripe
+  const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+  
+  console.log('🔄 Subscription status after payment:', subscription.status);
+  
+  // If subscription is now active, update the user
+  if (subscription.status === 'active') {
+    // Get the plan details
+    const priceId = subscription.items.data[0]?.price.id;
+    const plan = await prisma.subscriptionPlan.findFirst({
+      where: { stripePriceId: priceId }
+    });
+    
+    if (plan) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          subscriptionStatus: 'active',
+          plan: plan.planId,
+          subscriptionTier: plan.planId,
+          subscriptionStartDate: new Date()
+        }
+      });
+      
+      console.log('✅ User upgraded to', plan.name, 'plan after successful payment');
+    }
+  }
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  console.log('❌ Invoice payment failed:', invoice.id);
+  
+  // Only process subscription invoices
+  if (!invoice.subscription) {
+    return;
+  }
+
+  // Find user by customer ID
+  const user = await prisma.user.findFirst({
+    where: { stripeCustomerId: invoice.customer as string }
+  });
+
+  if (!user) {
+    console.error('❌ User not found for customer:', invoice.customer);
+    return;
+  }
+
+  // Log the failure but don't immediately downgrade
+  // Stripe will retry the payment according to your retry settings
+  console.log('⚠️ Payment failed for user:', user.email);
+  console.log('ℹ️ Stripe will retry according to retry rules');
+  
+  // You might want to send an email to the user here
+  // or update a payment_failed flag in the database
 }
 

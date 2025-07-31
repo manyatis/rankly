@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       items: [{ price: stripePriceId }],
       payment_behavior: 'default_incomplete',
       payment_settings: { save_default_payment_method: 'on_subscription' },
-      expand: ['latest_invoice.payment_intent'],
+      expand: ['latest_invoice.payment_intent', 'latest_invoice'],
       metadata: {
         userId: user.id.toString(),
         planId: subscriptionPlan.planId,
@@ -160,8 +160,23 @@ export async function POST(request: NextRequest) {
     console.log('✅ User subscription updated in database with status:', subscription.status);
 
     // Get the payment intent from the subscription
-    const invoice = subscription.latest_invoice as { payment_intent?: { client_secret?: string } };
-    const paymentIntent = invoice?.payment_intent;
+    const expandedSubscription = subscription as Stripe.Response<Stripe.Subscription> & {
+      latest_invoice?: Stripe.Invoice & {
+        payment_intent?: Stripe.PaymentIntent;
+      };
+    };
+    const latestInvoice = expandedSubscription.latest_invoice;
+    const paymentIntent = latestInvoice?.payment_intent;
+    
+    console.log('💳 Invoice status:', latestInvoice?.status);
+    console.log('💳 Payment intent:', paymentIntent?.id);
+    console.log('💳 Payment intent status:', paymentIntent?.status);
+    console.log('💳 Client secret:', paymentIntent?.client_secret ? 'Present' : 'Missing');
+
+    // If there's no client secret, the subscription might be immediately active (e.g., trial period)
+    if (!paymentIntent?.client_secret && subscription.status === 'active') {
+      console.log('✅ Subscription is already active without payment');
+    }
 
     return NextResponse.json({
       success: true,
@@ -170,6 +185,7 @@ export async function POST(request: NextRequest) {
       planId: planId,
       planName: subscriptionPlan.name,
       clientSecret: paymentIntent?.client_secret,
+      invoiceStatus: latestInvoice?.status,
       message: 'Subscription created successfully'
     });
 
