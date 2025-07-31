@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripeConfig } from '@/lib/stripe';
@@ -22,12 +22,7 @@ function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormP
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  // Create subscription on component mount
-  useEffect(() => {
-    createSubscription();
-  }, []);
-
-  const createSubscription = async () => {
+  const createSubscription = useCallback(async () => {
     try {
       const response = await fetch('/api/subscriptions/create-stripe', {
         method: 'POST',
@@ -53,7 +48,12 @@ function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormP
       console.error('Error creating subscription:', error);
       onError(error instanceof Error ? error.message : 'Failed to create subscription');
     }
-  };
+  }, [planId, onSuccess, onError]);
+
+  // Create subscription on component mount
+  useEffect(() => {
+    createSubscription();
+  }, [createSubscription]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

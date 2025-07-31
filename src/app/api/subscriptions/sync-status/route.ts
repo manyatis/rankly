@@ -4,7 +4,7 @@ import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);
@@ -58,7 +58,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user in database
-    const updateData: any = {
+    const updateData: {
+      subscriptionStatus: string;
+      stripePriceId: string | null;
+      plan?: string;
+      subscriptionTier?: string;
+      subscriptionStartDate?: Date;
+      subscriptionEndDate?: Date;
+    } = {
       subscriptionStatus: subscription.status,
       stripePriceId: subscription.items.data[0]?.price.id || null,
     };
