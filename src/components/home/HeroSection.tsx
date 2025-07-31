@@ -39,8 +39,8 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
           </div>
 
           {/* Right Column - Video Only */}
-          <div className="order-1 lg:order-2">
-            {/* Demo Video */}
+          {/* <div className="order-1 lg:order-2">
+            Demo Video
             <div className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-black">
               <video 
                 controls 
@@ -54,7 +54,7 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
                 Your browser does not support the video tag.
               </video>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
