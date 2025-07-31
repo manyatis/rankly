@@ -223,6 +223,58 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Track Your Competitors Section */}
+          <div className="mt-16 sm:mt-20">
+            <div className="bg-gray-800 rounded-2xl p-8 sm:p-12 shadow-lg border border-gray-600">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                    Track Your Competitors
+                  </h3>
+                  <p className="text-gray-300 mb-6 text-base sm:text-lg">
+                    See how your website ranks against competitors across AI search engines. 
+                    Identify opportunities and stay ahead of the competition in the age of AI-powered search.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center text-gray-300">
+                      <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Compare rankings across ChatGPT, Claude, and Perplexity</span>
+                    </div>
+                    <div className="flex items-center text-gray-300">
+                      <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Identify top-performing competitor strategies</span>
+                    </div>
+                    <div className="flex items-center text-gray-300">
+                      <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Track competitive positioning over time</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative">
+                  <div className="bg-gray-700 rounded-xl p-4 shadow-lg">
+                    <Image
+                      src="/competitors.png"
+                      alt="Competitor tracking dashboard showing rankings across AI search engines"
+                      width={600}
+                      height={400}
+                      className="w-full h-auto rounded-lg"
+                      priority={false}
+                    />
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                    Live Competitor Data
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Charts Section */}
           <div className="mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* SEO Effectiveness Chart */}
@@ -315,8 +367,7 @@ export default function Home() {
           <div className="text-center mb-16">
             {/* <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2> */}
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Get your first site analysis free to see how your website ranks across AI engines. Perfect for businesses wanting to understand their visibility 
-              and get actionable optimization recommendations.
+              Get your first site analysis free to see how your website ranks across AI engines.
             </p>
           </div>
 
@@ -324,15 +375,15 @@ export default function Home() {
           <div className="mb-16">
             <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-8 shadow-2xl overflow-hidden">
               <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium border border-gray-500 z-20 shadow-lg">
-                📊 Live Dashboard
+                Insights
               </div>
               
               {/* Screenshot Container */}
               <div className="relative">
                 <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg">
                   <Image 
-                    src="/dashboard.png" 
-                    alt="Rankly Dashboard - Visibility Analysis" 
+                    src="/insights.png" 
+                    alt="Rankly Insights - AI Visibility Analytics" 
                     width={1200} 
                     height={675} 
                     className="w-full h-auto"
@@ -343,8 +394,8 @@ export default function Home() {
               
               {/* Dashboard Title */}
               <div className="text-center mt-6">
-                <h3 className="text-xl font-bold text-white mb-1">Complete Visibility Analysis</h3>
-                <p className="text-gray-400 text-sm">Track your performance across ChatGPT, Claude, Perplexity, and more</p>
+                <h3 className="text-xl font-bold text-white mb-1">Get Automatic Insights to Boost Your Visibility</h3>
+                <p className="text-gray-400 text-sm">AI-powered recommendations to improve your rankings across all search engines</p>
               </div>
             </div>
           </div>

@@ -115,7 +115,7 @@ async function generateStackOverflowData() {
 }
 
 async function generateDataForBusiness(business) {
-  console.log('📊 Generating 30 days of data...');
+  console.log('📊 Generating data for July 19-30 + recent days...');
   
   // Find a user to associate the data with
   const user = await prisma.user.findFirst();
@@ -124,17 +124,38 @@ async function generateDataForBusiness(business) {
   }
   console.log('👤 Using user ID:', user.id);
   
-  // Clean up existing demo data for this business
-  console.log('🧹 Cleaning up existing demo data...');
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Define the date ranges we want to generate
+  const datesToGenerate = [];
+  
+  // July 19-30, 2025 (the missing data)
+  for (let day = 19; day <= 30; day++) {
+    const date = new Date(2025, 6, day, 10, 0, 0, 0); // July is month 6 (0-indexed)
+    datesToGenerate.push(date);
+  }
+  
+  // Add last 7 days for recent data
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    date.setHours(10, 0, 0, 0);
+    datesToGenerate.push(date);
+  }
+  
+  console.log(`📅 Will generate data for ${datesToGenerate.length} days`);
+  
+  // Clean up existing data for the date ranges
+  console.log('🧹 Cleaning up existing data for target dates...');
+  const earliestDate = datesToGenerate[0];
+  const latestDate = datesToGenerate[datesToGenerate.length - 1];
   
   await prisma.aeoScore.deleteMany({
     where: {
       businessId: business.id,
       userId: user.id,
       date: {
-        gte: thirtyDaysAgo
+        gte: earliestDate,
+        lte: latestDate
       }
     }
   });
@@ -144,7 +165,8 @@ async function generateDataForBusiness(business) {
       businessId: business.id,
       userId: user.id,
       createdAt: {
-        gte: thirtyDaysAgo
+        gte: earliestDate,
+        lte: latestDate
       }
     }
   });
@@ -154,24 +176,23 @@ async function generateDataForBusiness(business) {
       businessId: business.id,
       userId: user.id,
       date: {
-        gte: thirtyDaysAgo
+        gte: earliestDate,
+        lte: latestDate
       }
     }
   });
   
-  const runUuid = `demo-${Date.now()}`;
-  const now = new Date();
+  const runUuid = `stackoverflow-${Date.now()}`;
   
-  // Generate data for the last 30 days
-  for (let dayOffset = 29; dayOffset >= 0; dayOffset--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - dayOffset);
-    date.setHours(10, 0, 0, 0); // Set to 10 AM for consistency
+  // Generate data for each specific date
+  for (let i = 0; i < datesToGenerate.length; i++) {
+    const date = datesToGenerate[i];
+    const dayNumber = i + 1; // Simple sequential numbering: 1, 2, 3, etc.
     
-    console.log(`📅 Generating data for ${date.toDateString()} (day ${30 - dayOffset}/30)`);
+    console.log(`📅 Generating data for ${date.toDateString()} (${dayNumber}/${datesToGenerate.length})`);
     
-    // Generate AEO Score for this day (upsert to handle unique constraint)
-    const aeoScore = Math.round(generateTrendingScore(30 - dayOffset, 74));
+    // Generate AEO Score for this day
+    const aeoScore = Math.round(generateTrendingScore(dayNumber, 74));
     await prisma.aeoScore.upsert({
       where: {
         userId_date_businessId: {
@@ -182,34 +203,34 @@ async function generateDataForBusiness(business) {
       },
       update: {
         score: aeoScore,
-        keywords: sampleQueries.slice(0, 5), // Use first 5 queries as keywords
-        visibility: Math.round(generateTrendingScore(30 - dayOffset, 82)),
-        ranking: Math.round(generateTrendingScore(30 - dayOffset, 78)),
-        relevance: Math.round(generateTrendingScore(30 - dayOffset, 85)),
-        accuracy: Math.round(generateTrendingScore(30 - dayOffset, 88))
+        keywords: sampleQueries.slice(0, 5),
+        visibility: Math.round(generateTrendingScore(dayNumber, 82)),
+        ranking: Math.round(generateTrendingScore(dayNumber, 78)),
+        relevance: Math.round(generateTrendingScore(dayNumber, 85)),
+        accuracy: Math.round(generateTrendingScore(dayNumber, 88))
       },
       create: {
         userId: user.id,
         businessId: business.id,
         date: date,
         score: aeoScore,
-        keywords: sampleQueries.slice(0, 5), // Use first 5 queries as keywords
-        visibility: Math.round(generateTrendingScore(30 - dayOffset, 82)),
-        ranking: Math.round(generateTrendingScore(30 - dayOffset, 78)),
-        relevance: Math.round(generateTrendingScore(30 - dayOffset, 85)),
-        accuracy: Math.round(generateTrendingScore(30 - dayOffset, 88))
+        keywords: sampleQueries.slice(0, 5),
+        visibility: Math.round(generateTrendingScore(dayNumber, 82)),
+        ranking: Math.round(generateTrendingScore(dayNumber, 78)),
+        relevance: Math.round(generateTrendingScore(dayNumber, 85)),
+        accuracy: Math.round(generateTrendingScore(dayNumber, 88))
       }
     });
 
     // Generate 3-5 queries for this day
     const numQueries = getRandomNumber(3, 5);
     
-    for (let i = 0; i < numQueries; i++) {
+    for (let queryIndex = 0; queryIndex < numQueries; queryIndex++) {
       const query = getRandomElement(sampleQueries);
       const aiEngine = getRandomElement(aiEngines);
       
-      // Create query result
-      const queryResult = await prisma.queryResult.create({
+      // Create query result with clear UUID
+      await prisma.queryResult.create({
         data: {
           userId: user.id,
           businessId: business.id,
@@ -220,119 +241,48 @@ async function generateDataForBusiness(business) {
           rankPosition: getRandomNumber(1, 5),
           relevanceScore: getRandomNumber(75, 95),
           wordCount: getRandomNumber(150, 400),
-          businessDensity: Math.random() * 0.3 + 0.1, // 0.1 to 0.4
+          businessDensity: Math.random() * 0.3 + 0.1,
           createdAt: date,
-          runUuid: `${runUuid}-day${dayOffset}-q${i}`
+          runUuid: `${runUuid}-${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-q${queryIndex + 1}`
         }
       });
-
-      // Generate ranking history for StackOverflow (upsert due to unique constraint)
-      const stackOverflowRank = Math.round(generateTrendingScore(30 - dayOffset, 75));
-      await prisma.rankingHistory.upsert({
-        where: {
-          businessId_date: {
-            businessId: business.id,
-            date: date
-          }
-        },
-        update: {
-          openaiRank: aiEngine === 'ChatGPT' ? stackOverflowRank : null,
-          claudeRank: aiEngine === 'Claude' ? stackOverflowRank : null,
-          perplexityRank: aiEngine === 'Perplexity' ? stackOverflowRank : null,
-          averageRank: stackOverflowRank,
-          websiteScore: Math.round(generateTrendingScore(30 - dayOffset, 80)),
-          hasWebsiteAnalysis: true,
-          runUuid: `${runUuid}-day${dayOffset}-q${i}`
-        },
-        create: {
-          userId: user.id,
-          businessId: business.id,
-          date: date,
-          openaiRank: aiEngine === 'ChatGPT' ? stackOverflowRank : null,
-          claudeRank: aiEngine === 'Claude' ? stackOverflowRank : null,
-          perplexityRank: aiEngine === 'Perplexity' ? stackOverflowRank : null,
-          averageRank: stackOverflowRank,
-          websiteScore: Math.round(generateTrendingScore(30 - dayOffset, 80)),
-          hasWebsiteAnalysis: true,
-          runUuid: `${runUuid}-day${dayOffset}-q${i}`
-        }
-      });
-
-      // Generate some competitor rankings
-      const numCompetitors = getRandomNumber(3, 6);
-      for (let j = 0; j < numCompetitors; j++) {
-        const competitor = getRandomElement(competitors);
-        
-        // Find or create competitor business
-        let competitorBusiness = await prisma.business.findFirst({
-          where: { websiteUrl: { contains: competitor.domain } }
-        });
-
-        if (!competitorBusiness) {
-          competitorBusiness = await prisma.business.create({
-            data: {
-              websiteName: competitor.name,
-              websiteUrl: `https://${competitor.domain}`,
-              industry: 'Technology',
-              location: 'Global',
-              description: `${competitor.name} - Technology platform and community`,
-              isCompetitor: true
-            }
-          });
-        }
-
-        // Create competitor ranking (upsert due to unique constraint)
-        const competitorRank = Math.round(generateTrendingScore(30 - dayOffset, 60));
-        await prisma.rankingHistory.upsert({
-          where: {
-            businessId_date: {
-              businessId: competitorBusiness.id,
-              date: date
-            }
-          },
-          update: {
-            openaiRank: aiEngine === 'ChatGPT' ? competitorRank : null,
-            claudeRank: aiEngine === 'Claude' ? competitorRank : null,
-            perplexityRank: aiEngine === 'Perplexity' ? competitorRank : null,
-            averageRank: competitorRank,
-            websiteScore: Math.round(generateTrendingScore(30 - dayOffset, 65)),
-            hasWebsiteAnalysis: false,
-            runUuid: `${runUuid}-day${dayOffset}-q${i}-comp${j}`
-          },
-          create: {
-            userId: user.id,
-            businessId: competitorBusiness.id,
-            date: date,
-            openaiRank: aiEngine === 'ChatGPT' ? competitorRank : null,
-            claudeRank: aiEngine === 'Claude' ? competitorRank : null,
-            perplexityRank: aiEngine === 'Perplexity' ? competitorRank : null,
-            averageRank: competitorRank,
-            websiteScore: Math.round(generateTrendingScore(30 - dayOffset, 65)),
-            hasWebsiteAnalysis: false,
-            runUuid: `${runUuid}-day${dayOffset}-q${i}-comp${j}`
-          }
-        });
-
-        // Create competitor relationship if it doesn't exist
-        const existingRelation = await prisma.competitor.findFirst({
-          where: {
-            businessId: business.id,
-            competitorId: competitorBusiness.id
-          }
-        });
-
-        if (!existingRelation) {
-          await prisma.competitor.create({
-            data: {
-              businessId: business.id,
-              competitorId: competitorBusiness.id,
-              identifiedBy: 'ai',
-              confidence: 0.8 + Math.random() * 0.2 // 0.8 to 1.0
-            }
-          });
-        }
-      }
     }
+    
+    // Generate ranking history for this day
+    const openaiRank = Math.round(generateTrendingScore(dayNumber, 75));
+    const claudeRank = Math.round(generateTrendingScore(dayNumber, 78)); 
+    const perplexityRank = Math.round(generateTrendingScore(dayNumber, 72));
+    const averageRank = Math.round((openaiRank + claudeRank + perplexityRank) / 3);
+    
+    await prisma.rankingHistory.upsert({
+      where: {
+        businessId_date: {
+          businessId: business.id,
+          date: date
+        }
+      },
+      update: {
+        openaiRank: openaiRank,
+        claudeRank: claudeRank,
+        perplexityRank: perplexityRank,
+        averageRank: averageRank,
+        websiteScore: Math.round(generateTrendingScore(dayNumber, 80)),
+        hasWebsiteAnalysis: true,
+        runUuid: `${runUuid}-${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      },
+      create: {
+        userId: user.id,
+        businessId: business.id,
+        date: date,
+        openaiRank: openaiRank,
+        claudeRank: claudeRank,
+        perplexityRank: perplexityRank,
+        averageRank: averageRank,
+        websiteScore: Math.round(generateTrendingScore(dayNumber, 80)),
+        hasWebsiteAnalysis: true,
+        runUuid: `${runUuid}-${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      }
+    });
   }
 
   // Generate some AI insights
@@ -375,14 +325,13 @@ async function generateDataForBusiness(business) {
     });
   }
 
-  console.log('✅ Successfully generated 30 days of demo data for StackOverflow!');
+  console.log('✅ Successfully generated StackOverflow demo data!');
   console.log(`📈 Generated data includes:`);
-  console.log(`   • 30 daily AEO scores with upward trend`);
-  console.log(`   • ${30 * 4} query results across 5 AI engines`);
-  console.log(`   • Ranking positions for StackOverflow and competitors`);
-  console.log(`   • ${competitors.length} competitor businesses`);
+  console.log(`   • ${datesToGenerate.length} daily AEO scores (July 19-30 + recent days)`);
+  console.log(`   • ${datesToGenerate.length * 4} query results across 5 AI engines`);
+  console.log(`   • Daily ranking history with clear date-based runUuids`);
   console.log(`   • ${insights.length} AI insights`);
-  console.log(`   • Competitor relationships`);
+  console.log(`   • Data range: ${datesToGenerate[0].toDateString()} to ${datesToGenerate[datesToGenerate.length - 1].toDateString()}`);
 }
 
 // Run the script

@@ -23,6 +23,7 @@ ChartJS.register(
 
 interface RankingData {
   id: number;
+  date: string;
   createdAt: string;
   openaiRank?: number;
   claudeRank?: number;
@@ -100,15 +101,43 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
 
   // Generate chart data dynamically including competitors
   const generateChartData = () => {
-    const labels = rankingData.map(item => {
-      const date = new Date(item.createdAt);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Generate complete date range for the time period
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - timeRange);
+    
+    const dateRange: Date[] = [];
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      dateRange.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Create labels from the complete date range
+    const labels = dateRange.map(date => {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric'
+      });
     });
+    
+    // Map data to the complete date range
+    const mapDataToDateRange = (field: keyof RankingData) => {
+      return dateRange.map(date => {
+        const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const dataPoint = rankingData.find(item => {
+          const itemDate = new Date(item.date).toISOString().split('T')[0];
+          return itemDate === dateStr;
+        });
+        return dataPoint ? dataPoint[field] || null : null;
+      });
+    };
 
     const datasets = [
       {
         label: 'Average Rank',
-        data: rankingData.map(item => item.averageRank || null),
+        data: mapDataToDateRange('averageRank'),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 4,
@@ -117,7 +146,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
       },
       {
         label: 'OpenAI',
-        data: rankingData.map(item => item.openaiRank || null),
+        data: mapDataToDateRange('openaiRank'),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         borderWidth: 3,
@@ -126,7 +155,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
       },
       {
         label: 'Claude',
-        data: rankingData.map(item => item.claudeRank || null),
+        data: mapDataToDateRange('claudeRank'),
         borderColor: 'rgb(251, 146, 60)',
         backgroundColor: 'rgba(251, 146, 60, 0.1)',
         borderWidth: 3,
@@ -135,7 +164,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
       },
       {
         label: 'Perplexity',
-        data: rankingData.map(item => item.perplexityRank || null),
+        data: mapDataToDateRange('perplexityRank'),
         borderColor: 'rgb(248, 113, 113)',
         backgroundColor: 'rgba(248, 113, 113, 0.1)',
         borderWidth: 3,
@@ -211,8 +240,15 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
   const previousData = rankingData[rankingData.length - 2];
 
   const calculateChange = (current?: number, previous?: number) => {
-    if (!current || !previous) return null;
+    if (current === undefined || current === null) return null;
+    if (previous === undefined || previous === null) return null;
     return current - previous;
+  };
+
+  const formatChange = (change: number | null) => {
+    if (change === null) return null;
+    if (change === 0) return '+0';
+    return change > 0 ? `+${change}` : `${change}`;
   };
 
   if (loading) {
@@ -292,75 +328,99 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
       {/* Stats Cards */}
       {latestData && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Average Rank">
             <h3 className="text-sm font-medium text-gray-400 mb-1">Average Rank</h3>
             <div className="flex items-center">
               <span className="text-2xl font-bold text-blue-600">
                 {latestData.averageRank || 0}
               </span>
-              {calculateChange(latestData.averageRank, previousData?.averageRank) !== null && (
-                <span className={`ml-2 text-sm ${
-                  calculateChange(latestData.averageRank, previousData?.averageRank)! > 0 
-                    ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {calculateChange(latestData.averageRank, previousData?.averageRank)! > 0 ? '+' : ''}
-                  {calculateChange(latestData.averageRank, previousData?.averageRank)}
-                </span>
-              )}
+              {(() => {
+                const change = calculateChange(latestData.averageRank, previousData?.averageRank);
+                const formattedChange = formatChange(change);
+                if (formattedChange !== null) {
+                  return (
+                    <span className={`ml-2 text-sm ${
+                      change === 0 ? 'text-gray-400' :
+                      change! > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {formattedChange}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's OpenAI Rank">
             <h3 className="text-sm font-medium text-gray-400 mb-1">OpenAI Rank</h3>
             <div className="flex items-center">
               <span className="text-2xl font-bold text-green-400">
                 {latestData.openaiRank || 0}
               </span>
-              {calculateChange(latestData.openaiRank, previousData?.openaiRank) !== null && (
-                <span className={`ml-2 text-sm ${
-                  calculateChange(latestData.openaiRank, previousData?.openaiRank)! > 0 
-                    ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {calculateChange(latestData.openaiRank, previousData?.openaiRank)! > 0 ? '+' : ''}
-                  {calculateChange(latestData.openaiRank, previousData?.openaiRank)}
-                </span>
-              )}
+              {(() => {
+                const change = calculateChange(latestData.openaiRank, previousData?.openaiRank);
+                const formattedChange = formatChange(change);
+                if (formattedChange !== null) {
+                  return (
+                    <span className={`ml-2 text-sm ${
+                      change === 0 ? 'text-gray-400' :
+                      change! > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {formattedChange}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Claude Rank">
             <h3 className="text-sm font-medium text-gray-400 mb-1">Claude Rank</h3>
             <div className="flex items-center">
               <span className="text-2xl font-bold text-orange-400">
                 {latestData.claudeRank || 0}
               </span>
-              {calculateChange(latestData.claudeRank, previousData?.claudeRank) !== null && (
-                <span className={`ml-2 text-sm ${
-                  calculateChange(latestData.claudeRank, previousData?.claudeRank)! > 0 
-                    ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {calculateChange(latestData.claudeRank, previousData?.claudeRank)! > 0 ? '+' : ''}
-                  {calculateChange(latestData.claudeRank, previousData?.claudeRank)}
-                </span>
-              )}
+              {(() => {
+                const change = calculateChange(latestData.claudeRank, previousData?.claudeRank);
+                const formattedChange = formatChange(change);
+                if (formattedChange !== null) {
+                  return (
+                    <span className={`ml-2 text-sm ${
+                      change === 0 ? 'text-gray-400' :
+                      change! > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {formattedChange}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Perplexity Rank">
             <h3 className="text-sm font-medium text-gray-400 mb-1">Perplexity Rank</h3>
             <div className="flex items-center">
               <span className="text-2xl font-bold text-red-400">
                 {latestData.perplexityRank || 0}
               </span>
-              {calculateChange(latestData.perplexityRank, previousData?.perplexityRank) !== null && (
-                <span className={`ml-2 text-sm ${
-                  calculateChange(latestData.perplexityRank, previousData?.perplexityRank)! > 0 
-                    ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {calculateChange(latestData.perplexityRank, previousData?.perplexityRank)! > 0 ? '+' : ''}
-                  {calculateChange(latestData.perplexityRank, previousData?.perplexityRank)}
-                </span>
-              )}
+              {(() => {
+                const change = calculateChange(latestData.perplexityRank, previousData?.perplexityRank);
+                const formattedChange = formatChange(change);
+                if (formattedChange !== null) {
+                  return (
+                    <span className={`ml-2 text-sm ${
+                      change === 0 ? 'text-gray-400' :
+                      change! > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {formattedChange}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </div>
@@ -393,15 +453,15 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
 
       {/* Query Results Section */}
       {queryResults.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-3 sm:space-y-0">
+            <div className="min-w-0 flex-1">
               <h3 className="text-lg font-medium text-white">Query Analysis</h3>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-gray-400 text-sm mt-1 break-words">
                 Detailed results from {queryResults.length} queries across AI platforms
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right flex-shrink-0">
               <div className="text-2xl font-bold text-blue-400">
                 {Math.round((queryResults.filter(q => q.mentioned).length / queryResults.length) * 100)}%
               </div>
@@ -441,12 +501,12 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
           <div className="space-y-3">
             <h4 className="text-md font-medium text-white mb-3">Recent Queries</h4>
             {queryResults.slice(0, 10).map((query) => (
-              <div key={query.id} className="border border-gray-600 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1 pr-4">
-                    <p className="text-white font-medium mb-1">{query.query}</p>
-                    <div className="flex items-center space-x-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
+              <div key={query.id} className="border border-gray-600 rounded-lg p-4 overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                  <div className="flex-1 min-w-0 sm:pr-4">
+                    <p className="text-white font-medium mb-1 break-words">{query.query}</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
                         query.aiProvider === 'openai' ? 'bg-green-900 text-green-300' :
                         query.aiProvider === 'claude' ? 'bg-orange-900 text-orange-300' :
                         query.aiProvider === 'perplexity' ? 'bg-red-900 text-red-300' :
@@ -454,7 +514,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
                       }`}>
                         {query.aiProvider.toUpperCase()}
                       </span>
-                      <span className="text-gray-400">
+                      <span className="text-gray-400 text-xs sm:text-sm">
                         {new Date(query.createdAt).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric',
@@ -464,10 +524,10 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right flex-shrink-0">
                     {query.mentioned ? (
                       <div>
-                        <div className="text-green-400 font-medium">✓ Mentioned</div>
+                        <div className="text-green-400 font-medium text-sm">✓ Mentioned</div>
                         {query.rankPosition && (
                           <div className="text-xs text-gray-400">Position {query.rankPosition}</div>
                         )}
@@ -476,7 +536,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
                         )}
                       </div>
                     ) : (
-                      <div className="text-red-400 font-medium">✗ Not Mentioned</div>
+                      <div className="text-red-400 font-medium text-sm">✗ Not Mentioned</div>
                     )}
                   </div>
                 </div>
@@ -486,7 +546,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
                   <summary className="cursor-pointer text-sm text-blue-400 hover:text-blue-300 mb-2 group-open:mb-3">
                     View AI Response ({query.wordCount} words)
                   </summary>
-                  <div className="bg-gray-900 rounded-md p-3 text-sm text-gray-300 max-h-32 overflow-y-auto">
+                  <div className="bg-gray-900 rounded-md p-3 text-sm text-gray-300 max-h-32 overflow-y-auto overflow-x-hidden break-words">
                     {query.response.length > 300 ? 
                       query.response.substring(0, 300) + '...' : 
                       query.response

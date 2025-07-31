@@ -1,6 +1,8 @@
 .carousel-container {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
   mask-image: linear-gradient(
     to right,
     transparent,
@@ -48,6 +50,23 @@
 @media (max-width: 640px) {
   .carousel-track {
     animation-duration: 25s;
+  }
+  
+  .carousel-container {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 5%,
+      black 95%,
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 5%,
+      black 95%,
+      transparent
+    );
   }
 }
 

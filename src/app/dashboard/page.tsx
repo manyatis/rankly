@@ -29,6 +29,36 @@ interface Business {
   description?: string;
 }
 
+// Utility functions for localStorage persistence
+const getStoredActiveTab = (): 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website' => {
+  if (typeof window === 'undefined') return 'trends';
+  const stored = localStorage.getItem('dashboard-active-tab');
+  const validTabs = ['trends', 'insights', 'business', 'competitors', 'automation', 'execute', 'link-website'];
+  return (stored && validTabs.includes(stored)) ? stored as 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website' : 'trends';
+};
+
+const setStoredActiveTab = (tab: string) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('dashboard-active-tab', tab);
+  }
+};
+
+const getStoredSelectedBusiness = (): number | null => {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem('dashboard-selected-business');
+  return stored ? parseInt(stored, 10) : null;
+};
+
+const setStoredSelectedBusiness = (businessId: number | null) => {
+  if (typeof window !== 'undefined') {
+    if (businessId) {
+      localStorage.setItem('dashboard-selected-business', businessId.toString());
+    } else {
+      localStorage.removeItem('dashboard-selected-business');
+    }
+  }
+};
+
 function DashboardContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
@@ -36,7 +66,7 @@ function DashboardContent() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website'>('trends');
+  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website'>(getStoredActiveTab());
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -103,15 +133,27 @@ function DashboardContent() {
         const data = await response.json();
         setBusinesses(data.businesses);
         if (data.businesses.length > 0) {
-          // If a specific business ID is provided, select it; otherwise select the first one
-          const businessToSelect = selectBusinessId || data.businesses[0].id;
+          // Priority order: provided selectBusinessId > stored business ID > first business
+          let businessToSelect: number = selectBusinessId || data.businesses[0].id;
+          
+          if (!selectBusinessId) {
+            const storedBusinessId = getStoredSelectedBusiness();
+            // Check if stored business exists in current organization's businesses
+            if (storedBusinessId && data.businesses.some((b: Business) => b.id === storedBusinessId)) {
+              businessToSelect = storedBusinessId;
+            }
+          }
+          
           setSelectedBusiness(businessToSelect);
+          setStoredSelectedBusiness(businessToSelect);
           // Give a brief moment for the business selection to settle before showing content
           setTimeout(() => setInitialLoadComplete(true), 300);
         } else {
           setSelectedBusiness(null);
+          setStoredSelectedBusiness(null);
           setInitialLoadComplete(true);
-          setActiveTab('link-website')
+          setActiveTab('link-website');
+          setStoredActiveTab('link-website');
         }
       }
     } catch (error) {
@@ -153,14 +195,21 @@ function DashboardContent() {
   const handleOrganizationChange = (orgId: number) => {
     setSelectedOrganization(orgId);
     setSelectedBusiness(null);
+    setStoredSelectedBusiness(null);
     setInitialLoadComplete(false);
   };
 
   const handleBusinessChange = (businessId: number) => {
     setSelectedBusiness(businessId);
+    setStoredSelectedBusiness(businessId);
     setInitialLoadComplete(false);
     // Brief delay to allow tab component to start loading
     setTimeout(() => setInitialLoadComplete(true), 200);
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId as 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website');
+    setStoredActiveTab(tabId);
   };
 
   const handleWebsiteLinked = (businessId: number) => {
@@ -168,6 +217,7 @@ function DashboardContent() {
     if (selectedOrganization) {
       fetchBusinesses(selectedOrganization, businessId);
       setActiveTab('trends');
+      setStoredActiveTab('trends');
     }
     fetchWebsiteLimitInfo();
   };
@@ -491,7 +541,7 @@ function DashboardContent() {
                 <button
                   key={tab.id}
                   onClick={() => {
-                    setActiveTab(tab.id);
+                    handleTabChange(tab.id);
                     setSidebarOpen(false); // Close sidebar on mobile when tab is selected
                   }}
                   disabled={!selectedBusiness && tab.id !== 'execute' && tab.id !== 'link-website'}

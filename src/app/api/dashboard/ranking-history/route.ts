@@ -63,10 +63,11 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'asc'
+        date: 'asc'
       },
       select: {
         id: true,
+        date: true,
         createdAt: true,
         openaiRank: true,
         claudeRank: true,

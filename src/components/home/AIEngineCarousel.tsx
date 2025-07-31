@@ -58,8 +58,8 @@ export default function AIEngineCarousel() {
   const duplicatedEngines = [...aiEngines, ...aiEngines, ...aiEngines];
 
   return (
-    <div className="w-full overflow-hidden py-2 sm:py-4">
-      <div className="relative">
+    <div className="w-full max-w-full overflow-hidden py-2 sm:py-4">
+      <div className="relative max-w-full">
         <div className="carousel-container">
           <div className="carousel-track">
             {duplicatedEngines.map((engine, index) => (

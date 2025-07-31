@@ -100,7 +100,7 @@ export default function WebsiteAnalysisInput({
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           disabled={isLoading}
-          className={`w-full bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 ${config.input}`}
+          className={`w-full bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 caret-white animate-pulse ${config.input}`}
         />
       </div>
       
