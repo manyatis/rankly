@@ -63,13 +63,28 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
 
   // Determine plan from subscription items
   let planId = 'free';
+  let planName = 'Free';
   if (subscription.items.data.length > 0) {
     const priceId = subscription.items.data[0].price.id;
+    console.log('🔍 Looking up plan for price ID:', priceId);
+    
     const plan = await prisma.subscriptionPlan.findFirst({
       where: { stripePriceId: priceId }
     });
+    
     if (plan) {
       planId = plan.planId;
+      planName = plan.name;
+      console.log('✅ Found plan:', planName, '(' + planId + ')');
+    } else {
+      console.error('❌ No plan found for price ID:', priceId);
+      console.log('💡 Available plans in database:');
+      const allPlans = await prisma.subscriptionPlan.findMany({
+        select: { planId: true, name: true, stripePriceId: true }
+      });
+      allPlans.forEach(p => {
+        console.log(`  - ${p.name} (${p.planId}): ${p.stripePriceId || 'NO_PRICE_ID'}`);
+      });
     }
   }
 
@@ -94,11 +109,21 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     updateData.subscriptionTier = planId;
     // Set subscription start date
     updateData.subscriptionStartDate = new Date();
-  } else if (['canceled', 'unpaid', 'past_due'].includes(subscription.status)) {
+    console.log('✅ Setting user to active plan:', planName);
+  } else if (subscription.status === 'incomplete') {
+    // Keep subscription info but don't activate the plan yet
+    // User will get upgraded when payment is completed and status becomes 'active'
+    console.log('⏳ Subscription incomplete - waiting for payment confirmation');
+    // Don't change the plan yet, keep existing plan
+    // Just update the subscription tracking info
+  } else if (['canceled', 'unpaid', 'past_due', 'incomplete_expired'].includes(subscription.status)) {
     // Downgrade to free if subscription is no longer active
     updateData.plan = 'free';
     updateData.subscriptionTier = 'free';
     updateData.subscriptionEndDate = new Date();
+    console.log('⬇️ Downgrading user to free plan due to status:', subscription.status);
+  } else {
+    console.log('❓ Unhandled subscription status:', subscription.status);
   }
 
   await prisma.user.update({
@@ -106,6 +131,6 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     data: updateData
   });
 
-  console.log('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan);
+  console.log('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan || 'unchanged');
 }
 
