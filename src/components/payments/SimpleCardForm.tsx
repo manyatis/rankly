@@ -65,7 +65,6 @@ export default function SimpleCardForm({ onSuccess, onError, planName, planPrice
         if (isMounted) {
           setCard(cardInstance);
           setIsLoaded(true);
-          setMessage('Card form loaded successfully!');
         }
         
       } catch (error) {
