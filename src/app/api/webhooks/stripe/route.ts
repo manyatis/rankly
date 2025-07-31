@@ -28,6 +28,10 @@ export async function POST(request: NextRequest) {
 
   try {
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+      
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
@@ -142,6 +146,41 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   });
 
   console.log('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan || 'unchanged');
+}
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  console.log('🛒 Checkout session completed:', session.id);
+  
+  // Only handle subscription mode checkouts
+  if (session.mode !== 'subscription') {
+    console.log('ℹ️ Non-subscription checkout session, skipping');
+    return;
+  }
+
+  // Find user by customer ID
+  const user = await prisma.user.findFirst({
+    where: { stripeCustomerId: session.customer as string }
+  });
+
+  if (!user) {
+    console.error('❌ User not found for customer:', session.customer);
+    return;
+  }
+
+  // Get the subscription from the session
+  if (session.subscription) {
+    const subscriptionId = typeof session.subscription === 'string' 
+      ? session.subscription 
+      : session.subscription.id;
+    
+    console.log('📋 Retrieving subscription:', subscriptionId);
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    
+    // Process the subscription
+    await handleSubscriptionChange(subscription);
+  } else {
+    console.log('⚠️ No subscription found in checkout session');
+  }
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {

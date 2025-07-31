@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, Star, Zap, Crown, ArrowLeft } from 'lucide-react';
-import StripeCardForm from './StripeCardForm';
+import CheckoutButton from './StripeCardForm';
 
 interface SubscriptionPlan {
   id: number;
@@ -52,12 +52,13 @@ export default function SubscriptionFlow() {
     setError(null);
   };
 
-  const handlePaymentSuccess = async (subscriptionId: string) => {
-    if (!selectedPlan) return;
-    
-    console.log('Payment successful for subscription:', subscriptionId);
-    setStep('success');
-  };
+  // This function is no longer used with Checkout but kept for potential future use
+  // const handlePaymentSuccess = async (subscriptionId: string) => {
+  //   if (!selectedPlan) return;
+  //   
+  //   console.log('Payment successful for subscription:', subscriptionId);
+  //   setStep('success');
+  // };
 
   const handlePaymentError = (errorMessage: string) => {
     setError(errorMessage);
@@ -170,8 +171,7 @@ export default function SubscriptionFlow() {
         )}
 
         {/* Payment Form */}
-        <StripeCardForm 
-          onSuccess={handlePaymentSuccess}
+        <CheckoutButton 
           onError={handlePaymentError}
           planName={selectedPlan.name}
           planPrice={formatPrice(selectedPlan.priceCents)}

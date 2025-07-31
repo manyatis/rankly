@@ -1,6 +1,7 @@
 # Stripe Webhook Setup
 
-To ensure payment confirmations work properly, you need to configure your Stripe webhook to listen for the following events:
+## Overview
+Your subscription system now uses **Stripe Checkout Sessions** for a much simpler and more reliable payment flow. Configure your webhook to handle these events:
 
 ## Required Events
 
@@ -10,15 +11,15 @@ In your Stripe Dashboard:
 3. Set endpoint URL: `https://your-domain.com/api/webhooks/stripe`
 4. Select the following events:
 
-### Subscription Events (already configured)
-- `customer.subscription.created`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
+### Primary Events (for Checkout flow)
+- `checkout.session.completed` - **MOST IMPORTANT** - Handles successful subscription creation
+- `customer.subscription.updated` - Handles subscription changes (upgrades, cancellations)
+- `customer.subscription.deleted` - Handles subscription cancellations
 
-### Invoice Events (REQUIRED for payment confirmations)
-- `invoice.payment_succeeded` - Confirms successful payment
-- `invoice.payment_failed` - Handles failed payments
-- `invoice.payment_action_required` - For 3D Secure requirements
+### Optional Events (for additional functionality)
+- `invoice.payment_succeeded` - Monthly recurring payments
+- `invoice.payment_failed` - Failed recurring payments
+- `customer.subscription.created` - Subscription creation (redundant with checkout.session.completed)
 
 ## Testing Locally
 
@@ -32,12 +33,25 @@ Copy the webhook signing secret and add to your `.env`:
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-## Why Invoice Events Matter
+## How the New Flow Works
 
-When a subscription requires payment confirmation (e.g., 3D Secure cards):
-1. Subscription is created with status `incomplete`
-2. Customer completes payment authentication
-3. Stripe fires `invoice.payment_succeeded` event
-4. Your webhook handler upgrades the user to the paid plan
+1. **User clicks subscribe** → Creates Checkout Session via `/api/subscriptions/create-stripe`
+2. **User redirected to Stripe Checkout** → Stripe handles all payment complexity
+3. **User completes payment** → Stripe fires `checkout.session.completed` webhook
+4. **Webhook activates subscription** → User is upgraded to paid plan
+5. **User redirected to success page** → `/subscribe/success`
 
-Without invoice events, subscriptions will stay stuck in "incomplete" status even after successful payment.
+## Benefits of Checkout Sessions
+
+✅ **No client secret handling**  
+✅ **Automatic 3D Secure support**  
+✅ **Built-in payment retry logic**  
+✅ **Support for all payment methods**  
+✅ **PCI compliance handled by Stripe**  
+✅ **Mobile-optimized checkout**
+
+## Success/Cancel URLs
+
+The system includes dedicated pages:
+- Success: `/subscribe/success` - Shows confirmation and redirects to dashboard
+- Cancel: `/subscribe/cancel` - Handles cancelled payments with retry option

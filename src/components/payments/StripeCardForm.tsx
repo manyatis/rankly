@@ -1,28 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { stripeConfig } from '@/lib/stripe';
+import { useState } from 'react';
 
-// Initialize Stripe
-const stripePromise = loadStripe(stripeConfig.publishableKey);
-
-interface CardFormProps {
-  onSuccess: (subscriptionId: string) => void;
+interface CheckoutButtonProps {
   onError: (error: string) => void;
   planName: string;
   planPrice: string;
   planId: string;
 }
 
-function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormProps) {
-  const stripe = useStripe();
-  const elements = useElements();
+export default function CheckoutButton({ onError, planName, planPrice, planId }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  const createSubscription = useCallback(async () => {
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    
     try {
       const response = await fetch('/api/subscriptions/create-stripe', {
         method: 'POST',
@@ -35,154 +27,47 @@ function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormP
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create subscription');
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
+      if (data.sessionUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.sessionUrl;
       } else {
-        // This shouldn't happen for paid subscriptions
-        console.error('No client secret returned for subscription:', data);
-        onError('Payment setup failed - no payment intent created');
+        throw new Error('No checkout URL returned');
       }
     } catch (error) {
-      console.error('Error creating subscription:', error);
-      onError(error instanceof Error ? error.message : 'Failed to create subscription');
-    }
-  }, [planId, onSuccess, onError]);
-
-  // Create subscription on component mount
-  useEffect(() => {
-    createSubscription();
-  }, [createSubscription]);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!stripe || !elements || !clientSecret) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    const cardElement = elements.getElement(CardElement);
-    if (!cardElement) {
-      onError('Card element not found');
-      setIsLoading(false);
-      return;
-    }
-
-    // Confirm the payment
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-      }
-    });
-
-    if (error) {
-      onError(error.message || 'Payment failed');
-      setIsLoading(false);
-    } else if (paymentIntent.status === 'succeeded') {
-      // Confirm payment and update subscription status
-      try {
-        const confirmResponse = await fetch('/api/subscriptions/confirm-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentIntentId: paymentIntent.id })
-        });
-
-        const confirmResult = await confirmResponse.json();
-        
-        if (confirmResult.success) {
-          onSuccess(confirmResult.subscriptionId || paymentIntent.id);
-        } else {
-          onError(confirmResult.error || 'Failed to confirm payment');
-        }
-      } catch (err) {
-        console.error('Error confirming payment:', err);
-        onError('Payment succeeded but failed to update subscription');
-      }
-      setIsLoading(false);
-    } else if (paymentIntent.status === 'processing') {
-      // Payment is still processing
-      onError('Payment is processing. Please check your subscription status in a few moments.');
-      setIsLoading(false);
-    } else if (paymentIntent.status === 'requires_action' || paymentIntent.status === 'requires_payment_method') {
-      // Payment requires additional action
-      onError('Payment requires additional authentication. Please try again.');
-      setIsLoading(false);
-    } else {
-      // Unexpected status
-      onError(`Unexpected payment status: ${paymentIntent.status}`);
+      console.error('Error creating checkout session:', error);
+      onError(error instanceof Error ? error.message : 'Failed to create checkout session');
       setIsLoading(false);
     }
-  };
-
-  const cardElementOptions = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#ffffff',
-        '::placeholder': {
-          color: '#9ca3af',
-        },
-        backgroundColor: 'transparent',
-      },
-      invalid: {
-        color: '#ef4444',
-      },
-    },
   };
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white mb-2">Payment Details</h3>
+        <h3 className="text-lg font-semibold text-white mb-2">Subscribe to {planName}</h3>
         <p className="text-gray-400 text-sm">
-          Subscribe to {planName} for {planPrice}/month
+          {planPrice}/month - Secure checkout powered by Stripe
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Card Information
-          </label>
-          <div className="bg-gray-800 border border-gray-600 rounded-lg p-4">
-            <CardElement options={cardElementOptions} />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={!stripe || !clientSecret || isLoading}
-          className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-            !stripe || !clientSecret || isLoading
-              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-          }`}
-        >
-          {isLoading 
-            ? 'Processing...' 
-            : !clientSecret 
-            ? 'Setting up...'
-            : `Subscribe to ${planName}`
-          }
-        </button>
-      </form>
+      <button
+        onClick={handleCheckout}
+        disabled={isLoading}
+        className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+          isLoading
+            ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
+        }`}
+      >
+        {isLoading ? 'Redirecting to Checkout...' : `Subscribe to ${planName}`}
+      </button>
 
       <div className="mt-4 text-xs text-gray-500 text-center">
-        <p>Secure payment powered by Stripe</p>
-        <p>Your card information is encrypted and secure</p>
+        <p>You&apos;ll be redirected to Stripe&apos;s secure checkout</p>
+        <p>All major payment methods accepted</p>
       </div>
     </div>
-  );
-}
-
-export default function StripeCardForm(props: CardFormProps) {
-  return (
-    <Elements stripe={stripePromise}>
-      <CardForm {...props} />
-    </Elements>
   );
 }

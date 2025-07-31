@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
-import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
@@ -126,97 +125,38 @@ export async function POST(request: NextRequest) {
       console.log('✅ Stripe price created:', stripePriceId);
     }
 
-    // Create Stripe subscription
-    console.log('📋 Creating Stripe subscription...');
-    const subscription = await stripe.subscriptions.create({
+    // Create Stripe Checkout Session for subscription
+    console.log('📋 Creating Stripe Checkout Session...');
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode: 'subscription',
       customer: stripeCustomerId,
-      items: [{ price: stripePriceId }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: { save_default_payment_method: 'on_subscription' },
-      expand: ['latest_invoice.payment_intent', 'latest_invoice'],
+      line_items: [{
+        price: stripePriceId,
+        quantity: 1,
+      }],
+      success_url: `${process.env.NEXTAUTH_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/subscribe/cancel`,
       metadata: {
         userId: user.id.toString(),
         planId: subscriptionPlan.planId,
+      },
+      subscription_data: {
+        metadata: {
+          userId: user.id.toString(),
+          planId: subscriptionPlan.planId,
+        }
       }
     });
 
-    // Update user in database with subscription info
-    const now = new Date();
-    console.log('📋 Stripe subscription status:', subscription.status);
-    console.log('📋 Latest invoice type:', typeof subscription.latest_invoice);
-    console.log('📋 Latest invoice id:', typeof subscription.latest_invoice === 'string' ? subscription.latest_invoice : subscription.latest_invoice?.id);
-    
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        subscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
-        subscriptionStartDate: now,
-        stripePriceId,
-        plan: planId,
-        subscriptionTier: planId,
-        dailyUsageCount: 0 // Reset usage count
-      }
-    });
-
-    console.log('✅ User subscription updated in database with status:', subscription.status);
-
-    // Get the payment intent from the subscription
-    // The latest_invoice might be a string ID or an expanded object
-    let clientSecret: string | undefined;
-    let invoiceStatus: string | undefined;
-    
-    if (typeof subscription.latest_invoice === 'string') {
-      // Invoice is not expanded, we need to retrieve it
-      console.log('📋 Invoice not expanded, retrieving invoice:', subscription.latest_invoice);
-      const invoice = await stripe.invoices.retrieve(subscription.latest_invoice, {
-        expand: ['payment_intent']
-      });
-      
-      invoiceStatus = invoice.status || undefined;
-      const expandedInvoice = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-      if (expandedInvoice.payment_intent) {
-        const paymentIntent = expandedInvoice.payment_intent as Stripe.PaymentIntent;
-        clientSecret = paymentIntent?.client_secret || undefined;
-        console.log('💳 Payment intent:', paymentIntent?.id);
-      }
-      
-      console.log('💳 Retrieved invoice status:', invoiceStatus);
-      console.log('💳 Client secret:', clientSecret ? 'Present' : 'Missing');
-    } else if (subscription.latest_invoice) {
-      // Invoice is expanded
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
-      invoiceStatus = invoice.status || undefined;
-      
-      // payment_intent might be a string or expanded object
-      const expandedInvoice = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-      if (typeof expandedInvoice.payment_intent === 'string') {
-        console.log('📋 Payment intent not expanded, retrieving:', expandedInvoice.payment_intent);
-        const paymentIntent = await stripe.paymentIntents.retrieve(expandedInvoice.payment_intent);
-        clientSecret = paymentIntent.client_secret || undefined;
-      } else if (expandedInvoice.payment_intent) {
-        const paymentIntent = expandedInvoice.payment_intent as Stripe.PaymentIntent;
-        clientSecret = paymentIntent?.client_secret || undefined;
-      }
-      
-      console.log('💳 Expanded invoice status:', invoiceStatus);
-      console.log('💳 Client secret:', clientSecret ? 'Present' : 'Missing');
-    }
-
-    // If there's no client secret, the subscription might be immediately active (e.g., trial period)
-    if (!clientSecret && subscription.status === 'active') {
-      console.log('✅ Subscription is already active without payment');
-    }
+    console.log('✅ Checkout Session created:', checkoutSession.id);
 
     return NextResponse.json({
       success: true,
-      subscriptionId: subscription.id,
-      status: subscription.status,
+      sessionId: checkoutSession.id,
+      sessionUrl: checkoutSession.url,
       planId: planId,
       planName: subscriptionPlan.name,
-      clientSecret: clientSecret,
-      invoiceStatus: invoiceStatus,
-      message: 'Subscription created successfully'
+      message: 'Checkout session created successfully'
     });
 
   } catch (error) {
