@@ -31,12 +31,12 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({ error: 'No active subscription found' }, { status: 400 });
     }
 
-    console.log(`🔄 Canceling Stripe subscription for ${user.email}: ${user.subscriptionId}`);
+    console.debug(`🔄 Canceling Stripe subscription for ${user.email}: ${user.subscriptionId}`);
 
     // Cancel subscription with Stripe (at the end of the current period)
     const canceledSubscription = await stripe.subscriptions.cancel(user.subscriptionId);
     
-    console.log('✅ Subscription canceled in Stripe:', canceledSubscription.id);
+    console.debug('✅ Subscription canceled in Stripe:', canceledSubscription.id);
 
     // Update user in database
     await prisma.user.update({
@@ -50,7 +50,7 @@ export async function POST(_request: NextRequest) {
       }
     });
 
-    console.log('✅ User subscription status updated in database');
+    console.debug('✅ User subscription status updated in database');
 
     // Calculate when access will end (use canceled_at as fallback)
     const periodEnd = new Date();

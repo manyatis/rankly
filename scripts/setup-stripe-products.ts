@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { prisma } from '../src/lib/prisma';
 
 // Hardcode your Stripe secret key here
-const STRIPE_SECRET_KEY = 'sk_test_51Rqmd1RdBVc2VZ7lzF80zy8sqC39MQjm3DeO86sco56hRwflHmkSZ2LFmxFLVg9jNDxzkb4jsnbDD3MLSFUNxGFX00BPhdKtGJ';
+const STRIPE_SECRET_KEY = 'KEY HERE';
 
 // Create Stripe instance with hardcoded key
 const stripe = new Stripe(STRIPE_SECRET_KEY, {

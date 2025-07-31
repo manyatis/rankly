@@ -37,13 +37,13 @@ export async function POST(_request: NextRequest) {
       });
     }
 
-    console.log('🔄 Syncing subscription status for user:', user.email);
+    console.debug('🔄 Syncing subscription status for user:', user.email);
 
     // Get latest subscription status from Stripe
     const subscription = await stripe.subscriptions.retrieve(user.subscriptionId);
     
-    console.log('📋 Stripe subscription status:', subscription.status);
-    console.log('📋 Current DB status:', user.subscriptionStatus);
+    console.debug('📋 Stripe subscription status:', subscription.status);
+    console.debug('📋 Current DB status:', user.subscriptionStatus);
 
     // Determine plan from subscription
     let planId = 'free';
@@ -89,7 +89,7 @@ export async function POST(_request: NextRequest) {
       data: updateData
     });
 
-    console.log('✅ Subscription synced:', subscription.status, 'Plan:', updateData.plan);
+    console.debug('✅ Subscription synced:', subscription.status, 'Plan:', updateData.plan);
 
     return NextResponse.json({
       success: true,

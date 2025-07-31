@@ -77,7 +77,7 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
         // Check if user's tier supports recurring scans
         const hasRecurringScans = SubscriptionTiers.hasFeature(primaryUser.plan, 'recurring_scans');
         if (!hasRecurringScans) {
-          console.warn(`⚠️ User ${primaryUser.email} (${primaryUser.plan}) does not have recurring scans feature, disabling for business ${business.id}`);
+          console.debug(`⚠️ User ${primaryUser.email} (${primaryUser.plan}) does not have recurring scans feature, disabling for business ${business.id}`);
           
           // Disable recurring scans for this business
           await prisma.business.update({

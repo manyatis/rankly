@@ -11,6 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "seed-plans": "npx tsx prisma/seed-subscription-plans.ts",
+    "clear-stripe-ids": "npx tsx scripts/clear-stripe-ids.ts",
     "setup-stripe-products": "npx tsx scripts/setup-stripe-products.ts"
   },
   "dependencies": {

@@ -48,23 +48,23 @@ export async function POST(request: NextRequest) {
         expand: ['latest_invoice']
       });
       
-      console.log('🔄 Updating subscription status after payment confirmation');
-      console.log('📋 Current subscription status:', subscription.status);
+      console.debug('🔄 Updating subscription status after payment confirmation');
+      console.debug('📋 Current subscription status:', subscription.status);
       
       // If subscription is still incomplete, we might need to pay the invoice
       if (subscription.status === 'incomplete') {
         const latestInvoice = (subscription as Stripe.Response<Stripe.Subscription> & {
           latest_invoice?: Stripe.Invoice;
         }).latest_invoice;
-        console.log('📋 Latest invoice status:', latestInvoice?.status);
-        console.log('📋 Latest invoice ID:', latestInvoice?.id);
+        console.debug('📋 Latest invoice status:', latestInvoice?.status);
+        console.debug('📋 Latest invoice ID:', latestInvoice?.id);
         
         // If the invoice is open, we need to pay it
         if (latestInvoice && latestInvoice.status === 'open' && latestInvoice.id) {
-          console.log('💳 Attempting to pay open invoice:', latestInvoice.id);
+          console.debug('💳 Attempting to pay open invoice:', latestInvoice.id);
           try {
             const paidInvoice = await stripe.invoices.pay(latestInvoice.id);
-            console.log('✅ Invoice paid successfully:', paidInvoice.status);
+            console.debug('✅ Invoice paid successfully:', paidInvoice.status);
           } catch (invoiceError) {
             console.error('❌ Error paying invoice:', invoiceError);
             // The invoice might already be paid or payment might have failed
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         
         // Retrieve subscription again to get updated status
         const updatedSubscription = await stripe.subscriptions.retrieve(user.subscriptionId);
-        console.log('📋 Updated subscription status:', updatedSubscription.status);
+        console.debug('📋 Updated subscription status:', updatedSubscription.status);
         
         // Update user in database with latest subscription status
         await prisma.user.update({
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      console.log('✅ Subscription status updated:', subscription.status);
+      console.debug('✅ Subscription status updated:', subscription.status);
 
       return NextResponse.json({
         success: true,

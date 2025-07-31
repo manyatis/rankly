@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
-  console.log('🔔 Stripe webhook received:', event.type);
+  console.debug('🔔 Stripe webhook received:', event.type);
 
   try {
     switch (event.type) {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
-  console.log('🔄 Processing subscription change:', subscription.id, 'Status:', subscription.status);
+  console.debug('🔄 Processing subscription change:', subscription.id, 'Status:', subscription.status);
 
   // Find user by Stripe customer ID
   const user = await prisma.user.findFirst({
@@ -80,7 +80,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   let planName = 'Free';
   if (subscription.items.data.length > 0) {
     const priceId = subscription.items.data[0].price.id;
-    console.log('🔍 Looking up plan for price ID:', priceId);
+    console.debug('🔍 Looking up plan for price ID:', priceId);
     
     const plan = await prisma.subscriptionPlan.findFirst({
       where: { stripePriceId: priceId }
@@ -89,7 +89,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     if (plan) {
       planId = plan.planId;
       planName = plan.name;
-      console.log('✅ Found plan:', planName, '(' + planId + ')');
+      console.debug('✅ Found plan:', planName, '(' + planId + ')');
     } else {
       console.error('❌ No plan found for price ID:', priceId);
       console.log('💡 Available plans in database:');
@@ -123,7 +123,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     updateData.subscriptionTier = planId;
     // Set subscription start date
     updateData.subscriptionStartDate = new Date();
-    console.log('✅ Setting user to active plan:', planName);
+    console.debug('✅ Setting user to active plan:', planName);
   } else if (subscription.status === 'incomplete') {
     // Keep subscription info but don't activate the plan yet
     // User will get upgraded when payment is completed and status becomes 'active'
@@ -135,7 +135,7 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     updateData.plan = 'free';
     updateData.subscriptionTier = 'free';
     updateData.subscriptionEndDate = new Date();
-    console.log('⬇️ Downgrading user to free plan due to status:', subscription.status);
+    console.debug('⬇️ Downgrading user to free plan due to status:', subscription.status);
   } else {
     console.log('❓ Unhandled subscription status:', subscription.status);
   }
@@ -145,11 +145,11 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     data: updateData
   });
 
-  console.log('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan || 'unchanged');
+  console.debug('✅ Updated user subscription:', user.email, 'Status:', subscription.status, 'Plan:', updateData.plan || 'unchanged');
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log('🛒 Checkout session completed:', session.id);
+  console.debug('🛒 Checkout session completed:', session.id);
   
   // Only handle subscription mode checkouts
   if (session.mode !== 'subscription') {
@@ -173,7 +173,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       ? session.subscription 
       : session.subscription.id;
     
-    console.log('📋 Retrieving subscription:', subscriptionId);
+    console.debug('📋 Retrieving subscription:', subscriptionId);
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     
     // Process the subscription
@@ -184,7 +184,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log('💳 Invoice payment succeeded:', invoice.id);
+  console.debug('💳 Invoice payment succeeded:', invoice.id);
   
   // Only process subscription invoices
   const invoiceAny = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -210,7 +210,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   // Fetch the latest subscription status from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   
-  console.log('🔄 Subscription status after payment:', subscription.status);
+  console.debug('🔄 Subscription status after payment:', subscription.status);
   
   // If subscription is now active, update the user
   if (subscription.status === 'active') {
@@ -231,13 +231,13 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
         }
       });
       
-      console.log('✅ User upgraded to', plan.name, 'plan after successful payment');
+      console.debug('✅ User upgraded to', plan.name, 'plan after successful payment');
     }
   }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  console.log('❌ Invoice payment failed:', invoice.id);
+  console.debug('❌ Invoice payment failed:', invoice.id);
   
   // Only process subscription invoices
   const invoiceAny = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -261,8 +261,8 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   // Log the failure but don't immediately downgrade
   // Stripe will retry the payment according to your retry settings
-  console.log('⚠️ Payment failed for user:', user.email);
-  console.log('ℹ️ Stripe will retry according to retry rules');
+  console.debug('⚠️ Payment failed for user:', user.email);
+  console.debug('ℹ️ Stripe will retry according to retry rules');
   
   // You might want to send an email to the user here
   // or update a payment_failed flag in the database

@@ -56,13 +56,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or inactive subscription plan' }, { status: 400 });
     }
 
-    console.log(`🔄 Creating Stripe subscription for ${user.email}: ${subscriptionPlan.name} plan`);
+    console.debug(`🔄 Creating Stripe subscription for ${user.email}: ${subscriptionPlan.name} plan`);
 
     // Create or get existing Stripe customer
     let stripeCustomerId = user.stripeCustomerId;
     
     if (!stripeCustomerId) {
-      console.log('👤 Creating Stripe customer...');
+      console.debug('👤 Creating Stripe customer...');
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.name || undefined,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         data: { stripeCustomerId }
       });
       
-      console.log('✅ Stripe customer created:', stripeCustomerId);
+      console.debug('✅ Stripe customer created:', stripeCustomerId);
     }
 
     // For now, we'll use a test price ID. In production, you would create prices in Stripe dashboard
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     
     if (!stripePriceId) {
       // Create a price on the fly for testing (you'd normally do this once in Stripe dashboard)
-      console.log('💰 Creating Stripe price...');
+      console.debug('💰 Creating Stripe price...');
       
       // First, create or get the product
       const product = await stripe.products.create({
@@ -122,11 +122,11 @@ export async function POST(request: NextRequest) {
         }
       });
       
-      console.log('✅ Stripe price created:', stripePriceId);
+      console.debug('✅ Stripe price created:', stripePriceId);
     }
 
     // Create Stripe Checkout Session for subscription
-    console.log('📋 Creating Stripe Checkout Session...');
+    console.debug('📋 Creating Stripe Checkout Session...');
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: stripeCustomerId,
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('✅ Checkout Session created:', checkoutSession.id);
+    console.debug('✅ Checkout Session created:', checkoutSession.id);
 
     return NextResponse.json({
       success: true,
