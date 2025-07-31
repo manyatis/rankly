@@ -148,7 +148,12 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log('💳 Invoice payment succeeded:', invoice.id);
   
   // Only process subscription invoices
-  if (!invoice.subscription) {
+  const invoiceAny = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const subscriptionId = typeof invoiceAny.subscription === 'string' 
+    ? invoiceAny.subscription 
+    : invoiceAny.subscription?.id;
+    
+  if (!subscriptionId) {
     console.log('ℹ️ Invoice not related to a subscription, skipping');
     return;
   }
@@ -164,7 +169,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 
   // Fetch the latest subscription status from Stripe
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   
   console.log('🔄 Subscription status after payment:', subscription.status);
   
@@ -196,7 +201,12 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   console.log('❌ Invoice payment failed:', invoice.id);
   
   // Only process subscription invoices
-  if (!invoice.subscription) {
+  const invoiceAny = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const subscriptionId = typeof invoiceAny.subscription === 'string' 
+    ? invoiceAny.subscription 
+    : invoiceAny.subscription?.id;
+    
+  if (!subscriptionId) {
     return;
   }
 

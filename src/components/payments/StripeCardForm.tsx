@@ -41,8 +41,9 @@ function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormP
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
       } else {
-        // Subscription created successfully without payment needed
-        onSuccess(data.subscriptionId);
+        // This shouldn't happen for paid subscriptions
+        console.error('No client secret returned for subscription:', data);
+        onError('Payment setup failed - no payment intent created');
       }
     } catch (error) {
       console.error('Error creating subscription:', error);
@@ -101,6 +102,18 @@ function CardForm({ onSuccess, onError, planName, planPrice, planId }: CardFormP
         console.error('Error confirming payment:', err);
         onError('Payment succeeded but failed to update subscription');
       }
+      setIsLoading(false);
+    } else if (paymentIntent.status === 'processing') {
+      // Payment is still processing
+      onError('Payment is processing. Please check your subscription status in a few moments.');
+      setIsLoading(false);
+    } else if (paymentIntent.status === 'requires_action' || paymentIntent.status === 'requires_payment_method') {
+      // Payment requires additional action
+      onError('Payment requires additional authentication. Please try again.');
+      setIsLoading(false);
+    } else {
+      // Unexpected status
+      onError(`Unexpected payment status: ${paymentIntent.status}`);
       setIsLoading(false);
     }
   };

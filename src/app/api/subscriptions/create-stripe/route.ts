@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {

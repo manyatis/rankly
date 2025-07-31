@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         console.log('📋 Latest invoice ID:', latestInvoice?.id);
         
         // If the invoice is open, we need to pay it
-        if (latestInvoice && latestInvoice.status === 'open') {
+        if (latestInvoice && latestInvoice.status === 'open' && latestInvoice.id) {
           console.log('💳 Attempting to pay open invoice:', latestInvoice.id);
           try {
             const paidInvoice = await stripe.invoices.pay(latestInvoice.id);
