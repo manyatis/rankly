@@ -167,9 +167,23 @@ export default function AccountPage() {
                     <label className="text-sm font-medium text-gray-400">Status</label>
                     <div className="flex items-center gap-2">
                       <span className={`inline-block w-2 h-2 rounded-full ${
-                        subscription.status === 'ACTIVE' ? 'bg-green-500' : 'bg-gray-500'
+                        subscription.status === 'ACTIVE' ? 'bg-green-500' : 
+                        subscription.status === 'CANCELED' || subscription.status === 'CANCELLED' ? 'bg-red-500' :
+                        subscription.status === 'PAUSED' ? 'bg-yellow-500' :
+                        subscription.status === 'PAST_DUE' ? 'bg-orange-500' :
+                        subscription.status === 'EXPIRED' ? 'bg-red-400' :
+                        subscription.status === 'DEACTIVATED' ? 'bg-gray-600' :
+                        'bg-gray-500'
                       }`} />
-                      <p className="capitalize text-white">{subscription.status.toLowerCase()}</p>
+                      <p className={`capitalize ${
+                        subscription.status === 'ACTIVE' ? 'text-green-400' : 
+                        subscription.status === 'CANCELED' || subscription.status === 'CANCELLED' ? 'text-red-400' :
+                        subscription.status === 'PAUSED' ? 'text-yellow-400' :
+                        subscription.status === 'PAST_DUE' ? 'text-orange-400' :
+                        subscription.status === 'EXPIRED' ? 'text-red-300' :
+                        subscription.status === 'DEACTIVATED' ? 'text-gray-400' :
+                        'text-white'
+                      }`}>{subscription.status.toLowerCase()}</p>
                     </div>
                   </div>
                 )}
