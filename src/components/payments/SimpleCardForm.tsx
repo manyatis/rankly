@@ -86,7 +86,8 @@ export default function SimpleCardForm({ onSuccess, onError, planName, planPrice
 
       const script = document.createElement('script');
       // Determine environment from app ID (sandbox app IDs start with 'sandbox-')
-      const isSandbox = applicationId.startsWith('sandbox-');
+      const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID || '';
+      const isSandbox = appId.startsWith('sandbox-');
       script.src = isSandbox 
         ? 'https://sandbox.web.squarecdn.com/v1/square.js'
         : 'https://web.squarecdn.com/v1/square.js';
@@ -117,7 +118,7 @@ export default function SimpleCardForm({ onSuccess, onError, planName, planPrice
         }
       }
     };
-  }, [cardContainerId]);
+  }, [card, cardContainerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
