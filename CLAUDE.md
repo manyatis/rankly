@@ -127,6 +127,12 @@ Required environment variables:
 
 ## Development Guidelines
 
+### TypeScript Best Practices
+- **Always use enums for string constants**: When dealing with predefined string values (like subscription status, user roles, etc.), always import and use the appropriate enum instead of hardcoding strings
+  - Example: Use `SubscriptionStatus.CANCELED` instead of `'canceled'`
+  - This ensures type safety and prevents typos
+- **Type imports**: Import types/enums from their source files rather than using string literals
+
 ### Database Schema Changes
 1. Update `prisma/schema.prisma`
 2. Run `npx prisma db push` for development

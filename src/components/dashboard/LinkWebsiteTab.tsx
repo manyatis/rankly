@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProgressLoader from '../ui/ProgressLoader';
 
 interface LinkWebsiteTabProps {
@@ -11,6 +11,8 @@ interface LinkWebsiteTabProps {
     tier: string;
     isUnlimited: boolean;
   } | null;
+  pendingAnalysisUrl?: string | null;
+  onClearPendingUrl?: () => void;
 }
 
 interface WebsiteAnalysisResult {
@@ -32,7 +34,7 @@ interface WebsiteAnalysisResult {
   };
 }
 
-export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo }: LinkWebsiteTabProps) {
+export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pendingAnalysisUrl, onClearPendingUrl }: LinkWebsiteTabProps) {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,16 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo }: Li
   const [step, setStep] = useState<'input' | 'results'>('input');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
+
+  // Auto-populate URL if provided from hero section
+  useEffect(() => {
+    if (pendingAnalysisUrl && !websiteUrl) {
+      setWebsiteUrl(pendingAnalysisUrl);
+      if (onClearPendingUrl) {
+        onClearPendingUrl();
+      }
+    }
+  }, [pendingAnalysisUrl, websiteUrl, onClearPendingUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

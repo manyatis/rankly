@@ -1,7 +1,8 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoginModal from '@/components/LoginModal';
@@ -28,8 +29,9 @@ interface Business {
   description?: string;
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
@@ -47,13 +49,23 @@ export default function Dashboard() {
     tier: string;
     isUnlimited: boolean;
   } | null>(null);
+  const [pendingAnalysisUrl, setPendingAnalysisUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user) {
       fetchOrganizations();
       fetchWebsiteLimitInfo();
+      
+      // Check for URL parameters for website analysis
+      const analyzeUrl = searchParams.get('analyzeUrl');
+      const autoStart = searchParams.get('autoStart');
+      
+      if (analyzeUrl && autoStart === 'true') {
+        setPendingAnalysisUrl(analyzeUrl);
+        setActiveTab('link-website');
+      }
     }
-  }, [session]);
+  }, [session, searchParams]);
 
   useEffect(() => {
     if (selectedOrganization) {
@@ -84,14 +96,16 @@ export default function Dashboard() {
     }
   };
 
-  const fetchBusinesses = async (orgId: number) => {
+  const fetchBusinesses = async (orgId: number, selectBusinessId?: number) => {
     try {
       const response = await fetch(`/api/dashboard/businesses?organizationId=${orgId}`);
       if (response.ok) {
         const data = await response.json();
         setBusinesses(data.businesses);
         if (data.businesses.length > 0) {
-          setSelectedBusiness(data.businesses[0].id);
+          // If a specific business ID is provided, select it; otherwise select the first one
+          const businessToSelect = selectBusinessId || data.businesses[0].id;
+          setSelectedBusiness(businessToSelect);
           // Give a brief moment for the business selection to settle before showing content
           setTimeout(() => setInitialLoadComplete(true), 300);
         } else {
@@ -152,11 +166,8 @@ export default function Dashboard() {
   const handleWebsiteLinked = (businessId: number) => {
     // Refresh businesses list and select the new one
     if (selectedOrganization) {
-      fetchBusinesses(selectedOrganization).then(() => {
-        setSelectedBusiness(businessId);
-        setActiveTab('trends');
-        setTimeout(() => setInitialLoadComplete(true), 200);
-      });
+      fetchBusinesses(selectedOrganization, businessId);
+      setActiveTab('trends');
     }
     fetchWebsiteLimitInfo();
   };
@@ -169,7 +180,7 @@ export default function Dashboard() {
       id: 'trends', 
       name: 'Trends', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
       ), 
@@ -179,7 +190,7 @@ export default function Dashboard() {
       id: 'insights', 
       name: 'AI Insights', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
       ), 
@@ -189,7 +200,7 @@ export default function Dashboard() {
       id: 'business', 
       name: 'Website Info', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0-9c-5 0-9 4-9 9s4 9 9 9" />
         </svg>
       ), 
@@ -199,7 +210,7 @@ export default function Dashboard() {
       id: 'competitors', 
       name: 'Competitors', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       ), 
@@ -209,7 +220,7 @@ export default function Dashboard() {
       id: 'automation', 
       name: 'Automation Setup', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ), 
@@ -219,7 +230,7 @@ export default function Dashboard() {
       id: 'execute', 
       name: 'Manual Analysis', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       ), 
@@ -227,9 +238,9 @@ export default function Dashboard() {
     },
     { 
       id: 'link-website', 
-      name: 'Link Website', 
+      name: 'Link New Website', 
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
       ), 
@@ -438,7 +449,7 @@ export default function Dashboard() {
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === 'add-new') {
-                      setActiveTab('execute');
+                      setActiveTab('link-website');
                       setSelectedBusiness(null);
                     } else if (value) {
                       handleBusinessChange(parseInt(value));
@@ -460,13 +471,6 @@ export default function Dashboard() {
                           {business.websiteName}
                         </option>
                       ))}
-                      {websiteLimitInfo?.canAddWebsite ? (
-                        <option value="add-new">+ Add a new website</option>
-                      ) : (
-                        <option value="" disabled>
-                          --- Limit reached ({websiteLimitInfo?.tier} - {websiteLimitInfo?.limit} website{websiteLimitInfo?.limit !== 1 ? 's' : ''}) ---
-                        </option>
-                      )}
                     </>
                   )}
                 </select>
@@ -491,7 +495,7 @@ export default function Dashboard() {
                     setSidebarOpen(false); // Close sidebar on mobile when tab is selected
                   }}
                   disabled={!selectedBusiness && tab.id !== 'execute' && tab.id !== 'link-website'}
-                  className={`w-full flex items-start p-4 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-start p-3 rounded-lg text-left transition-colors ${
                     activeTab === tab.id
                       ? 'bg-blue-600 text-white cursor-pointer'
                       : !selectedBusiness && tab.id !== 'execute' && tab.id !== 'link-website'
@@ -499,7 +503,7 @@ export default function Dashboard() {
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer'
                   }`}
                 >
-                  <div className="mr-3 mt-1">{tab.icon}</div>
+                  <div className="mr-2 mt-0.5">{tab.icon}</div>
                   <div>
                     <div className="font-medium">{tab.name}</div>
                     <div className="text-sm opacity-75">{tab.description}</div>
@@ -553,7 +557,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex-1 p-4 sm:p-6 lg:p-8">
-            {!selectedBusiness && businesses.length > 0 ? (
+            {!selectedBusiness && businesses.length > 0 && activeTab !== 'link-website' && activeTab !== 'execute' ? (
               <div className="text-center py-12 sm:py-20">
                 <div className="text-gray-500 text-4xl sm:text-6xl mb-4 sm:mb-6">📊</div>
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-white mb-4">No Website Selected</h2>
@@ -589,6 +593,8 @@ export default function Dashboard() {
                   <LinkWebsiteTab 
                     onWebsiteLinked={handleWebsiteLinked}
                     websiteLimitInfo={websiteLimitInfo}
+                    pendingAnalysisUrl={pendingAnalysisUrl}
+                    onClearPendingUrl={() => setPendingAnalysisUrl(null)}
                   />
                 )}
               </div>
@@ -604,5 +610,15 @@ export default function Dashboard() {
         onSuccess={() => setLoginModalOpen(false)}
       />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="text-white">Loading...</div>
+    </div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

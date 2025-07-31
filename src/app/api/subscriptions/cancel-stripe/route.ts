@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 import { SubscriptionStatus } from '@/types/subscription';
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);
@@ -34,27 +34,33 @@ export async function POST(_request: NextRequest) {
 
     console.debug(`🔄 Canceling Stripe subscription for ${user.email}: ${user.subscriptionId}`);
 
-    // Cancel subscription with Stripe (at the end of the current period)
-    const canceledSubscription = await stripe.subscriptions.cancel(user.subscriptionId);
+    // Update subscription to cancel at period end instead of immediately
+    const updatedSubscription = await stripe.subscriptions.update(user.subscriptionId, {
+      cancel_at_period_end: true
+    });
     
-    console.debug('✅ Subscription canceled in Stripe:', canceledSubscription.id);
+    console.debug('✅ Subscription set to cancel at period end in Stripe:', updatedSubscription.id);
 
-    // Update user in database
+    // Get the actual period end date from Stripe
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const periodEndTimestamp = (updatedSubscription as any).current_period_end;
+    const periodEndDate = new Date(periodEndTimestamp * 1000);
+
+    // Update user in database - keep their plan active but mark as canceling
     await prisma.user.update({
       where: { id: user.id },
       data: {
         subscriptionStatus: SubscriptionStatus.CANCELED,
-        subscriptionEndDate: new Date(canceledSubscription.canceled_at! * 1000),
-        // Keep plan active until period end
-        // plan: 'free',  // Don't change plan until subscription actually ends
-        // subscriptionTier: 'free'
+        subscriptionEndDate: periodEndDate,
+        // IMPORTANT: Keep the current plan active until period end
+        // The plan will be downgraded by the sync job when period ends
       }
     });
 
     console.debug('✅ User subscription status updated in database');
 
-    // Calculate when access will end (use canceled_at as fallback)
-    const periodEnd = new Date();
+    // Return the actual period end date
+    const periodEnd = periodEndDate;
 
     return NextResponse.json({
       success: true,

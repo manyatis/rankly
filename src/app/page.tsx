@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import HeroSection from '../components/home/HeroSection';
 import PricingSection from '../components/home/PricingSection';
 import Footer from '@/components/Footer';
+import WebsiteAnalysisInput from '../components/WebsiteAnalysisInput';
 
 export default function Home() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -50,63 +50,58 @@ export default function Home() {
       <HeroSection onCreateAccount={handleCreateAccount} />
 
 
-      {/* Statistics Section */}
-      <div className="bg-gray-900 py-12 sm:py-16">
+      {/* Dashboard Screenshot Section */}
+      <div className="bg-gray-900 py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-              AI Search Rankings Join The SEO Equation 
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Track Your Progress with Real-Time Analytics
             </h2>
-            {/* <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              Freelance SEOs need quick client reports. Businesses want to handle their own SEO. Our AI-powered platform 
-              aggregates rankings from all major AI engines and generates actionable recommendations automatically.
-            </p> */}
+            <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              Monitor your website&apos;s visibility across AI engines and watch your rankings improve over time
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-2">60%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of searches complete without clicks</p>
-              <p className="text-gray-400 text-xs mt-2">Source: SparkToro/Datos Study (2024)</p>
+          {/* Dashboard Screenshot */}
+          <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-8 shadow-2xl overflow-hidden">
+            <div className="absolute top-4 right-4 bg-green-500/20 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-green-400 text-xs sm:text-sm font-medium border border-green-500/30 z-20 shadow-lg">
+              <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+              Live Data
             </div>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600 mb-2">13.14%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of Google queries now show AI Overviews</p>
-              <p className="text-gray-400 text-xs mt-2">Source: Semrush Study (March 2025)</p>
+            
+            {/* Screenshot Container */}
+            <div className="relative">
+              <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg">
+                <Image 
+                  src="/dashboard-trends.png" 
+                  alt="Rankly Dashboard - Trends Analysis" 
+                  width={1200} 
+                  height={675} 
+                  className="w-full h-auto"
+                  priority
+                />
+              </div>
             </div>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 mb-2">525%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">revenue growth for AI search engines in 2024</p>
-              <p className="text-gray-400 text-xs mt-2">Source: Industry Analysis (2024)</p>
-            </div>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 mb-2">78%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">of enterprises now use AI in business functions</p>
-              <p className="text-gray-400 text-xs mt-2">Source: McKinsey AI Survey (2024)</p>
-            </div>
-          </div>
-
-          {/* Additional Impact Statistics Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600 mb-2">25%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">predicted drop in traditional search volume by 2026</p>
-              <p className="text-gray-400 text-xs mt-2">Source: Gartner Research (2024)</p>
-            </div>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-teal-600 mb-2">$13.8B</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">AI spending surge in 2024 (6x increase from 2023)</p>
-              <p className="text-gray-400 text-xs mt-2">Source: Enterprise AI Reports (2024)</p>
-            </div>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 text-center border border-gray-600">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600 mb-2">34.5%</div>
-              <p className="text-gray-300 font-medium text-xs sm:text-sm lg:text-base">drop in click-through rates when AI Overviews appear</p>
-              <p className="text-gray-400 text-xs mt-2">Source: Ahrefs Study (2024)</p>
+            
+            {/* Feature Callouts */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-1">+42%</div>
+                <p className="text-sm text-gray-400">Average visibility increase</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-400 mb-1">5 AI Engines</div>
+                <p className="text-sm text-gray-400">Tracked simultaneously</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-400 mb-1">Real-time</div>
+                <p className="text-sm text-gray-400">Performance monitoring</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-6 sm:p-8 max-w-4xl mx-auto">
-            <p className="text-gray-300 text-base sm:text-lg text-center leading-relaxed">
+          <div className="mt-8 text-center">
+            <p className="text-gray-300 text-base sm:text-lg">
               We use a <strong className="text-blue-600">multi-agentic AI workflow</strong> to handle prompt generation, 
               analysis, and recommendations automatically.
             </p>
@@ -387,10 +382,14 @@ export default function Home() {
 
           {/* CTA */}
           <div className="text-center mt-12">
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/dashboard" className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base sm:text-lg shadow-lg inline-block">
-                Analyze Your Site Free
-              </Link>
+            <div className="flex justify-center">
+              <WebsiteAnalysisInput
+                onLoginRequired={handleCreateAccount}
+                placeholder="Enter your website URL"
+                buttonText="Analyze Your Site Free"
+                size="small"
+                className="max-w-sm"
+              />
             </div>
           </div>
 
@@ -410,21 +409,24 @@ export default function Home() {
       />
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 py-20">
+      <div className="bg-gray-900 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
             Ready to Analyze Your Site&apos;s Visibility?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Get your first site analysis free. See how your website ranks across all major AI engines and discover 
             actionable optimization opportunities.
           </p>
-          <button
-            onClick={handleCreateAccount}
-            className="bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-gray-100 transition-colors font-medium text-base sm:text-lg cursor-pointer"
-          >
-            Create Free Account
-          </button>
+          <div className="flex justify-center">
+            <WebsiteAnalysisInput
+              onLoginRequired={handleCreateAccount}
+              placeholder="Enter your website URL"
+              buttonText="Analyze Your Site Free"
+              size="small"
+              className="max-w-sm"
+            />
+          </div>
         </div>
       </div>
 

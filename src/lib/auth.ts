@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './nextauth';
 import { prisma } from './prisma';
 import { SubscriptionTiers } from './subscription-tiers';
+import { SubscriptionStatus } from '@/types/subscription';
 
 
 export async function getUser() {
@@ -19,12 +20,23 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
     return { canUse: false, usageCount: 0, maxUsage: freeLimit, tier: 'free' };
   }
 
+  // Check if user has a canceled subscription that's still active
+  let effectivePlan = user.plan;
+  if (user.subscriptionStatus === SubscriptionStatus.CANCELED && user.subscriptionEndDate) {
+    const now = new Date();
+    if (now > user.subscriptionEndDate) {
+      // Subscription period has ended, use free tier
+      effectivePlan = 'free';
+    }
+    // Otherwise, keep their current plan until subscriptionEndDate
+  }
+
   // Get tier-specific usage limits
-  const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+  const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
   
   // Professional and Enterprise users get unlimited usage
   if (usageLimits.isUnlimited) {
-    return { canUse: true, usageCount: user.dailyUsageCount, maxUsage: 'unlimited', tier: user.plan };
+    return { canUse: true, usageCount: user.dailyUsageCount, maxUsage: 'unlimited', tier: effectivePlan };
   }
 
   const dailyLimit = usageLimits.dailyAnalysisLimit!;
@@ -44,11 +56,11 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
         lastUsageDate: new Date()
       }
     });
-    return { canUse: true, usageCount: 0, maxUsage: dailyLimit, tier: user.plan };
+    return { canUse: true, usageCount: 0, maxUsage: dailyLimit, tier: effectivePlan };
   }
 
   const canUse = user.dailyUsageCount < dailyLimit;
-  return { canUse, usageCount: user.dailyUsageCount, maxUsage: dailyLimit, tier: user.plan };
+  return { canUse, usageCount: user.dailyUsageCount, maxUsage: dailyLimit, tier: effectivePlan };
 }
 
 export async function incrementUsage(email: string): Promise<boolean> {
@@ -61,8 +73,18 @@ export async function incrementUsage(email: string): Promise<boolean> {
       return false;
     }
 
+    // Check if user has a canceled subscription that's still active
+    let effectivePlan = user.plan;
+    if (user.subscriptionStatus === SubscriptionStatus.CANCELED && user.subscriptionEndDate) {
+      const now = new Date();
+      if (now > user.subscriptionEndDate) {
+        // Subscription period has ended, use free tier
+        effectivePlan = 'free';
+      }
+    }
+
     // Get tier-specific usage limits
-    const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+    const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
 
     // Professional and Enterprise users get unlimited usage
     if (usageLimits.isUnlimited) {
@@ -141,8 +163,18 @@ export async function checkRateLimit(
     return { canUse: false, remainingUses: 0, resetTime: null, waitMinutes: 0 };
   }
 
+  // Check if user has a canceled subscription that's still active
+  let effectivePlan = user.plan;
+  if (user.subscriptionStatus === SubscriptionStatus.CANCELED && user.subscriptionEndDate) {
+    const now = new Date();
+    if (now > user.subscriptionEndDate) {
+      // Subscription period has ended, use free tier
+      effectivePlan = 'free';
+    }
+  }
+
   // Get tier-specific rate limits
-  const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+  const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
 
   // Professional and Enterprise users get unlimited usage
   if (usageLimits.isUnlimited) {
@@ -191,8 +223,18 @@ export async function incrementRateLimit(
       return false;
     }
 
+    // Check if user has a canceled subscription that's still active
+    let effectivePlan = user.plan;
+    if (user.subscriptionStatus === SubscriptionStatus.CANCELED && user.subscriptionEndDate) {
+      const now = new Date();
+      if (now > user.subscriptionEndDate) {
+        // Subscription period has ended, use free tier
+        effectivePlan = 'free';
+      }
+    }
+
     // Get tier-specific rate limits
-    const usageLimits = SubscriptionTiers.getUsageLimits(user.plan);
+    const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
 
     // Professional and Enterprise users get unlimited usage
     if (usageLimits.isUnlimited) {

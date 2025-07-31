@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import WebsiteAnalysisInput from '../WebsiteAnalysisInput';
 
 interface AnalyticsFeature {
   icon: React.ReactNode;
@@ -128,10 +128,14 @@ export default function AnalyticsFeatures({
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
               See what people are asking AI about your industry and discover untapped opportunities with our free analytics tool.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/dashboard" className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg shadow-sm inline-block">
-                Start your analysis today
-              </Link>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <WebsiteAnalysisInput
+                onLoginRequired={onCreateAccount}
+                placeholder="Enter your website URL"
+                buttonText="Start Analysis"
+                size="small"
+                className="max-w-sm"
+              />
               <button
                 onClick={onCreateAccount}
                 className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium text-lg cursor-pointer"

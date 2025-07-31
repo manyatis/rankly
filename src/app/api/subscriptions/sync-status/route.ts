@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 import { SubscriptionStatus } from '@/types/subscription';
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);
@@ -78,8 +78,22 @@ export async function POST(_request: NextRequest) {
       if (!user.plan || user.plan === 'free') {
         updateData.subscriptionStartDate = new Date();
       }
-    } else if ([SubscriptionStatus.CANCELED, SubscriptionStatus.UNPAID, SubscriptionStatus.PAST_DUE, SubscriptionStatus.INCOMPLETE_EXPIRED].includes(subscription.status as SubscriptionStatus)) {
-      // Downgrade to free if subscription is no longer active
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } else if (subscription.status === SubscriptionStatus.CANCELED && subscription.cancel_at_period_end && (subscription as any).current_period_end) {
+      // Subscription is canceled but still active until period end
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const periodEndDate = new Date((subscription as any).current_period_end * 1000);
+      updateData.subscriptionEndDate = periodEndDate;
+      
+      // Check if the period has already ended
+      if (new Date() > periodEndDate) {
+        // Period has ended, downgrade to free
+        updateData.plan = 'free';
+        updateData.subscriptionTier = 'free';
+      }
+      // Otherwise, keep current plan until period end
+    } else if ([SubscriptionStatus.UNPAID, SubscriptionStatus.PAST_DUE, SubscriptionStatus.INCOMPLETE_EXPIRED].includes(subscription.status as SubscriptionStatus)) {
+      // Immediately downgrade for these statuses
       updateData.plan = 'free';
       updateData.subscriptionTier = 'free';
       updateData.subscriptionEndDate = new Date();
