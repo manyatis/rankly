@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { canCancelSubscription, getStatusDisplay, getStatusColor, getStatusIndicatorColor } from '@/types/subscription'
 
 interface SubscriptionData {
   plan: {
@@ -166,24 +167,8 @@ export default function AccountPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-400">Status</label>
                     <div className="flex items-center gap-2">
-                      <span className={`inline-block w-2 h-2 rounded-full ${
-                        subscription.status === 'ACTIVE' ? 'bg-green-500' : 
-                        subscription.status === 'CANCELED' || subscription.status === 'CANCELLED' ? 'bg-red-500' :
-                        subscription.status === 'PAUSED' ? 'bg-yellow-500' :
-                        subscription.status === 'PAST_DUE' ? 'bg-orange-500' :
-                        subscription.status === 'EXPIRED' ? 'bg-red-400' :
-                        subscription.status === 'DEACTIVATED' ? 'bg-gray-600' :
-                        'bg-gray-500'
-                      }`} />
-                      <p className={`capitalize ${
-                        subscription.status === 'ACTIVE' ? 'text-green-400' : 
-                        subscription.status === 'CANCELED' || subscription.status === 'CANCELLED' ? 'text-red-400' :
-                        subscription.status === 'PAUSED' ? 'text-yellow-400' :
-                        subscription.status === 'PAST_DUE' ? 'text-orange-400' :
-                        subscription.status === 'EXPIRED' ? 'text-red-300' :
-                        subscription.status === 'DEACTIVATED' ? 'text-gray-400' :
-                        'text-white'
-                      }`}>{subscription.status.toLowerCase()}</p>
+                      <span className={`inline-block w-2 h-2 rounded-full ${getStatusIndicatorColor(subscription.status)}`} />
+                      <p className={getStatusColor(subscription.status)}>{getStatusDisplay(subscription.status)}</p>
                     </div>
                   </div>
                 )}
@@ -219,7 +204,7 @@ export default function AccountPage() {
                 )}
               </div>
               <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                {subscription?.status === 'ACTIVE' ? (
+                {canCancelSubscription(subscription?.status) ? (
                   <>
                     <Link href="/subscribe" className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors font-normal text-sm text-center">
                       Change Plan

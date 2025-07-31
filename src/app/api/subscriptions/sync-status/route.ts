@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import { SubscriptionStatus } from '@/types/subscription';
 
 export async function POST(_request: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({ 
         success: true, 
         message: 'No subscription to sync',
-        status: 'free',
+        status: SubscriptionStatus.FREE,
         plan: 'free'
       });
     }
@@ -71,13 +72,13 @@ export async function POST(_request: NextRequest) {
     };
 
     // Handle different subscription statuses
-    if (subscription.status === 'active') {
+    if (subscription.status === SubscriptionStatus.ACTIVE) {
       updateData.plan = planId;
       updateData.subscriptionTier = planId;
       if (!user.plan || user.plan === 'free') {
         updateData.subscriptionStartDate = new Date();
       }
-    } else if (['canceled', 'unpaid', 'past_due', 'incomplete_expired'].includes(subscription.status)) {
+    } else if ([SubscriptionStatus.CANCELED, SubscriptionStatus.UNPAID, SubscriptionStatus.PAST_DUE, SubscriptionStatus.INCOMPLETE_EXPIRED].includes(subscription.status as SubscriptionStatus)) {
       // Downgrade to free if subscription is no longer active
       updateData.plan = 'free';
       updateData.subscriptionTier = 'free';

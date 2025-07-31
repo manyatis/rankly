@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import { SubscriptionStatus } from '@/types/subscription';
 
 export async function POST(_request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function POST(_request: NextRequest) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        subscriptionStatus: 'canceled',
+        subscriptionStatus: SubscriptionStatus.CANCELED,
         subscriptionEndDate: new Date(canceledSubscription.canceled_at! * 1000),
         // Keep plan active until period end
         // plan: 'free',  // Don't change plan until subscription actually ends
@@ -58,7 +59,7 @@ export async function POST(_request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Subscription canceled successfully',
-      status: 'canceled',
+      status: SubscriptionStatus.CANCELED,
       accessEndsAt: periodEnd.toISOString(),
       note: 'You will retain access to premium features until the end of your current billing period.'
     });

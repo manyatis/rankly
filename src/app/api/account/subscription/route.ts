@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/nextauth'
 import { prisma as db } from '@/lib/prisma'
+import { SubscriptionStatus } from '@/types/subscription'
 
 export async function GET() {
   try {
@@ -39,14 +40,14 @@ export async function GET() {
             'Limited competitor tracking'
           ]
         },
-        status: 'ACTIVE',
+        status: SubscriptionStatus.FREE,
         startDate: user.createdAt.toISOString()
       })
     }
 
     // Calculate next billing date if subscription is active
     let nextBillingDate
-    if (user.subscriptionStatus === 'ACTIVE' && user.subscriptionStartDate) {
+    if (user.subscriptionStatus === SubscriptionStatus.ACTIVE && user.subscriptionStartDate) {
       const startDate = new Date(user.subscriptionStartDate)
       const now = new Date()
       const monthsSinceStart = (now.getFullYear() - startDate.getFullYear()) * 12 + 
@@ -62,7 +63,7 @@ export async function GET() {
         price: subscriptionPlan.priceCents / 100, // Convert cents to dollars
         features: subscriptionPlan.features
       },
-      status: user.subscriptionStatus || 'INACTIVE',
+      status: user.subscriptionStatus || SubscriptionStatus.INACTIVE,
       startDate: user.subscriptionStartDate?.toISOString() || user.createdAt.toISOString(),
       nextBillingDate: nextBillingDate?.toISOString(),
       subscriptionId: user.subscriptionId
