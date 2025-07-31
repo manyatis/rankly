@@ -118,7 +118,7 @@ export default function SimpleCardForm({ onSuccess, onError, planName, planPrice
         }
       }
     };
-  }, [card, cardContainerId]);
+  }, [cardContainerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
