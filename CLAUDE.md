@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers with Square subscription payments.
+Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers with Stripe subscription payments.
 
 ## Development Commands
 
@@ -65,10 +65,10 @@ npx prisma studio         # Database browser
 - Session-based authentication with multiple providers
 - Subscription tiers: free (1/day), indie (3/day + recurring scans), professional (unlimited), enterprise (unlimited + consultation)
 
-### Subscription Management (Square)
-- **Square Subscriptions API** for recurring monthly payments
-- **Web Payments SDK** for secure card tokenization on frontend
-- **Node.js SDK** for server-side subscription management
+### Subscription Management (Stripe)
+- **Stripe Checkout** for secure payment processing
+- **Stripe Subscriptions API** for recurring monthly payments
+- **Stripe Customer Portal** for subscription management
 - **Webhook handling** for subscription lifecycle events
 - **Tier-based feature access** enforced throughout application
 
@@ -96,7 +96,7 @@ npx prisma studio         # Database browser
 ### API Routes (`src/app/api/`)
 - `aeo-score/` - Core AEO analysis endpoint
 - `auth/` - NextAuth.js authentication routes
-- `subscriptions/` - Square subscription management (create, cancel, update, webhooks)
+- `subscriptions/` - Stripe subscription management (create, cancel, update, webhooks)
 - `cron/recurring-scans/` - Automated recurring analysis endpoint
 - `usage-check/` - Rate limiting validation
 - `dashboard/` - Dashboard-specific endpoints (organizations, businesses, ranking history, recurring scans)
@@ -104,7 +104,7 @@ npx prisma studio         # Database browser
 ### Components (`src/components/`)
 - Organized by page/feature (home/, auth/, dashboard/, payment/)
 - Dashboard components: AutomationSetupTab (recurring scans), TrendsTab (with query results), ExecuteTab, etc.
-- Payment components: PlanSelector, PaymentForm, SubscriptionManager
+- Payment components: SubscriptionFlow, StripeCardForm (Stripe Checkout)
 - Follow React 19 patterns with server/client component separation
 
 ### Services (`src/services/`)
@@ -120,9 +120,9 @@ Required environment variables:
 - `ANTHROPIC_API_KEY` - Claude integration
 - `OPENAI_API_KEY` - ChatGPT integration
 - `PERPLEXITY_API_KEY` - Perplexity integration
-- `SQUARE_ACCESS_TOKEN` - Square API access
-- `SQUARE_APPLICATION_ID` / `SQUARE_LOCATION_ID` - Square configuration
-- `SQUARE_ENVIRONMENT` - sandbox/production
+- `STRIPE_SECRET_KEY` - Stripe API access
+- `STRIPE_PUBLISHABLE_KEY` - Stripe frontend integration
+- `STRIPE_WEBHOOK_SECRET` - Webhook signature verification
 - `CRON_SECRET` - Vercel cron job authentication
 
 ## Development Guidelines
@@ -156,7 +156,7 @@ Required environment variables:
 ### Automation & Subscription System
 - **Recurring Scans**: Automated AEO analysis for indie+ subscribers
 - **Automation Setup Tab**: Dedicated interface for configuring recurring analysis
-- **Subscription Tiers**: Integrated Square payments with tier-based feature access
+- **Subscription Tiers**: Integrated Stripe payments with tier-based feature access
 - **Vercel Cron Integration**: Daily automated processing with proper error handling
 
 ### Advanced Analytics
@@ -179,12 +179,12 @@ Required environment variables:
 
 ### Recent Major Updates (Current Session)
 
-#### Square Subscription System (Complete)
-- **Payment Infrastructure** - Full Square subscription integration with Web Payments SDK
+#### Stripe Subscription System (Complete)
+- **Payment Infrastructure** - Full Stripe subscription integration with Stripe Checkout
 - **Subscription Plans** - Indie ($20), Professional ($75), Enterprise ($250) tiers with database seeding
-- **Payment Components** - PaymentForm and SubscriptionPlans components with dark theme
+- **Payment Components** - SubscriptionFlow and StripeCardForm components with dark theme
 - **API Endpoints** - Complete subscription creation, cancellation, and plan fetching
-- **Subscription Sync** - Daily cron job to sync subscription statuses with Square (pseudo-webhook)
+- **Subscription Sync** - Daily cron job to sync subscription statuses with Stripe (pseudo-webhook)
 
 #### Database Schema for Subscriptions (Complete)
 - **User subscription fields** - subscriptionId, subscriptionStatus, subscriptionStartDate, etc.
@@ -192,10 +192,10 @@ Required environment variables:
 - **Automatic downgrading** - Users moved to free tier when subscriptions become inactive
 
 #### Subscription Status Sync System (Complete)
-- **Daily cron job** at 2 AM to check all subscription statuses against Square
+- **Daily cron job** at 2 AM to check all subscription statuses against Stripe
 - **SubscriptionSyncService** - Comprehensive service for subscription status management
 - **Manual sync endpoint** - `/api/admin/sync-subscription` for testing and admin use
-- **Status handling** - Automatic downgrade on CANCELED, PAUSED, DEACTIVATED, EXPIRED
+- **Status handling** - Automatic downgrade on canceled, past_due, incomplete, or expired subscriptions
 
 #### Automation Features (Complete)
 - **Recurring scans** - Backend system with Vercel cron job for automated AEO analysis
@@ -205,17 +205,17 @@ Required environment variables:
 
 #### Current Production Status
 - **Build successful** with all TypeScript issues resolved
-- **Mock Square client** in place (ready for production Square SDK configuration)
+- **Stripe integration** fully functional with checkout flow
 - **Complete payment flow** from plan selection to subscription creation
 - **Comprehensive error handling** and user feedback throughout
 
 #### Environment Configuration Required
-- Square API credentials (SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, etc.)
+- Stripe API credentials (STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY)
+- STRIPE_WEBHOOK_SECRET for webhook signature verification
 - CRON_SECRET for secure cron job authentication
-- Production Square environment configuration
 
 #### Next Steps for Production
-- Configure real Square API credentials and catalog items
-- Replace mock Square client with production implementation
-- Test complete payment flow in Square sandbox
-- Set up proper webhook handling for real-time subscription events
+- Configure production Stripe API credentials
+- Set up Stripe webhook endpoints for real-time subscription events
+- Test complete payment flow in Stripe test mode
+- Configure Stripe Customer Portal for subscription self-service
