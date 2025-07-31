@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
-  return NextResponse.json({ message: 'Webhook endpoint is working' });
-}
-
 export async function POST(request: NextRequest) {
   console.log('🔔 Webhook POST received');
   
