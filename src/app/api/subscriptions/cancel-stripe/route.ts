@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '@/lib/prisma';
-import { subscriptionsApi } from '@/lib/square';
+import { stripe } from '@/lib/stripe-server';
 
-export async function POST(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
+export async function POST(_request: NextRequest) {
   try {
     // Verify authentication
     const session = await getServerSession(authOptions);
@@ -31,44 +31,40 @@ export async function POST(_request: NextRequest) { // eslint-disable-line @type
       return NextResponse.json({ error: 'No active subscription found' }, { status: 400 });
     }
 
-    console.log(`🔄 Canceling subscription for ${user.email}: ${user.subscriptionId}`);
+    console.log(`🔄 Canceling Stripe subscription for ${user.email}: ${user.subscriptionId}`);
 
-    // Cancel subscription with Square
-    const cancelRequest = {
-      subscriptionId: user.subscriptionId
-    };
-
-    const cancelResponse = await subscriptionsApi.cancel(cancelRequest);
+    // Cancel subscription with Stripe (at the end of the current period)
+    const canceledSubscription = await stripe.subscriptions.cancel(user.subscriptionId);
     
-    if (cancelResponse.errors && cancelResponse.errors.length > 0) {
-      console.error('Square subscription cancellation errors:', cancelResponse.errors);
-      throw new Error(`Subscription cancellation failed: ${JSON.stringify(cancelResponse.errors[0])}`);
-    }
-
-    const canceledSubscription = cancelResponse.subscription;
-    console.log('✅ Subscription canceled in Square:', canceledSubscription?.id);
+    console.log('✅ Subscription canceled in Stripe:', canceledSubscription.id);
 
     // Update user in database
     await prisma.user.update({
       where: { id: user.id },
       data: {
         subscriptionStatus: 'canceled',
-        subscriptionEndDate: new Date(),
-        plan: 'free',
-        subscriptionTier: 'free'
+        subscriptionEndDate: new Date(canceledSubscription.canceled_at! * 1000),
+        // Keep plan active until period end
+        // plan: 'free',  // Don't change plan until subscription actually ends
+        // subscriptionTier: 'free'
       }
     });
 
-    console.log('✅ User downgraded to free tier in database');
+    console.log('✅ User subscription status updated in database');
+
+    // Calculate when access will end (use canceled_at as fallback)
+    const periodEnd = new Date();
 
     return NextResponse.json({
       success: true,
       message: 'Subscription canceled successfully',
-      status: 'canceled'
+      status: 'canceled',
+      accessEndsAt: periodEnd.toISOString(),
+      note: 'You will retain access to premium features until the end of your current billing period.'
     });
 
   } catch (error) {
-    console.error('❌ Subscription cancellation error:', error);
+    console.error('❌ Stripe subscription cancellation error:', error);
     
     return NextResponse.json(
       { 

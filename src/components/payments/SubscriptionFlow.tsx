@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, Star, Zap, Crown, ArrowLeft } from 'lucide-react';
-import SimpleCardForm from './SimpleCardForm';
+import StripeCardForm from './StripeCardForm';
 
 interface SubscriptionPlan {
   id: number;
@@ -43,37 +43,20 @@ export default function SubscriptionFlow() {
   };
 
   const handlePlanSelect = (plan: SubscriptionPlan) => {
+    // Only allow indie plan for now
+    if (plan.planId !== 'indie') {
+      return; // Do nothing for disabled plans
+    }
     setSelectedPlan(plan);
     setStep('payment');
     setError(null);
   };
 
-  const handlePaymentSuccess = async (token: string) => {
+  const handlePaymentSuccess = async (subscriptionId: string) => {
     if (!selectedPlan) return;
-
-    try {
-      const response = await fetch('/api/subscriptions/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cardToken: token,
-          planId: selectedPlan.planId
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Subscription creation failed');
-      }
-
-      setStep('success');
-    } catch (error) {
-      console.error('Payment processing error:', error);
-      setError(error instanceof Error ? error.message : 'Payment processing failed');
-    }
+    
+    console.log('Payment successful for subscription:', subscriptionId);
+    setStep('success');
   };
 
   const handlePaymentError = (errorMessage: string) => {
@@ -99,6 +82,10 @@ export default function SubscriptionFlow() {
 
   const isPlanPopular = (planId: string): boolean => {
     return planId === 'indie'; // Indie is most popular
+  };
+
+  const isPlanDisabled = (planId: string): boolean => {
+    return planId !== 'indie'; // Only indie is enabled
   };
 
   if (isLoading) {
@@ -183,11 +170,12 @@ export default function SubscriptionFlow() {
         )}
 
         {/* Payment Form */}
-        <SimpleCardForm 
+        <StripeCardForm 
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           planName={selectedPlan.name}
           planPrice={formatPrice(selectedPlan.priceCents)}
+          planId={selectedPlan.planId}
         />
       </div>
     );
@@ -209,10 +197,12 @@ export default function SubscriptionFlow() {
           <div
             key={plan.id}
             className={`
-              relative bg-gray-900 border rounded-xl p-6 transition-all duration-200 cursor-pointer
-              ${isPlanPopular(plan.planId)
-                ? 'border-blue-500 ring-2 ring-blue-500/20 transform scale-105'
-                : 'border-gray-700 hover:border-gray-600'
+              relative bg-gray-900 border rounded-xl p-6 transition-all duration-200
+              ${isPlanDisabled(plan.planId)
+                ? 'border-gray-800 opacity-60 cursor-not-allowed'
+                : isPlanPopular(plan.planId)
+                ? 'border-blue-500 ring-2 ring-blue-500/20 transform scale-105 cursor-pointer'
+                : 'border-gray-700 hover:border-gray-600 cursor-pointer'
               }
             `}
             onClick={() => handlePlanSelect(plan)}
@@ -221,6 +211,13 @@ export default function SubscriptionFlow() {
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
+                </span>
+              </div>
+            )}
+            {isPlanDisabled(plan.planId) && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-gray-600 text-gray-300 px-4 py-1 rounded-full text-sm font-medium">
+                  Coming Soon
                 </span>
               </div>
             )}
@@ -251,13 +248,16 @@ export default function SubscriptionFlow() {
             <button
               className={`
                 w-full py-3 px-4 rounded-lg font-medium transition-colors
-                ${isPlanPopular(plan.planId)
+                ${isPlanDisabled(plan.planId)
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : isPlanPopular(plan.planId)
                   ? 'bg-blue-600 hover:bg-blue-700 text-white'
                   : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }
               `}
+              disabled={isPlanDisabled(plan.planId)}
             >
-              Choose {plan.name}
+              {isPlanDisabled(plan.planId) ? 'Coming Soon' : `Choose ${plan.name}`}
             </button>
           </div>
         ))}

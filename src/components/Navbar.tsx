@@ -46,6 +46,7 @@ export default function Navbar() {
             <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">API</Link>
             <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Learn</Link>
             <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Pricing</Link>
+            <Link href="/subscribe" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Subscribe</Link>
           </div>
           
           {/* Right side - Auth */}
@@ -130,6 +131,7 @@ export default function Navbar() {
                 <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>API</Link>
                 <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Learn More</Link>
                 <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Pricing</Link>
+                <Link href="/subscribe" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Subscribe</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}
                 {loading ? (
                   <div className="space-y-4">

@@ -2,7 +2,7 @@ export interface SubscriptionTier {
   name: string;
   websiteLimit: number;
   price?: string;
-  priceCents?: number; // Price in cents for Square
+  priceCents?: number; // Price in cents
   features: string[];
   usageLimits: {
     dailyAnalysisLimit: number | null; // null = unlimited

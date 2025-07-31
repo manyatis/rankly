@@ -61,7 +61,7 @@ export default function AccountPage() {
 
     try {
       setCancelling(true)
-      const response = await fetch('/api/subscriptions/cancel', {
+      const response = await fetch('/api/subscriptions/cancel-stripe', {
         method: 'POST',
       })
 

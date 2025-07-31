@@ -24,7 +24,8 @@ async function seedSubscriptionPlans() {
         'Query results visibility'
       ],
       isActive: true,
-      squarePlanId: null, // Will be set when Square catalog items are created
+      stripePriceId: null, // Will be set when Stripe products are created
+      stripeProductId: null,
     },
     {
       planId: 'professional',
@@ -42,7 +43,8 @@ async function seedSubscriptionPlans() {
         'Priority support'
       ],
       isActive: true,
-      squarePlanId: null,
+      stripePriceId: null, // Will be set when Stripe products are created
+      stripeProductId: null,
     },
     {
       planId: 'enterprise',
@@ -61,7 +63,8 @@ async function seedSubscriptionPlans() {
         'API access'
       ],
       isActive: true,
-      squarePlanId: null,
+      stripePriceId: null, // Will be set when Stripe products are created
+      stripeProductId: null,
     }
   ];
 
