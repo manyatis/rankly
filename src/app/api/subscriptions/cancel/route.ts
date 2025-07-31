@@ -38,14 +38,14 @@ export async function POST(_request: NextRequest) { // eslint-disable-line @type
       subscriptionId: user.subscriptionId
     };
 
-    const cancelResponse = await subscriptionsApi.cancelSubscription(cancelRequest);
+    const cancelResponse = await subscriptionsApi.cancel(cancelRequest);
     
-    if (cancelResponse.result.errors) {
-      console.error('Square subscription cancellation errors:', cancelResponse.result.errors);
-      throw new Error(`Subscription cancellation failed: ${JSON.stringify(cancelResponse.result.errors[0])}`);
+    if (cancelResponse.errors && cancelResponse.errors.length > 0) {
+      console.error('Square subscription cancellation errors:', cancelResponse.errors);
+      throw new Error(`Subscription cancellation failed: ${JSON.stringify(cancelResponse.errors[0])}`);
     }
 
-    const canceledSubscription = cancelResponse.result.subscription;
+    const canceledSubscription = cancelResponse.subscription;
     console.log('✅ Subscription canceled in Square:', canceledSubscription?.id);
 
     // Update user in database

@@ -63,19 +63,19 @@ export async function POST(request: NextRequest) {
       };
 
       console.log('👤 Creating Square customer...');
-      const customerResponse = await customersApi.createCustomer(customerRequest);
+      const customerResponse = await customersApi.create(customerRequest);
 
       // console.log('Customer response:', JSON.stringify(customerResponse, null, 2));
 
-      if (customerResponse.result.errors && customerResponse.result.errors.length > 0) {
-        console.error('Square customer creation errors:', customerResponse.result.errors);
-        throw new Error(`Customer creation failed: ${JSON.stringify(customerResponse.result.errors[0])}`);
+      if (customerResponse.errors && customerResponse.errors.length > 0) {
+        console.error('Square customer creation errors:', customerResponse.errors);
+        throw new Error(`Customer creation failed: ${JSON.stringify(customerResponse.errors[0])}`);
       }
 
-      customerId = customerResponse.result.customer?.id || null;
+      customerId = customerResponse.customer?.id || null;
 
       if (!customerId) {
-        console.error('No customer ID returned:', customerResponse.result);
+        console.error('No customer ID returned:', customerResponse);
         throw new Error('Failed to create Square customer - no customer ID returned');
       }
 
@@ -100,13 +100,13 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const cardResponse = await cardsApi.createCard(cardRequest);
-    if (cardResponse.result.errors && cardResponse.result.errors?.length > 0) {
-      console.error('Square card creation errors:', cardResponse.result.errors);
-      throw new Error(`Card creation failed: ${JSON.stringify(cardResponse.result.errors[0])}`);
+    const cardResponse = await cardsApi.create(cardRequest);
+    if (cardResponse.errors && cardResponse.errors?.length > 0) {
+      console.error('Square card creation errors:', cardResponse.errors);
+      throw new Error(`Card creation failed: ${JSON.stringify(cardResponse.errors[0])}`);
     }
 
-    const cardId = cardResponse.result.card?.id;
+    const cardId = cardResponse.card?.id;
     if (!cardId) {
       throw new Error('Failed to create card on file');
     }
@@ -127,14 +127,14 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    const subscriptionResponse = await subscriptionsApi.createSubscription(subscriptionRequest);
+    const subscriptionResponse = await subscriptionsApi.create(subscriptionRequest);
 
-    if (subscriptionResponse.result.errors && subscriptionResponse.result.errors.length > 1) {
-      console.error('Square subscription creation errors:', subscriptionResponse.result.errors);
-      throw new Error(`Subscription creation failed: ${JSON.stringify(subscriptionResponse.result.errors[0])}`);
+    if (subscriptionResponse.errors && subscriptionResponse.errors.length > 0) {
+      console.error('Square subscription creation errors:', subscriptionResponse.errors);
+      throw new Error(`Subscription creation failed: ${JSON.stringify(subscriptionResponse.errors[0])}`);
     }
 
-    const subscription = subscriptionResponse.result.subscription;
+    const subscription = subscriptionResponse.subscription;
     if (!subscription?.id) {
       throw new Error('Failed to create subscription');
     }

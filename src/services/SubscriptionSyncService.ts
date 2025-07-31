@@ -113,16 +113,16 @@ export class SubscriptionSyncService {
     console.log(`🔍 Checking subscription for ${user.email}: ${user.subscriptionId}`);
 
     // Retrieve subscription status from Square
-    const squareResponse = await subscriptionsApi.retrieveSubscription({
+    const squareResponse = await subscriptionsApi.get({
       subscriptionId: user.subscriptionId
     });
 
-    if (squareResponse.result.errors && squareResponse.result.errors.length > 0) {
-      console.error(`❌ Square API error for ${user.email}:`, squareResponse.result.errors);
+    if (squareResponse.errors && squareResponse.errors.length > 0) {
+      console.error(`❌ Square API error for ${user.email}:`, squareResponse.errors);
       return { success: false, updated: false };
     }
 
-    const squareSubscription = squareResponse.result.subscription;
+    const squareSubscription = squareResponse.subscription;
     if (!squareSubscription) {
       console.warn(`⚠️ No subscription found in Square for ${user.email}`);
       return { success: false, updated: false };
@@ -130,6 +130,11 @@ export class SubscriptionSyncService {
 
     const squareStatus = squareSubscription.status;
     const currentStatus = user.subscriptionStatus;
+
+    if (!squareStatus) {
+      console.warn(`⚠️ No status found in Square subscription for ${user.email}`);
+      return { success: false, updated: false };
+    }
 
     console.log(`📋 ${user.email}: Square status = ${squareStatus}, DB status = ${currentStatus}`);
 

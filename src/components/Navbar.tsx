@@ -83,6 +83,13 @@ export default function Navbar() {
                           {user.email}
                         </div>
                         <div className="border-t border-gray-600">
+                          <Link
+                            href="/account"
+                            onClick={closeUserDropdown}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors cursor-pointer"
+                          >
+                            Account settings
+                          </Link>
                           <button
                             onClick={handleLogout}
                             className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 transition-colors cursor-pointer"
@@ -140,6 +147,13 @@ export default function Navbar() {
                         <div className="text-sm font-normal text-gray-200">{user.email.split("@")[0]}</div>
                         <div className="text-xs text-gray-400 truncate">{user.email}</div>
                       </div>
+                      <Link
+                        href="/account"
+                        onClick={closeMobileMenu}
+                        className="block w-full bg-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors font-normal text-sm cursor-pointer text-center mb-2"
+                      >
+                        Account settings
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="w-full bg-red-900/20 text-red-400 px-4 py-2 rounded-lg hover:bg-red-900/30 transition-colors font-normal text-sm cursor-pointer"
