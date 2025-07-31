@@ -85,7 +85,11 @@ export default function SimpleCardForm({ onSuccess, onError, planName, planPrice
       }
 
       const script = document.createElement('script');
-      script.src = 'https://sandbox.web.squarecdn.com/v1/square.js';
+      // Determine environment from app ID (sandbox app IDs start with 'sandbox-')
+      const isSandbox = applicationId.startsWith('sandbox-');
+      script.src = isSandbox 
+        ? 'https://sandbox.web.squarecdn.com/v1/square.js'
+        : 'https://web.squarecdn.com/v1/square.js';
       script.async = true;
       script.onload = () => {
         if (isMounted) initializeSquare();
