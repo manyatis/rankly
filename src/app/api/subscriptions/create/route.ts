@@ -50,6 +50,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or inactive subscription plan' }, { status: 400 });
     }
 
+    if (!subscriptionPlan.squarePlanId) {
+      console.error(`❌ Square plan ID not configured for plan: ${planId}`);
+      return NextResponse.json({ 
+        error: 'Subscription plan not properly configured. Please contact support.',
+        details: 'Square catalog item not found for this plan'
+      }, { status: 500 });
+    }
+
     // console.log(`🔄 Creating subscription for ${user.email}: ${subscriptionPlan.name} plan`);
 
     let customerId = user.customerId;

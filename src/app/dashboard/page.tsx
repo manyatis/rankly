@@ -8,7 +8,6 @@ import LoginModal from '@/components/LoginModal';
 import TrendsTab from '@/components/dashboard/TrendsTab';
 import AIInsightsTab from '@/components/dashboard/AIInsightsTab';
 import BusinessInfoTab from '@/components/dashboard/BusinessInfoTab';
-import PromptsTab from '@/components/dashboard/PromptsTab';
 import ExecuteTab from '@/components/dashboard/ExecuteTabSimple';
 import CompetitorsTab from '@/components/dashboard/CompetitorsTab';
 import LinkWebsiteTab from '@/components/dashboard/LinkWebsiteTab';
@@ -35,7 +34,7 @@ export default function Dashboard() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'automation' | 'trends' | 'insights' | 'business' | 'competitors' | 'prompts' | 'execute' | 'link-website'>('automation');
+  const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website'>('trends');
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -155,7 +154,7 @@ export default function Dashboard() {
     if (selectedOrganization) {
       fetchBusinesses(selectedOrganization).then(() => {
         setSelectedBusiness(businessId);
-        setActiveTab('automation');
+        setActiveTab('trends');
         setTimeout(() => setInitialLoadComplete(true), 200);
       });
     }
@@ -166,16 +165,6 @@ export default function Dashboard() {
   const selectedBusinessName = businesses.find(biz => biz.id === selectedBusiness)?.websiteName || 'Select Business';
 
   const tabs = [
-    { 
-      id: 'automation', 
-      name: 'Automation Setup', 
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ), 
-      description: 'Configure recurring scans' 
-    },
     { 
       id: 'trends', 
       name: 'Trends', 
@@ -217,14 +206,14 @@ export default function Dashboard() {
       description: 'Compare competitor rankings' 
     },
     { 
-      id: 'prompts', 
-      name: 'Prompts', 
+      id: 'automation', 
+      name: 'Automation Setup', 
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ), 
-      description: 'Review prompt history' 
+      description: 'Configure recurring scans' 
     },
     { 
       id: 'execute', 
@@ -590,7 +579,6 @@ export default function Dashboard() {
                   />
                 )}
                 {activeTab === 'competitors' && selectedBusiness && <CompetitorsTab businessId={selectedBusiness} />}
-                {activeTab === 'prompts' && selectedBusiness && <PromptsTab businessId={selectedBusiness} />}
                 {activeTab === 'execute' && (
                   <ExecuteTab 
                     businessId={selectedBusiness} 

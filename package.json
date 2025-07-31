@@ -9,7 +9,10 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "seed-plans": "npx tsx prisma/seed-subscription-plans.ts",
+    "setup-square-catalog": "npx tsx scripts/setup-square-catalog.ts",
+    "update-square-plan-ids": "npx tsx scripts/update-square-plan-ids.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.56.0",
