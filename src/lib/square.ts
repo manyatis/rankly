@@ -24,12 +24,17 @@ const mockApi: MockApi = {
       errors: []
     }
   }),
-  createCustomer: async () => ({
-    result: {
-      customer: { id: 'mock-customer-' + Date.now() },
-      errors: []
-    }
-  }),
+  createCustomer: async (request: unknown) => {
+    console.log('Mock createCustomer called with:', request);
+    const response = {
+      result: {
+        customer: { id: 'mock-customer-' + Date.now() },
+        errors: []
+      }
+    };
+    console.log('Mock createCustomer response:', response);
+    return response;
+  },
   createCard: async () => ({
     result: {
       card: { id: 'mock-card-' + Date.now() },

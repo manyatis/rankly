@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import SubscriptionPlans from '@/components/payments/SubscriptionPlans';
+import SubscriptionFlow from '@/components/payments/SubscriptionFlow';
 
 export const metadata: Metadata = {
   title: 'Subscribe - Rankly',
@@ -15,7 +15,7 @@ export default function SubscribePage() {
       
       <main className="pt-20">
         <div className="container mx-auto px-4 py-16">
-          <SubscriptionPlans />
+          <SubscriptionFlow />
         </div>
       </main>
       

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or inactive subscription plan' }, { status: 400 });
     }
 
-    console.log(`🔄 Creating subscription for ${user.email}: ${subscriptionPlan.name} plan`);
+    // console.log(`🔄 Creating subscription for ${user.email}: ${subscriptionPlan.name} plan`);
 
     let customerId = user.customerId;
 
@@ -64,17 +64,22 @@ export async function POST(request: NextRequest) {
 
       console.log('👤 Creating Square customer...');
       const customerResponse = await customersApi.createCustomer(customerRequest);
-      
-      if (customerResponse.result.errors) {
+
+      // console.log('Customer response:', JSON.stringify(customerResponse, null, 2));
+
+      if (customerResponse.result.errors && customerResponse.result.errors.length > 0) {
         console.error('Square customer creation errors:', customerResponse.result.errors);
         throw new Error(`Customer creation failed: ${JSON.stringify(customerResponse.result.errors[0])}`);
       }
 
       customerId = customerResponse.result.customer?.id || null;
-      
+
       if (!customerId) {
-        throw new Error('Failed to create Square customer');
+        console.error('No customer ID returned:', customerResponse.result);
+        throw new Error('Failed to create Square customer - no customer ID returned');
       }
+
+      // console.log('✅ Customer created with ID:', customerId);
 
       // Update user with Square customer ID
       await prisma.user.update({
@@ -82,7 +87,7 @@ export async function POST(request: NextRequest) {
         data: { customerId }
       });
 
-      console.log('✅ Square customer created:', customerId);
+      // console.log('✅ Square customer created:', customerId);
     }
 
     // Create card on file
@@ -96,8 +101,7 @@ export async function POST(request: NextRequest) {
     };
 
     const cardResponse = await cardsApi.createCard(cardRequest);
-    
-    if (cardResponse.result.errors) {
+    if (cardResponse.result.errors && cardResponse.result.errors?.length > 0) {
       console.error('Square card creation errors:', cardResponse.result.errors);
       throw new Error(`Card creation failed: ${JSON.stringify(cardResponse.result.errors[0])}`);
     }
@@ -107,7 +111,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create card on file');
     }
 
-    console.log('✅ Card on file created:', cardId);
+    // console.log('✅ Card on file created:', cardId);
 
     // Create subscription
     console.log('📋 Creating subscription...');
@@ -124,8 +128,8 @@ export async function POST(request: NextRequest) {
     };
 
     const subscriptionResponse = await subscriptionsApi.createSubscription(subscriptionRequest);
-    
-    if (subscriptionResponse.result.errors) {
+
+    if (subscriptionResponse.result.errors && subscriptionResponse.result.errors.length > 1) {
       console.error('Square subscription creation errors:', subscriptionResponse.result.errors);
       throw new Error(`Subscription creation failed: ${JSON.stringify(subscriptionResponse.result.errors[0])}`);
     }
@@ -135,7 +139,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create subscription');
     }
 
-    console.log('✅ Subscription created:', subscription.id);
+    // console.log('✅ Subscription created:', subscription.id);
 
     // Update user in database with subscription info
     const now = new Date();
@@ -165,10 +169,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Subscription creation error:', error);
-    
+
     return NextResponse.json(
-      { 
-        error: 'Failed to create subscription', 
+      {
+        error: 'Failed to create subscription',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

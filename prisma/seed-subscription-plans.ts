@@ -13,7 +13,7 @@ async function seedSubscriptionPlans() {
     {
       planId: 'indie',
       name: 'Indie',
-      priceCents: 2000, // $20.00
+      priceCents: 1000, // $10.00 (SALE PRICE)
       billingPeriod: 'month',
       description: 'Perfect for indie developers and small projects',
       features: [
@@ -29,7 +29,7 @@ async function seedSubscriptionPlans() {
     {
       planId: 'professional',
       name: 'Professional',
-      priceCents: 7500, // $75.00
+      priceCents: 3500, // $35.00 (SALE PRICE)
       billingPeriod: 'month',
       description: 'Ideal for growing businesses and agencies',
       features: [
@@ -47,7 +47,7 @@ async function seedSubscriptionPlans() {
     {
       planId: 'enterprise',
       name: 'Enterprise',
-      priceCents: 25000, // $250.00
+      priceCents: 12500, // $125.00 (SALE PRICE)
       billingPeriod: 'month',
       description: 'Advanced features for large organizations',
       features: [

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, Star, Zap, Crown } from 'lucide-react';
-import PaymentForm from './PaymentForm';
+import { Check, Star, Zap, Crown, ArrowLeft } from 'lucide-react';
+import SimpleCardForm from './SimpleCardForm';
 
 interface SubscriptionPlan {
   id: number;
@@ -14,17 +14,12 @@ interface SubscriptionPlan {
   description: string;
 }
 
-interface SubscriptionPlansProps {
-  onSubscriptionSuccess?: () => void;
-}
-
-export default function SubscriptionPlans({ onSubscriptionSuccess }: SubscriptionPlansProps) {
+export default function SubscriptionFlow() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [step, setStep] = useState<'plans' | 'payment' | 'success'>('plans');
 
   useEffect(() => {
     fetchPlans();
@@ -49,30 +44,40 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
 
   const handlePlanSelect = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
-    setShowPaymentForm(true);
-    setPaymentError(null);
+    setStep('payment');
+    setError(null);
   };
 
-  const handlePaymentSuccess = (result: { planName: string; subscriptionId: string }) => {
-    console.log('✅ Subscription created successfully:', result);
-    setShowPaymentForm(false);
-    setSelectedPlan(null);
-    
-    // Show success message or redirect
-    alert(`Successfully subscribed to ${result.planName}! Your subscription is now active.`);
-    
-    // Call the success callback if provided
-    if (onSubscriptionSuccess) {
-      onSubscriptionSuccess();
+  const handlePaymentSuccess = async (token: string) => {
+    if (!selectedPlan) return;
+
+    try {
+      const response = await fetch('/api/subscriptions/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cardToken: token,
+          planId: selectedPlan.planId
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Subscription creation failed');
+      }
+
+      setStep('success');
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      setError(error instanceof Error ? error.message : 'Payment processing failed');
     }
-    
-    // Optionally redirect to dashboard
-    window.location.href = '/dashboard';
   };
 
   const handlePaymentError = (errorMessage: string) => {
-    console.error('❌ Payment error:', errorMessage);
-    setPaymentError(errorMessage);
+    setError(errorMessage);
   };
 
   const formatPrice = (priceCents: number): string => {
@@ -93,7 +98,7 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
   };
 
   const isPlanPopular = (planId: string): boolean => {
-    return planId === 'indie'; // Mark Indie as popular
+    return planId === 'indie'; // Indie is most popular
   };
 
   if (isLoading) {
@@ -104,7 +109,7 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
     );
   }
 
-  if (error) {
+  if (error && step === 'plans') {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="text-red-400">Error: {error}</div>
@@ -112,39 +117,83 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
     );
   }
 
-  if (showPaymentForm && selectedPlan) {
+  // Success Step
+  if (step === 'success') {
     return (
-      <div className="space-y-6">
-        <div className="text-center">
+      <div className="max-w-md mx-auto text-center">
+        <div className="bg-green-900/20 border border-green-700 rounded-lg p-8">
+          <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome to {selectedPlan?.name}!</h2>
+          <p className="text-gray-300 mb-6">
+            Your subscription is now active. You can start using all the features right away.
+          </p>
           <button
-            onClick={() => {
-              setShowPaymentForm(false);
-              setSelectedPlan(null);
-              setPaymentError(null);
-            }}
-            className="text-blue-400 hover:text-blue-300 text-sm"
+            onClick={() => window.location.href = '/dashboard'}
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
           >
-            ← Back to plans
+            Go to Dashboard
           </button>
         </div>
-        
-        {paymentError && (
-          <div className="max-w-md mx-auto p-4 bg-red-900/50 border border-red-700 rounded-lg">
-            <p className="text-red-300 text-sm">{paymentError}</p>
+      </div>
+    );
+  }
+
+  // Payment Step
+  if (step === 'payment' && selectedPlan) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Back Button */}
+        <button
+          onClick={() => {
+            setStep('plans');
+            setError(null);
+          }}
+          className="flex items-center text-blue-400 hover:text-blue-300 text-sm transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to plans
+        </button>
+
+        {/* Selected Plan Summary */}
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {getPlanIcon(selectedPlan.planId)}
+              <div>
+                <h3 className="text-lg font-semibold text-white">{selectedPlan.name} Plan</h3>
+                <p className="text-gray-400 text-sm">{selectedPlan.description}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-white">
+                {formatPrice(selectedPlan.priceCents)}
+              </div>
+              <div className="text-gray-400 text-sm">/{selectedPlan.billingPeriod}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-900/50 border border-red-700 rounded-lg p-4">
+            <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
-        
-        <PaymentForm
-          planId={selectedPlan.planId}
-          planName={selectedPlan.name}
-          price={formatPrice(selectedPlan.priceCents) + '/month'}
+
+        {/* Payment Form */}
+        <SimpleCardForm 
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
+          planName={selectedPlan.name}
+          planPrice={formatPrice(selectedPlan.priceCents)}
         />
       </div>
     );
   }
 
+  // Plans Selection Step
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -155,21 +204,22 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {plans.map((plan) => (
           <div
             key={plan.id}
             className={`
-              relative bg-gray-900 border rounded-xl p-6 transition-all duration-200
+              relative bg-gray-900 border rounded-xl p-6 transition-all duration-200 cursor-pointer
               ${isPlanPopular(plan.planId)
-                ? 'border-purple-500 ring-2 ring-purple-500/20 transform scale-105'
+                ? 'border-blue-500 ring-2 ring-blue-500/20 transform scale-105'
                 : 'border-gray-700 hover:border-gray-600'
               }
             `}
+            onClick={() => handlePlanSelect(plan)}
           >
             {isPlanPopular(plan.planId) && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
                 </span>
               </div>
@@ -199,21 +249,19 @@ export default function SubscriptionPlans({ onSubscriptionSuccess }: Subscriptio
             </div>
 
             <button
-              onClick={() => handlePlanSelect(plan)}
               className={`
                 w-full py-3 px-4 rounded-lg font-medium transition-colors
                 ${isPlanPopular(plan.planId)
                   ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }
               `}
             >
-              Subscribe to {plan.name}
+              Choose {plan.name}
             </button>
           </div>
         ))}
       </div>
-
 
       <div className="text-center text-sm text-gray-500">
         <p>All plans include a 30-day money-back guarantee. Cancel anytime.</p>
