@@ -143,7 +143,8 @@ export async function POST(request: NextRequest) {
     // Update user in database with subscription info
     const now = new Date();
     console.log('📋 Stripe subscription status:', subscription.status);
-    console.log('📋 Stripe subscription object:', JSON.stringify(subscription, null, 2));
+    console.log('📋 Latest invoice type:', typeof subscription.latest_invoice);
+    console.log('📋 Latest invoice id:', typeof subscription.latest_invoice === 'string' ? subscription.latest_invoice : subscription.latest_invoice?.id);
     
     await prisma.user.update({
       where: { id: user.id },
@@ -161,21 +162,49 @@ export async function POST(request: NextRequest) {
     console.log('✅ User subscription updated in database with status:', subscription.status);
 
     // Get the payment intent from the subscription
-    const expandedSubscription = subscription as Stripe.Response<Stripe.Subscription> & {
-      latest_invoice?: Stripe.Invoice & {
-        payment_intent?: Stripe.PaymentIntent;
-      };
-    };
-    const latestInvoice = expandedSubscription.latest_invoice;
-    const paymentIntent = latestInvoice?.payment_intent;
+    // The latest_invoice might be a string ID or an expanded object
+    let clientSecret: string | undefined;
+    let invoiceStatus: string | undefined;
     
-    console.log('💳 Invoice status:', latestInvoice?.status);
-    console.log('💳 Payment intent:', paymentIntent?.id);
-    console.log('💳 Payment intent status:', paymentIntent?.status);
-    console.log('💳 Client secret:', paymentIntent?.client_secret ? 'Present' : 'Missing');
+    if (typeof subscription.latest_invoice === 'string') {
+      // Invoice is not expanded, we need to retrieve it
+      console.log('📋 Invoice not expanded, retrieving invoice:', subscription.latest_invoice);
+      const invoice = await stripe.invoices.retrieve(subscription.latest_invoice, {
+        expand: ['payment_intent']
+      });
+      
+      invoiceStatus = invoice.status || undefined;
+      const expandedInvoice = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (expandedInvoice.payment_intent) {
+        const paymentIntent = expandedInvoice.payment_intent as Stripe.PaymentIntent;
+        clientSecret = paymentIntent?.client_secret || undefined;
+        console.log('💳 Payment intent:', paymentIntent?.id);
+      }
+      
+      console.log('💳 Retrieved invoice status:', invoiceStatus);
+      console.log('💳 Client secret:', clientSecret ? 'Present' : 'Missing');
+    } else if (subscription.latest_invoice) {
+      // Invoice is expanded
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      invoiceStatus = invoice.status || undefined;
+      
+      // payment_intent might be a string or expanded object
+      const expandedInvoice = invoice as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (typeof expandedInvoice.payment_intent === 'string') {
+        console.log('📋 Payment intent not expanded, retrieving:', expandedInvoice.payment_intent);
+        const paymentIntent = await stripe.paymentIntents.retrieve(expandedInvoice.payment_intent);
+        clientSecret = paymentIntent.client_secret || undefined;
+      } else if (expandedInvoice.payment_intent) {
+        const paymentIntent = expandedInvoice.payment_intent as Stripe.PaymentIntent;
+        clientSecret = paymentIntent?.client_secret || undefined;
+      }
+      
+      console.log('💳 Expanded invoice status:', invoiceStatus);
+      console.log('💳 Client secret:', clientSecret ? 'Present' : 'Missing');
+    }
 
     // If there's no client secret, the subscription might be immediately active (e.g., trial period)
-    if (!paymentIntent?.client_secret && subscription.status === 'active') {
+    if (!clientSecret && subscription.status === 'active') {
       console.log('✅ Subscription is already active without payment');
     }
 
@@ -185,8 +214,8 @@ export async function POST(request: NextRequest) {
       status: subscription.status,
       planId: planId,
       planName: subscriptionPlan.name,
-      clientSecret: paymentIntent?.client_secret,
-      invoiceStatus: latestInvoice?.status,
+      clientSecret: clientSecret,
+      invoiceStatus: invoiceStatus,
       message: 'Subscription created successfully'
     });
 
