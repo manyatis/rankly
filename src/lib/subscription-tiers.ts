@@ -32,7 +32,7 @@ export class SubscriptionTiers {
     name: 'Indie',
     websiteLimit: 3,
     price: '$20/month',
-    priceCents: 100, // $20.00 in cents
+    priceCents: 2000, // $20.00 in cents
     features: [
       '3 websites',
       'Advanced AEO analysis',
