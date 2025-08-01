@@ -25,7 +25,7 @@ export default function PricingSection({ onCreateAccount, onPlanSelection }: Pri
           onPlanSelect={handlePlanSelect}
           onCreateAccount={onCreateAccount}
           showFree={true}
-          title=""
+          title="Enroll Today"
           subtitle="Get started immediately free. No credit card required. Upgrade for additional sites and advanced features."
           isSubscriptionFlow={false}
         />
