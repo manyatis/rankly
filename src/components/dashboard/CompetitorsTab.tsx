@@ -216,7 +216,7 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
           </div>
 
           {mainBusiness.latestRanking ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4 text-center">
               <div>
                 <p className="text-gray-400 text-sm mb-1">OpenAI</p>
                 <p className={`text-lg font-semibold ${getRankColor(mainBusiness.latestRanking.openaiRank)}`}>
@@ -263,7 +263,7 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
         
         {competitors.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-gray-500 text-4xl mb-4">🔍</div>
+            <div className="text-gray-500 text-4xl mb-4">SEARCH</div>
             <h4 className="text-lg font-medium text-white mb-2">No Competitors Found</h4>
             <p className="text-gray-400 mb-4">
               Competitors are automatically identified during AEO analysis.
@@ -301,7 +301,7 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
                 </div>
 
                 {competitor.latestRanking ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center ml-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 text-center ml-4 sm:ml-8">
                     <div>
                       <p className="text-gray-400 text-sm mb-1">OpenAI</p>
                       <p className={`font-medium ${getRankColor(competitor.latestRanking.openaiRank)}`}>
@@ -334,7 +334,7 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-2 ml-8">
+                  <div className="text-center py-2 ml-4 sm:ml-8">
                     <p className="text-gray-500 text-sm">No ranking data available</p>
                   </div>
                 )}

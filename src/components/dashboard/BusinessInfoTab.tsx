@@ -121,7 +121,7 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
 
         {/* Business Information Skeleton */}
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i}>
                 <div className="h-4 bg-gray-600 rounded w-24 mb-2 animate-pulse"></div>
@@ -152,7 +152,7 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
   }
 
   if (error) {
-    const isSuccessMessage = error.startsWith('✅');
+    const isSuccessMessage = error.startsWith('Success:');
     return (
       <div className={`${isSuccessMessage ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'} border rounded-lg p-6`}>
         <h3 className={`text-lg font-medium ${isSuccessMessage ? 'text-green-300' : 'text-red-300'} mb-2`}>
@@ -200,7 +200,7 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
 
       {/* Business Information */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Website URL
@@ -335,7 +335,7 @@ export default function BusinessInfoTab({ businessId, onBusinessUnlinked }: Busi
       {/* Unlink Confirmation Modal */}
       {showUnlinkConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6 max-w-md w-full mx-4">
             <div className="flex items-center mb-4">
               <svg className="w-6 h-6 text-orange-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

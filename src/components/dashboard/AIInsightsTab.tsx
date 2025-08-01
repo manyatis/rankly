@@ -152,7 +152,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
   if (!businessId) {
     return (
       <div className="text-center py-20">
-        <div className="text-gray-500 text-6xl mb-6">🧠</div>
+        <div className="text-gray-500 text-6xl mb-6">AI</div>
         <h2 className="text-3xl font-semibold text-white mb-4">No Business Selected</h2>
         <p className="text-gray-400 mb-8 max-w-md mx-auto">
           Select a business from the sidebar to view AI-generated insights and recommendations.
@@ -173,7 +173,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
   if (error) {
     return (
       <div className="text-center py-20">
-        <div className="text-red-500 text-6xl mb-6">⚠️</div>
+        <div className="text-red-500 text-6xl mb-6">!</div>
         <h2 className="text-3xl font-semibold text-white mb-4">Error Loading Insights</h2>
         <p className="text-gray-400 mb-8">{error}</p>
         <button
@@ -356,23 +356,23 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
                     {/* Meta Information */}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
                       <span className="whitespace-nowrap">Category: {insight.category}</span>
-                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline">-</span>
                       <span className="whitespace-nowrap">Impact: {insight.impact}</span>
-                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline">-</span>
                       <span className="whitespace-nowrap">Effort: {insight.effort}</span>
                       {insight.aiProvider && (
                         <>
-                          <span className="hidden sm:inline">•</span>
+                          <span className="hidden sm:inline">-</span>
                           <span className="whitespace-nowrap">Source: {insight.aiProvider}</span>
                         </>
                       )}
                       {insight.confidence !== undefined && (
                         <>
-                          <span className="hidden sm:inline">•</span>
+                          <span className="hidden sm:inline">-</span>
                           <span className="whitespace-nowrap">Confidence: {insight.confidence}%</span>
                         </>
                       )}
-                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline">-</span>
                       <span className="whitespace-nowrap">{new Date(insight.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function AIInsightsTab({ businessId }: AIInsightsTabProps) {
                       </svg>
                     </button>
                     
-                    <div className="absolute right-0 sm:right-0 left-0 sm:left-auto top-full mt-2 w-full sm:w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-gray-700 border border-gray-600 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                       <div className="p-2">
                         <button
                           onClick={() => updateInsightStatus(insight.id, 'in_progress')}

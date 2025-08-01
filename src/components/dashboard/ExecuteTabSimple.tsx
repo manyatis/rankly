@@ -77,12 +77,12 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
 
     // Progress tracking with realistic timing for manual analysis
     const progressSteps = [
-      { progress: 10, message: '📊 Loading stored business data...', duration: 1000 },
-      { progress: 25, message: '🧠 Retrieving previous prompts...', duration: 1500 },
-      { progress: 40, message: '🚀 Generating AEO analysis queries...', duration: 2000 },
-      { progress: 60, message: '🤖 Running queries across AI platforms...', duration: 8000 },
-      { progress: 80, message: '📈 Processing rankings and competitors...', duration: 2000 },
-      { progress: 95, message: '💾 Saving results to your dashboard...', duration: 1000 },
+      { progress: 10, message: 'Loading stored business data...', duration: 1000 },
+      { progress: 25, message: 'Retrieving previous prompts...', duration: 1500 },
+      { progress: 40, message: 'Generating AEO analysis queries...', duration: 2000 },
+      { progress: 60, message: 'Running queries across AI platforms...', duration: 8000 },
+      { progress: 80, message: 'Processing rankings and competitors...', duration: 2000 },
+      { progress: 95, message: 'Saving results to your dashboard...', duration: 1000 },
     ];
 
     // const currentStepIndex = 0; // Unused - kept for potential future use
@@ -133,7 +133,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       // Complete the progress
       clearInterval(progressInterval);
       setProgress(100);
-      setProgressMessage('✅ Analysis complete!');
+      setProgressMessage('Analysis complete!');
       
       // Show completion for a moment before showing results
       setTimeout(() => {
@@ -155,7 +155,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
   if (!businessId) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-6xl mb-6">🔍</div>
+        <div className="text-gray-500 text-6xl mb-6">SEARCH</div>
         <h2 className="text-2xl font-semibold text-white mb-4">No Website Selected</h2>
         <p className="text-gray-400 mb-8">
           Select a website from the sidebar to run AEO analysis, or use the <strong className="text-blue-400">&quot;Link New Website for Tracking&quot;</strong> button to add a new website.
@@ -190,7 +190,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       {/* Analysis Button Card */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-8 text-center">
         <div className="max-w-md mx-auto">
-          <div className="text-blue-400 text-5xl mb-4">⚡</div>
+          <div className="text-blue-400 text-5xl mb-4">FAST</div>
           <h3 className="text-xl font-semibold text-white mb-3">Quick Analysis</h3>
           <p className="text-gray-300 mb-6">
             Run AEO analysis using the stored website information and previous prompts, or generate new ones automatically.
@@ -224,7 +224,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 <span className={`${!usageInfo.canUse ? 'text-red-400' : 'text-gray-300'}`}>
-                  {usageInfo.usageCount}/{usageInfo.maxUsage === -1 ? '∞' : usageInfo.maxUsage} 
+                  {usageInfo.usageCount}/{usageInfo.maxUsage === -1 ? 'unlimited' : usageInfo.maxUsage} 
                   <span className="text-gray-400 ml-1">analyses used</span>
                 </span>
               </div>
@@ -248,7 +248,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
             isLoading={isAnalyzing}
             progress={progress}
             message={progressMessage}
-            subtitle="This usually takes 15-25 seconds • Please keep this tab open"
+            subtitle="This usually takes 15-25 seconds - Please keep this tab open"
             className="mt-6"
           />
         </div>
@@ -328,7 +328,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
               </div>
 
               <p className="text-green-200 text-sm mt-3">
-                🔄 Switch to the <strong>Trends</strong> tab to view your new ranking results!
+                Switch to the <strong>Trends</strong> tab to view your new ranking results!
               </p>
             </div>
           </div>

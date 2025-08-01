@@ -164,7 +164,7 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
       const data = await response.json();
       
       // Show success message
-      setError(`✅ ${data.message}`);
+      setError(`Success: ${data.message}`);
       setTimeout(() => setError(null), 5000);
 
       // Refresh the data
@@ -208,7 +208,7 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
     );
   }
 
-  if (error && !error.startsWith('✅')) {
+  if (error && !error.startsWith('Success:')) {
     return (
       <div className="bg-red-900/20 border border-red-700 rounded-lg p-6">
         <h3 className="text-lg font-medium text-red-300 mb-2">Error Loading Automation Settings</h3>
@@ -240,7 +240,7 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
       </div>
 
       {/* Success Message */}
-      {error && error.startsWith('✅') && (
+      {error && error.startsWith('Success:') && (
         <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
           <p className="text-green-400">{error}</p>
         </div>
@@ -303,7 +303,7 @@ export default function AutomationSetupTab({ businessId }: AutomationSetupTabPro
             {recurringScanSettings.enabled && recurringScanSettings.hasAccess && (
               <div className="space-y-6">
                 {/* Frequency Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-3">
                       Scan Frequency

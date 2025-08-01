@@ -68,7 +68,7 @@ export default function ResultsStep({
 
       {/* AI Insights Button - Moved to top */}
       <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-6">
-        <h4 className="text-lg font-medium text-blue-300 mb-2">🧠 AI Insights Available</h4>
+        <h4 className="text-lg font-medium text-blue-300 mb-2">AI Insights Available</h4>
         <p className="text-blue-200 mb-4">
           Get detailed recommendations on how to improve your AEO rankings based on this analysis.
         </p>
@@ -78,7 +78,7 @@ export default function ResultsStep({
           }}
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          📊 View AI Insights
+          View AI Insights
         </button>
       </div>
 
@@ -101,7 +101,7 @@ export default function ResultsStep({
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${result.provider.color}`}>
                     {result.provider.name}
                   </div>
-                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-400">-</span>
                   <span className={`text-2xl font-bold ${getScoreColor(result.aeoScore)}`}>
                     {result.aeoScore}/100
                   </span>
@@ -165,7 +165,7 @@ export default function ResultsStep({
                           </span>
                           {result.queryVariations[currentQueryIndex]?.mentioned && (
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                              Rank {result.queryVariations[currentQueryIndex].rankPosition} • 
+                              Rank {result.queryVariations[currentQueryIndex].rankPosition} - 
                               Score {result.queryVariations[currentQueryIndex].relevanceScore}
                             </span>
                           )}
@@ -193,14 +193,14 @@ export default function ResultsStep({
                           disabled={currentQueryIndex === 0}
                           className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          ← Previous
+                          Previous
                         </button>
                         <button
                           onClick={() => updateQueryIndex(Math.min(result.queryVariations.length - 1, currentQueryIndex + 1))}
                           disabled={currentQueryIndex === result.queryVariations.length - 1}
                           className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          Next →
+                          Next
                         </button>
                       </div>
                       
