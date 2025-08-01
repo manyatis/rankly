@@ -14,7 +14,7 @@ interface LoginModalProps {
   onSuccess: (user: User) => void;
 }
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
   const [error, setError] = useState('');
 
   useEffect(() => {

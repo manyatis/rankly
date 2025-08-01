@@ -109,6 +109,7 @@ export async function GET(request: NextRequest) {
       openaiRank: ranking.openaiRank,
       claudeRank: ranking.claudeRank,
       perplexityRank: ranking.perplexityRank,
+      googleRank: ranking.googleRank,
       averageRank: ranking.averageRank,
       websiteScore: ranking.websiteScore,
       hasWebsiteAnalysis: ranking.hasWebsiteAnalysis
@@ -129,6 +130,7 @@ export async function GET(request: NextRequest) {
             openaiRank: true,
             claudeRank: true,
             perplexityRank: true,
+            googleRank: true,
             averageRank: true,
             createdAt: true
           }
@@ -145,6 +147,7 @@ export async function GET(request: NextRequest) {
             openaiRank: latestRanking.openaiRank,
             claudeRank: latestRanking.claudeRank,
             perplexityRank: latestRanking.perplexityRank,
+            googleRank: latestRanking.googleRank,
             averageRank: latestRanking.averageRank,
             lastUpdated: latestRanking.createdAt.toISOString()
           } : null
@@ -173,6 +176,7 @@ export async function GET(request: NextRequest) {
         openaiRank: mainBusinessLatestRanking.openaiRank,
         claudeRank: mainBusinessLatestRanking.claudeRank,
         perplexityRank: mainBusinessLatestRanking.perplexityRank,
+        googleRank: mainBusinessLatestRanking.googleRank,
         averageRank: mainBusinessLatestRanking.averageRank,
         lastUpdated: mainBusinessLatestRanking.createdAt.toISOString()
       }

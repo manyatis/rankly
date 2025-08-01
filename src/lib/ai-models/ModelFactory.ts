@@ -2,8 +2,10 @@ import { BaseAIModel } from './BaseAIModel';
 import { OpenAIModel } from './OpenAIModel';
 import { AnthropicModel } from './AnthropicModel';
 import { PerplexityModel } from './PerplexityModel';
+import { GoogleAIModel } from './GoogleAIModel';
+import { isFeatureEnabled } from '../feature-flags';
 
-export type ModelType = 'openai' | 'anthropic' | 'perplexity';
+export type ModelType = 'openai' | 'anthropic' | 'perplexity' | 'google';
 
 export interface ModelInfo {
   type: ModelType;
@@ -17,7 +19,8 @@ export class ModelFactory {
   private static models = new Map<ModelType, () => BaseAIModel>([
     ['openai', () => new OpenAIModel()],
     ['anthropic', () => new AnthropicModel()],
-    ['perplexity', () => new PerplexityModel()]
+    ['perplexity', () => new PerplexityModel()],
+    ['google', () => new GoogleAIModel()]
   ]);
 
   static createModel(type: ModelType): BaseAIModel {
@@ -29,16 +32,24 @@ export class ModelFactory {
   }
 
   static getAvailableModels(): ModelInfo[] {
-    return Array.from(this.models.keys()).map(type => {
-      const model = this.createModel(type);
-      return {
-        type,
-        name: model.getName(),
-        displayName: model.getName(),
-        isConfigured: model.isConfigured(),
-        requiredEnvVars: model.getRequiredEnvVars()
-      };
-    });
+    return Array.from(this.models.keys())
+      .filter(type => {
+        // Filter out Google model if feature flag is disabled
+        if (type === 'google' && !isFeatureEnabled('googleAI')) {
+          return false;
+        }
+        return true;
+      })
+      .map(type => {
+        const model = this.createModel(type);
+        return {
+          type,
+          name: model.getName(),
+          displayName: model.getName(),
+          isConfigured: model.isConfigured(),
+          requiredEnvVars: model.getRequiredEnvVars()
+        };
+      });
   }
 
   static getConfiguredModels(): ModelInfo[] {

@@ -178,7 +178,7 @@ Format as JSON array:
   }
 
   /**
-   * Store insights in the database using upsert to prevent duplicates
+   * Store insights in the database preventing duplicates by title
    */
   private static async storeInsights(
     insights: AIInsightData[],
@@ -190,8 +190,32 @@ Format as JSON array:
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Use individual upserts to handle the unique constraint per category per day
-    for (const insight of insights) {
+    // Get existing insights for this business to check for duplicate titles
+    const existingInsights = await prisma.aIInsight.findMany({
+      where: {
+        userId,
+        businessId,
+        date: today
+      },
+      select: {
+        title: true,
+        category: true
+      }
+    });
+
+    const existingTitles = new Set(existingInsights.map(i => i.title));
+
+    // Filter out insights with duplicate titles
+    const uniqueInsights = insights.filter(insight => {
+      if (existingTitles.has(insight.title)) {
+        console.log(`⏭️ Skipping duplicate insight: "${insight.title}"`);
+        return false;
+      }
+      return true;
+    });
+
+    // Store only unique insights using upsert by category
+    for (const insight of uniqueInsights) {
       await prisma.aIInsight.upsert({
         where: {
           userId_businessId_date_category: {
@@ -238,6 +262,8 @@ Format as JSON array:
         }
       });
     }
+
+    console.log(`📝 Stored ${uniqueInsights.length} unique insights (${insights.length - uniqueInsights.length} duplicates skipped)`);
   }
 
   /**
@@ -254,6 +280,52 @@ Format as JSON array:
         { criticality: 'desc' }
       ]
     });
+  }
+
+  /**
+   * Remove duplicate insights by title for a business
+   */
+  static async removeDuplicateInsights(businessId: number, userId: number): Promise<void> {
+    try {
+      // Get all insights for this business
+      const allInsights = await prisma.aIInsight.findMany({
+        where: {
+          businessId,
+          userId
+        },
+        orderBy: [
+          { createdAt: 'asc' } // Keep the oldest one
+        ]
+      });
+
+      // Group by title to find duplicates
+      const seenTitles = new Set<string>();
+      const duplicateIds: string[] = [];
+
+      for (const insight of allInsights) {
+        if (seenTitles.has(insight.title)) {
+          duplicateIds.push(insight.id);
+        } else {
+          seenTitles.add(insight.title);
+        }
+      }
+
+      // Delete duplicates
+      if (duplicateIds.length > 0) {
+        await prisma.aIInsight.deleteMany({
+          where: {
+            id: {
+              in: duplicateIds
+            },
+            userId // Extra safety check
+          }
+        });
+
+        console.log(`🧹 Removed ${duplicateIds.length} duplicate insights for business ${businessId}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to remove duplicate insights:', error);
+    }
   }
 
   /**

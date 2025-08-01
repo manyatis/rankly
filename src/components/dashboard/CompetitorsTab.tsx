@@ -11,6 +11,7 @@ interface CompetitorRanking {
     openaiRank?: number;
     claudeRank?: number;
     perplexityRank?: number;
+    googleRank?: number;
     averageRank?: number;
     lastUpdated: string;
   };
@@ -24,6 +25,7 @@ interface MainBusinessInfo {
     openaiRank?: number;
     claudeRank?: number;
     perplexityRank?: number;
+    googleRank?: number;
     averageRank?: number;
     lastUpdated: string;
   };
@@ -234,6 +236,12 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
                 </p>
               </div>
               <div>
+                <p className="text-gray-400 text-sm mb-1">Google</p>
+                <p className={`text-lg font-semibold ${getRankColor(mainBusiness.latestRanking.googleRank)}`}>
+                  {getRankBadge(mainBusiness.latestRanking.googleRank)}
+                </p>
+              </div>
+              <div>
                 <p className="text-gray-400 text-sm mb-1">Average</p>
                 <p className={`text-lg font-semibold ${getRankColor(mainBusiness.latestRanking.averageRank)}`}>
                   {getRankBadge(mainBusiness.latestRanking.averageRank)}
@@ -310,6 +318,12 @@ export default function CompetitorsTab({ businessId }: CompetitorsTabProps) {
                       <p className="text-gray-400 text-sm mb-1">Perplexity</p>
                       <p className={`font-medium ${getRankColor(competitor.latestRanking.perplexityRank)}`}>
                         {getRankBadge(competitor.latestRanking.perplexityRank)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm mb-1">Google</p>
+                      <p className={`font-medium ${getRankColor(competitor.latestRanking.googleRank)}`}>
+                        {getRankBadge(competitor.latestRanking.googleRank)}
                       </p>
                     </div>
                     <div>
