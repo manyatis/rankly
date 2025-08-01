@@ -211,7 +211,7 @@ export default function PricingPlans({
             {/* Popular Badge */}
             {isPlanPopular(plan.planId) && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium whitespace-nowrap">
                   Most Popular
                 </span>
               </div>
@@ -220,7 +220,7 @@ export default function PricingPlans({
             {/* Coming Soon Badge */}
             {isPlanDisabled(plan.planId) && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gray-600 text-gray-300 px-4 py-1 rounded-full text-sm font-medium">
+                <span className="bg-gray-600 text-gray-300 px-4 py-1 rounded-full text-sm font-medium whitespace-nowrap">
                   Coming Soon
                 </span>
               </div>
