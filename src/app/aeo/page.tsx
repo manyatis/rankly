@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
 import Image from 'next/image';
+import Footer from '@/components/Footer';
 
 export default function AEOPage() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -359,20 +360,7 @@ export default function AEOPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-              <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
-              <span>Rankly</span>
-            </Link>
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-600">One-click AEO optimization</span>
-              <span className="text-gray-600">&copy; {new Date().getFullYear()} Rankly</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       <LoginModal
         isOpen={loginModalOpen}

@@ -6,6 +6,7 @@ import LoginModal from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 
 interface AIProvider {
   name: string;
@@ -1727,21 +1728,8 @@ export default function AEOScorePage() {
 
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-semibold text-white hover:text-gray-300 transition-colors">
-              <Image src="/lucy.png" alt="Rankly" width={24} height={24} />
-              <span>Rankly</span>
-            </Link>
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-              <span className="text-gray-400">AI-powered reports for SEO professionals</span>
-              <span className="text-gray-400">&copy; {new Date().getFullYear()} Rankly</span>
-            </div>
-          </div>
-        </div>
-      </footer>
-
+      <Footer />
+      
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}

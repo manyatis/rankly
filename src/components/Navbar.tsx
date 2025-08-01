@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo - Left */}
           <Link href="/" className="flex items-center space-x-2 text-base sm:text-lg font-medium text-white hover:text-gray-300 transition-colors">
-            <Image src="/lucy.png" alt="Rankly" width={18} height={18} className="sm:w-5 sm:h-5" />
+            <Image src="/king.png" alt="Rankly" width={18} height={18} className="sm:w-5 sm:h-5" />
             <span>rankly</span>
           </Link>
           
