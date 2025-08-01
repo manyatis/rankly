@@ -21,3 +21,13 @@ export const featureFlags = {
 export function isFeatureEnabled(feature: keyof typeof featureFlags): boolean {
   return featureFlags[feature]?.enabled ?? false;
 }
+
+/**
+ * Get all feature flags (server-side only)
+ */
+export function getFeatureFlags(): Record<string, boolean> {
+  return Object.entries(featureFlags).reduce((acc, [key, value]) => {
+    acc[key] = value.enabled;
+    return acc;
+  }, {} as Record<string, boolean>);
+}

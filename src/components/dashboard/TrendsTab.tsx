@@ -48,9 +48,10 @@ interface QueryResultData {
 
 interface TrendsTabProps {
   businessId: number;
+  featureFlags?: Record<string, boolean>;
 }
 
-export default function TrendsTab({ businessId }: TrendsTabProps) {
+export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabProps) {
   const [rankingData, setRankingData] = useState<RankingData[]>([]);
   const [queryResults, setQueryResults] = useState<QueryResultData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,8 +172,12 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         borderWidth: 3,
         fill: false,
         tension: 0.4,
-      },
-      {
+      }
+    ];
+
+    // Only add Google dataset if feature flag is enabled
+    if (featureFlags.googleAI) {
+      datasets.push({
         label: 'Google',
         data: mapDataToDateRange('googleRank'),
         borderColor: 'rgb(59, 130, 246)',
@@ -180,8 +185,8 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         borderWidth: 3,
         fill: false,
         tension: 0.4,
-      }
-    ];
+      });
+    }
 
     return { labels, datasets };
   };
@@ -434,29 +439,31 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
             </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Google Rank">
-            <h3 className="text-sm font-medium text-gray-400 mb-1">Google Rank</h3>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-blue-400">
-                {latestData.googleRank || 0}
-              </span>
-              {(() => {
-                const change = calculateChange(latestData.googleRank, previousData?.googleRank);
-                const formattedChange = formatChange(change);
-                if (formattedChange !== null) {
-                  return (
-                    <span className={`ml-2 text-sm ${
-                      change === 0 ? 'text-gray-400' :
-                      change! > 0 ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {formattedChange}
-                    </span>
-                  );
-                }
-                return null;
-              })()}
+          {featureFlags.googleAI && (
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Google Rank">
+              <h3 className="text-sm font-medium text-gray-400 mb-1">Google Rank</h3>
+              <div className="flex items-center">
+                <span className="text-2xl font-bold text-blue-400">
+                  {latestData.googleRank || 0}
+                </span>
+                {(() => {
+                  const change = calculateChange(latestData.googleRank, previousData?.googleRank);
+                  const formattedChange = formatChange(change);
+                  if (formattedChange !== null) {
+                    return (
+                      <span className={`ml-2 text-sm ${
+                        change === 0 ? 'text-gray-400' :
+                        change! > 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {formattedChange}
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
