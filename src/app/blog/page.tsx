@@ -22,6 +22,7 @@ interface BlogPost {
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   // Fetch published blog posts from API
@@ -40,6 +41,8 @@ export default function BlogPage() {
       } catch (error) {
         console.error('Error fetching blog posts:', error);
         setPosts([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -129,8 +132,52 @@ export default function BlogPage() {
           ))}
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="space-y-8">
+            {/* Skeleton Blog Posts */}
+            {[...Array(3)].map((_, i) => (
+              <article key={i} className="bg-gray-900 border border-gray-700 rounded-xl p-8">
+                {/* Category Badge Skeleton */}
+                <div className="mb-4">
+                  <div className="h-6 bg-gray-600 rounded-full w-24 animate-pulse"></div>
+                </div>
+
+                {/* Title Skeleton */}
+                <div className="mb-4">
+                  <div className="h-8 bg-gray-600 rounded w-3/4 mb-2 animate-pulse"></div>
+                  <div className="h-8 bg-gray-700 rounded w-1/2 animate-pulse"></div>
+                </div>
+
+                {/* Meta Information Skeleton */}
+                <div className="flex items-center space-x-6 mb-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 bg-gray-600 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-600 rounded w-24 animate-pulse"></div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 bg-gray-600 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-600 rounded w-16 animate-pulse"></div>
+                  </div>
+                  <div className="h-4 bg-gray-600 rounded w-20 animate-pulse"></div>
+                </div>
+
+                {/* Excerpt Skeleton */}
+                <div className="space-y-2 mb-6">
+                  <div className="h-4 bg-gray-700 rounded w-full animate-pulse"></div>
+                  <div className="h-4 bg-gray-700 rounded w-full animate-pulse"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                </div>
+
+                {/* Read More Button Skeleton */}
+                <div className="h-4 bg-gray-600 rounded w-32 animate-pulse"></div>
+              </article>
+            ))}
+          </div>
+        )}
+
         {/* Empty State */}
-        {posts.length === 0 && (
+        {!loading && posts.length === 0 && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">📝</div>
             <h3 className="text-2xl font-bold text-white mb-4">No blog posts yet</h3>

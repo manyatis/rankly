@@ -67,8 +67,9 @@ function DashboardContent() {
   const [selectedOrganization, setSelectedOrganization] = useState<number | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website'>(getStoredActiveTab());
-  const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [organizationsLoaded, setOrganizationsLoaded] = useState(false);
+  const [businessesLoaded, setBusinessesLoaded] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [websiteLimitInfo, setWebsiteLimitInfo] = useState<{
@@ -118,19 +119,30 @@ function DashboardContent() {
     }
   }, [selectedOrganization]);
 
+  // Only complete loading when both org and business data are loaded
   useEffect(() => {
-    if (businesses.length > 0 && !selectedBusiness && !initialLoadComplete) {
-      const storedBusinessId = getStoredSelectedBusiness();
-      const businessExists = businesses.find(b => b.id === storedBusinessId);
-      
-      if (businessExists) {
-        setSelectedBusiness(storedBusinessId);
-      } else {
-        setSelectedBusiness(businesses[0].id);
+    if (organizationsLoaded && businessesLoaded) {
+      // Set selected business after both are loaded
+      if (businesses.length > 0 && !selectedBusiness) {
+        const storedBusinessId = getStoredSelectedBusiness();
+        const businessExists = businesses.find(b => b.id === storedBusinessId);
+        
+        if (businessExists) {
+          setSelectedBusiness(storedBusinessId);
+        } else {
+          setSelectedBusiness(businesses[0].id);
+        }
       }
-      setInitialLoadComplete(true);
+      setIsLoading(false);
     }
-  }, [businesses, selectedBusiness, initialLoadComplete]);
+  }, [organizationsLoaded, businessesLoaded, businesses, selectedBusiness]);
+
+  const handleTabChange = (tab: 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website') => {
+    setActiveTab(tab);
+    setStoredActiveTab(tab);
+    // Close sidebar on mobile after tab selection
+    setSidebarOpen(false);
+  };
 
   const fetchOrganizations = async () => {
     try {
@@ -145,7 +157,7 @@ function DashboardContent() {
     } catch (error) {
       console.error('Error fetching organizations:', error);
     } finally {
-      setLoading(false);
+      setOrganizationsLoaded(true);
     }
   };
 
@@ -161,6 +173,8 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error('Error fetching businesses:', error);
+    } finally {
+      setBusinessesLoaded(true);
     }
   };
 
@@ -179,12 +193,6 @@ function DashboardContent() {
     }
   };
 
-  const handleTabChange = (tab: 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website') => {
-    setActiveTab(tab);
-    setStoredActiveTab(tab);
-    // Close sidebar on mobile after tab selection
-    setSidebarOpen(false);
-  };
 
   const handleBusinessChange = (businessId: number) => {
     setSelectedBusiness(businessId);
@@ -198,10 +206,69 @@ function DashboardContent() {
     fetchWebsiteLimitInfo();
   };
 
-  if (status === 'loading' || loading) {
+  if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-lg">Loading dashboard...</div>
+      <div className="min-h-screen bg-gray-900">
+        <Navbar />
+        <div className="flex">
+          {/* Loading Sidebar */}
+          <div className="w-64 bg-gray-800 border-r border-gray-700">
+            <div className="flex items-center justify-center h-16 px-4 border-b border-gray-700">
+              <div className="w-32 h-6 bg-gray-600 rounded animate-pulse"></div>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="space-y-2">
+                <div className="w-20 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-full h-10 bg-gray-600 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="w-16 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-full h-10 bg-gray-600 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-2">
+                {Array.from({length: 6}).map((_, i) => (
+                  <div key={i} className="w-full h-8 bg-gray-600 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Loading Main Content */}
+          <div className="flex-1 min-w-0">
+            <div className="h-full p-6">
+              <div className="space-y-6">
+                {/* Header Skeleton */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="h-8 bg-gray-600 rounded w-40 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-700 rounded w-56 animate-pulse"></div>
+                  </div>
+                  <div className="h-10 bg-gray-600 rounded w-32 animate-pulse"></div>
+                </div>
+
+                {/* Stats Cards Skeleton */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                      <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
+                      <div className="flex items-center">
+                        <div className="h-8 bg-gray-700 rounded w-12 animate-pulse"></div>
+                        <div className="h-4 bg-gray-600 rounded w-8 ml-2 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart Skeleton */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <div className="h-6 bg-gray-600 rounded w-48 mb-6 animate-pulse"></div>
+                  <div className="h-80 bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -438,9 +505,70 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-white">Loading...</div>
-    </div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900">
+        <Navbar />
+        <div className="flex">
+          {/* Loading Sidebar */}
+          <div className="w-64 bg-gray-800 border-r border-gray-700">
+            <div className="flex items-center justify-center h-16 px-4 border-b border-gray-700">
+              <div className="w-32 h-6 bg-gray-600 rounded animate-pulse"></div>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="space-y-2">
+                <div className="w-20 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-full h-10 bg-gray-600 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="w-16 h-4 bg-gray-600 rounded animate-pulse"></div>
+                <div className="w-full h-10 bg-gray-600 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-2">
+                {Array.from({length: 6}).map((_, i) => (
+                  <div key={i} className="w-full h-8 bg-gray-600 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Loading Main Content */}
+          <div className="flex-1 min-w-0">
+            <div className="h-full p-6">
+              <div className="space-y-6">
+                {/* Header Skeleton */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="h-8 bg-gray-600 rounded w-40 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-700 rounded w-56 animate-pulse"></div>
+                  </div>
+                  <div className="h-10 bg-gray-600 rounded w-32 animate-pulse"></div>
+                </div>
+
+                {/* Stats Cards Skeleton */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                      <div className="h-4 bg-gray-600 rounded w-20 mb-2 animate-pulse"></div>
+                      <div className="flex items-center">
+                        <div className="h-8 bg-gray-700 rounded w-12 animate-pulse"></div>
+                        <div className="h-4 bg-gray-600 rounded w-8 ml-2 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chart Skeleton */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                  <div className="h-6 bg-gray-600 rounded w-48 mb-6 animate-pulse"></div>
+                  <div className="h-80 bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
       <DashboardContent />
     </Suspense>
   );

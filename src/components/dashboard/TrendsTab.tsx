@@ -95,6 +95,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
     }
   }, [businessId, timeRange]);
 
+
   useEffect(() => {
     if (businessId) {
       fetchRankingData();
