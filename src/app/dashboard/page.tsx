@@ -182,6 +182,8 @@ function DashboardContent() {
   const handleTabChange = (tab: 'trends' | 'insights' | 'business' | 'competitors' | 'automation' | 'execute' | 'link-website') => {
     setActiveTab(tab);
     setStoredActiveTab(tab);
+    // Close sidebar on mobile after tab selection
+    setSidebarOpen(false);
   };
 
   const handleBusinessChange = (businessId: number) => {
@@ -250,13 +252,13 @@ function DashboardContent() {
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden text-gray-400 hover:text-white"
             >
-              ✕
+              ×
             </button>
           </div>
           
           <div className="p-4">
             {/* Organization Selector */}
-            {organizations.length > 1 && (
+            {organizations.length > 0 && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">Organization</label>
                 <select
@@ -296,16 +298,6 @@ function DashboardContent() {
             {/* Tab Navigation */}
             <nav className="space-y-1">
               <button
-                onClick={() => handleTabChange('automation')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'automation'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                }`}
-              >
-                🤖 Automation Setup
-              </button>
-              <button
                 onClick={() => handleTabChange('trends')}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === 'trends'
@@ -313,7 +305,17 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                📈 Trends
+                Trends
+              </button>
+              <button
+                onClick={() => handleTabChange('automation')}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'automation'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                Automation Setup
               </button>
               <button
                 onClick={() => handleTabChange('insights')}
@@ -323,7 +325,7 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                🔍 AI Insights
+                AI Insights
               </button>
               <button
                 onClick={() => handleTabChange('business')}
@@ -333,7 +335,7 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                🏢 Website Info
+                Website Info
               </button>
               <button
                 onClick={() => handleTabChange('competitors')}
@@ -343,7 +345,7 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                🏆 Competitors
+                Competitors
               </button>
               <button
                 onClick={() => handleTabChange('execute')}
@@ -353,7 +355,7 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                🚀 Manual Analysis
+                Manual Analysis
               </button>
               <button
                 onClick={() => handleTabChange('link-website')}
@@ -363,21 +365,21 @@ function DashboardContent() {
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
-                🔗 Link Website
+                Link Website
               </button>
             </nav>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0">
+        <div className="flex-1 lg:ml-0 min-w-0">
           {/* Mobile header */}
           <div className="lg:hidden flex items-center justify-between h-16 px-4 bg-gray-800 border-b border-gray-700">
             <button
               onClick={() => setSidebarOpen(true)}
               className="text-gray-400 hover:text-white"
             >
-              ☰
+              ≡
             </button>
             <h1 className="text-lg font-semibold text-white">
               {selectedBusinessData?.websiteName || 'Dashboard'}
@@ -403,7 +405,7 @@ function DashboardContent() {
                 </div>
               </div>
             ) : (
-              <div className="h-full">
+              <div className="h-full p-3 sm:p-6 overflow-x-hidden">
                 {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} featureFlags={featureFlags} />}
                 {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
                 {activeTab === 'business' && selectedBusiness && (

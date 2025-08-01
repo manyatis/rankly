@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
                 name: user.name || profile?.name,
                 organization: {
                   create: {
-                    name: 'My Org'
+                    name: `${(user.name || profile?.name || 'User').split(' ')[0]}'s Org`
                   }
                 }
               }
@@ -47,7 +47,7 @@ export const authOptions: NextAuthOptions = {
             if (!existingUser.organizationId) {
               const defaultOrg = await prisma.organization.create({
                 data: {
-                  name: 'My Org',
+                  name: `${(existingUser.name || 'User').split(' ')[0]}'s Org`,
                   domain: null
                 }
               });

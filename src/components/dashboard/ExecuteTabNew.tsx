@@ -330,7 +330,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
     }
 
     setIsAnalyzing(true);
-    // setCurrentStep('🧠 Generating optimized prompts...');
+    // setCurrentStep('Generating optimized prompts...');
     setProgress(30);
 
     try {
@@ -404,19 +404,19 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
 
     setIsAnalyzing(true);
     setProgress(0);
-    // setCurrentStep('🎪 The robots are getting excited...');
+    // setCurrentStep('The robots are getting excited...');
 
     const funMessages = [
-      '🎪 The robots are getting excited...',
-      '🎨 AI artists painting your digital portrait...',
-      '🚀 Launching queries into cyberspace...',
-      '🎯 Playing hide and seek with your business...',
-      '🧬 Mixing magical algorithms...',
-      '🎭 AI agents putting on a show...',
-      '🌟 Sprinkling some digital fairy dust...',
-      '🎵 Humming while they work...',
-      '🎲 Rolling the cyber dice...',
-      '🎊 Almost ready to party...'
+      'The robots are getting excited...',
+      'AI artists painting your digital portrait...',
+      'Launching queries into cyberspace...',
+      'Playing hide and seek with your business...',
+      'Mixing magical algorithms...',
+      'AI agents putting on a show...',
+      'Sprinkling some digital fairy dust...',
+      'Humming while they work...',
+      'Rolling the cyber dice...',
+      'Almost ready to party...'
     ];
 
     let messageIndex = 0;
@@ -469,7 +469,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
       clearInterval(messageInterval);
 
       setProgress(90);
-      // setCurrentStep('🎉 Wrapping up the magic...');
+      // setCurrentStep('Wrapping up the magic...');
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -480,7 +480,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
 
       setTimeout(() => {
         setProgress(100);
-        // setCurrentStep('✨ Ta-da! Your rankings are ready!');
+        // setCurrentStep('Ta-da! Your rankings are ready!');
 
         setTimeout(() => {
           setResults(data.results);

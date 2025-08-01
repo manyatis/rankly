@@ -202,7 +202,7 @@ export default function BusinessInfoStep({
                 Generating Prompts...
               </span>
             ) : (
-              '🧠 Generate AI Prompts'
+              'Generate AI Prompts'
             )}
           </button>
           

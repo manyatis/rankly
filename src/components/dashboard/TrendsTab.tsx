@@ -342,7 +342,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
 
       {/* Stats Cards */}
       {latestData && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Average Rank">
             <h3 className="text-sm font-medium text-gray-400 mb-1">Average Rank</h3>
             <div className="flex items-center">
@@ -470,8 +470,8 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
 
       {/* Chart */}
       {rankingData.length > 0 ? (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-6">
-          <div className="h-64 sm:h-80 lg:h-96">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-6 overflow-hidden">
+          <div className="h-64 sm:h-80 lg:h-96 w-full">
             <Line data={chartData} options={chartOptions} />
           </div>
         </div>
@@ -511,7 +511,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
           </div>
 
           {/* Query Results Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
             <div className="bg-gray-700 rounded-lg p-4 text-center">
               <div className="text-xl font-bold text-green-400">
                 {queryResults.filter(q => q.mentioned).length}
@@ -542,7 +542,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
           <div className="space-y-3">
             <h4 className="text-md font-medium text-white mb-3">Recent Queries</h4>
             {queryResults.slice(0, 10).map((query) => (
-              <div key={query.id} className="border border-gray-600 rounded-lg p-4 overflow-hidden">
+              <div key={query.id} className="border border-gray-600 rounded-lg p-3 sm:p-4 overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
                   <div className="flex-1 min-w-0 sm:pr-4">
                     <p className="text-white font-medium mb-1 break-words">{query.query}</p>
@@ -569,7 +569,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
                   <div className="text-left sm:text-right flex-shrink-0">
                     {query.mentioned ? (
                       <div>
-                        <div className="text-green-400 font-medium text-sm">✓ Mentioned</div>
+                        <div className="text-green-400 font-medium text-sm">Mentioned</div>
                         {query.rankPosition && (
                           <div className="text-xs text-gray-400">Position {query.rankPosition}</div>
                         )}
@@ -578,7 +578,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
                         )}
                       </div>
                     ) : (
-                      <div className="text-red-400 font-medium text-sm">✗ Not Mentioned</div>
+                      <div className="text-red-400 font-medium text-sm">Not Mentioned</div>
                     )}
                   </div>
                 </div>
@@ -588,7 +588,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
                   <summary className="cursor-pointer text-sm text-blue-400 hover:text-blue-300 mb-2 group-open:mb-3">
                     View AI Response ({query.wordCount} words)
                   </summary>
-                  <div className="bg-gray-900 rounded-md p-3 text-sm text-gray-300 max-h-32 overflow-y-auto overflow-x-hidden break-words">
+                  <div className="bg-gray-900 rounded-md p-2 sm:p-3 text-xs sm:text-sm text-gray-300 max-h-32 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap">
                     {query.response.length > 300 ? 
                       query.response.substring(0, 300) + '...' : 
                       query.response

@@ -10,6 +10,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [resourcesDropdownOpen, setResourcesDropdownOpen] = useState(false);
   const { user, loading, logout } = useAuth();
 
   const closeMobileMenu = () => {
@@ -30,6 +31,10 @@ export default function Navbar() {
     setUserDropdownOpen(false);
   };
 
+  const closeResourcesDropdown = () => {
+    setResourcesDropdownOpen(false);
+  };
+
   return (
     <nav className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50 safe-top">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 sm:py-3">
@@ -43,8 +48,42 @@ export default function Navbar() {
           {/* Center Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Dashboard</Link>
+            <div className="relative">
+              <button
+                onClick={() => setResourcesDropdownOpen(!resourcesDropdownOpen)}
+                className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors font-normal text-sm"
+              >
+                <span>Resources</span>
+                <svg className={`w-3 h-3 transition-transform ${resourcesDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {resourcesDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={closeResourcesDropdown} />
+                  <div className="absolute left-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg border border-gray-600 z-20">
+                    <div className="py-2">
+                      <Link
+                        href="/learn"
+                        onClick={closeResourcesDropdown}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
+                      >
+                        Learn
+                      </Link>
+                      <Link
+                        href="/blog"
+                        onClick={closeResourcesDropdown}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
+                      >
+                        Blog
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">API</Link>
-            <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Learn</Link>
             <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Pricing</Link>
             <Link href="/subscribe" className="text-gray-300 hover:text-white transition-colors font-normal text-sm">Subscribe</Link>
           </div>
@@ -128,8 +167,17 @@ export default function Navbar() {
                 {/* <Link href="/#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Analytics</Link> */}
                 {/* <Link href="/#solutions" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>Solutions</Link> */}
                 <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Dashboard</Link>
+                
+                {/* Resources Section */}
+                <div className="space-y-2">
+                  <div className="text-gray-400 text-sm font-medium px-2">Resources</div>
+                  <div className="pl-4 space-y-2">
+                    <Link href="/learn" className="block text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Learn</Link>
+                    <Link href="/blog" className="block text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Blog</Link>
+                  </div>
+                </div>
+                
                 <Link href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>API</Link>
-                <Link href="/learn" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Learn More</Link>
                 <Link href="/#pricing" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Pricing</Link>
                 <Link href="/subscribe" className="text-gray-300 hover:text-white transition-colors font-normal text-base" onClick={closeMobileMenu}>Subscribe</Link>
                 {/* <Link href="/aeo" className="text-gray-600 hover:text-gray-900 transition-colors font-medium text-lg" onClick={closeMobileMenu}>About Us</Link> */}

@@ -42,27 +42,33 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   const [step, setStep] = useState<'input' | 'results'>('input');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
+  const [autoStartTriggered, setAutoStartTriggered] = useState(false);
 
-  // Auto-populate URL if provided from hero section
+  // Auto-populate URL and start analysis if provided from hero section
   useEffect(() => {
-    if (pendingAnalysisUrl && !websiteUrl) {
+    if (pendingAnalysisUrl && !websiteUrl && !autoStartTriggered) {
       setWebsiteUrl(pendingAnalysisUrl);
+      setAutoStartTriggered(true);
       if (onClearPendingUrl) {
         onClearPendingUrl();
       }
+      
+      // Auto-start the analysis after a brief delay to ensure state is set
+      setTimeout(() => {
+        handleAnalysisStart(pendingAnalysisUrl);
+      }, 100);
     }
-  }, [pendingAnalysisUrl, websiteUrl, onClearPendingUrl]);
+  }, [pendingAnalysisUrl, websiteUrl, autoStartTriggered, onClearPendingUrl]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!websiteUrl.trim()) {
+  const handleAnalysisStart = async (urlToAnalyze: string) => {
+    const trimmedUrl = urlToAnalyze.trim();
+    if (!trimmedUrl) {
       setError('Please enter a website URL');
       return;
     }
 
     // Basic URL validation
-    let normalizedUrl = websiteUrl.trim();
+    let normalizedUrl = trimmedUrl;
     if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
       normalizedUrl = 'https://' + normalizedUrl;
     }
@@ -74,14 +80,14 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
 
     // Progress tracking with realistic timing
     const progressSteps = [
-      { progress: 5, message: '🌐 Connecting to website...', duration: 1000 },
-      { progress: 15, message: '📄 Extracting website content...', duration: 2000 },
-      { progress: 30, message: '🧠 AI analyzing business information...', duration: 3000 },
-      { progress: 45, message: '🔍 Identifying industry and keywords...', duration: 2000 },
-      { progress: 60, message: '🚀 Generating AEO analysis prompts...', duration: 3000 },
-      { progress: 75, message: '🤖 Running queries across AI platforms...', duration: 8000 },
-      { progress: 90, message: '📊 Processing rankings and competitors...', duration: 2000 },
-      { progress: 95, message: '💾 Saving results to your dashboard...', duration: 1000 },
+      { progress: 5, message: 'Connecting to website...', duration: 1000 },
+      { progress: 15, message: 'Extracting website content...', duration: 2000 },
+      { progress: 30, message: 'AI analyzing business information...', duration: 3000 },
+      { progress: 45, message: 'Identifying industry and keywords...', duration: 2000 },
+      { progress: 60, message: 'Generating AEO analysis prompts...', duration: 3000 },
+      { progress: 75, message: 'Running queries across AI platforms...', duration: 8000 },
+      { progress: 90, message: 'Processing rankings and competitors...', duration: 2000 },
+      { progress: 95, message: 'Saving results to your dashboard...', duration: 1000 },
     ];
 
     // const currentStepIndex = 0; // Unused - kept for potential future use
@@ -132,7 +138,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
       // Complete the progress
       clearInterval(progressInterval);
       setProgress(100);
-      setProgressMessage('✅ Analysis complete!');
+      setProgressMessage('Analysis complete!');
       
       // Show completion for a moment before showing results
       setTimeout(() => {
@@ -148,6 +154,11 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
       setProgress(0);
       setProgressMessage('');
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleAnalysisStart(websiteUrl);
   };
 
   const handleComplete = () => {
@@ -202,7 +213,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
             <div className="flex-1">
               <h3 className="text-lg font-medium text-orange-300 mb-2">Website Limit Reached</h3>
               <p className="text-orange-200 mb-4">
-                You&apos;ve reached your website tracking limit ({websiteLimitInfo?.currentCount}/{websiteLimitInfo?.isUnlimited ? '∞' : websiteLimitInfo?.limit} websites) 
+                You&apos;ve reached your website tracking limit ({websiteLimitInfo?.currentCount}/{websiteLimitInfo?.isUnlimited ? 'unlimited' : websiteLimitInfo?.limit} websites) 
                 for the <strong>{websiteLimitInfo?.tier}</strong> tier.
               </p>
               <div className="bg-orange-900/30 border border-orange-600 rounded-lg p-4 mb-4">
@@ -210,7 +221,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                 <div className="space-y-1 text-sm text-orange-200">
                   <div className="flex justify-between">
                     <span>Websites tracked:</span>
-                    <span>{websiteLimitInfo?.currentCount}/{websiteLimitInfo?.isUnlimited ? '∞' : websiteLimitInfo?.limit}</span>
+                    <span>{websiteLimitInfo?.currentCount}/{websiteLimitInfo?.isUnlimited ? 'unlimited' : websiteLimitInfo?.limit}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Plan:</span>
@@ -259,7 +270,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
           {/* Main Input Card */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-8">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="text-blue-400 text-6xl mb-6">🔗</div>
+              <div className="text-blue-400 text-6xl mb-6">LINK</div>
               <h3 className="text-xl font-semibold text-white mb-4">Add Website for Tracking</h3>
               <p className="text-gray-300 mb-8">
                 Enter any website URL and we&apos;ll automatically extract business information, generate analysis prompts, and run your first AEO analysis.
@@ -305,7 +316,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                   isLoading={isAnalyzing}
                   progress={progress}
                   message={progressMessage}
-                  subtitle="This usually takes 20-30 seconds • Please keep this tab open"
+                  subtitle="This usually takes 20-30 seconds - Please keep this tab open"
                   className="mt-6"
                 />
               </form>
@@ -330,7 +341,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
           {/* How it Works */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
             <h3 className="text-lg font-medium text-white mb-4">How it Works</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-white font-bold">1</span>
@@ -358,7 +369,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
           {/* Features */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
             <h3 className="text-lg font-medium text-white mb-4">What You Get</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
               <div className="flex items-start">
                 <svg className="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

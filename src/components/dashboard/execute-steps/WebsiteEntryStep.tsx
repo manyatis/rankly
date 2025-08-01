@@ -33,7 +33,7 @@ export default function WebsiteEntryStep({
       </div>
       
       <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-6 border border-blue-600/30">
-        <h4 className="text-lg font-semibold text-white mb-4">🧠 Website Analysis</h4>
+        <h4 className="text-lg font-semibold text-white mb-4">Website Analysis</h4>
         
         <div className="mb-6">
           <label className="block text-sm font-medium text-white mb-2">Website URL</label>
@@ -64,7 +64,7 @@ export default function WebsiteEntryStep({
                 <span>Analyzing Website...</span>
               </span>
             ) : (
-              '🔍 Analyze Website'
+              'Analyze Website'
             )}
           </button>
           
