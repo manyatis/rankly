@@ -220,7 +220,7 @@ function DashboardContent() {
             </button>
           </div>
         </div>
-        <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
+        <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} onSuccess={() => setLoginModalOpen(false)} />
       </div>
     );
   }
@@ -409,7 +409,7 @@ function DashboardContent() {
                 {activeTab === 'business' && selectedBusiness && (
                   <BusinessInfoTab 
                     businessId={selectedBusiness} 
-                    onBusinessUpdate={handleBusinessUpdate}
+                    onBusinessUnlinked={handleBusinessUpdate}
                   />
                 )}
                 {activeTab === 'competitors' && selectedBusiness && <CompetitorsTab businessId={selectedBusiness} />}
@@ -417,11 +417,10 @@ function DashboardContent() {
                 {activeTab === 'execute' && selectedBusiness && <ExecuteTab businessId={selectedBusiness} />}
                 {activeTab === 'link-website' && (
                   <LinkWebsiteTab 
-                    organizationId={selectedOrganization}
-                    onBusinessUpdate={handleBusinessUpdate}
+                    onWebsiteLinked={handleBusinessUpdate}
                     websiteLimitInfo={websiteLimitInfo}
                     pendingAnalysisUrl={pendingAnalysisUrl}
-                    onAnalysisComplete={() => setPendingAnalysisUrl(null)}
+                    onClearPendingUrl={() => setPendingAnalysisUrl(null)}
                   />
                 )}
               </div>

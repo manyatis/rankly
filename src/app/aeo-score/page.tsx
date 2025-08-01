@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
 import { useAuth } from '@/hooks/useAuth';
-import { CheckIcon, ArrowPathIcon, ExclamationCircleIcon, LightBulbIcon, ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
+import { Check, RotateCw, AlertCircle, Lightbulb, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
 interface AIProvider {
@@ -629,7 +628,7 @@ export default function AEOScorePage() {
                   >
                     {isExtractingInfo ? (
                       <>
-                        <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                        <RotateCw className="h-4 w-4 animate-spin" />
                         Analyzing...
                       </>
                     ) : (
@@ -687,7 +686,7 @@ export default function AEOScorePage() {
                   onClick={applyExtractedInfo}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
                 >
-                  <CheckIcon className="h-4 w-4" />
+                  <Check className="h-4 w-4" />
                   Use This Information
                 </button>
                 <button
@@ -705,7 +704,7 @@ export default function AEOScorePage() {
         {error && (
           <div className="bg-red-900 border border-red-700 rounded-lg p-4 mb-6">
             <div className="flex items-center">
-              <ExclamationCircleIcon className="h-5 w-5 text-red-400 mr-2" />
+              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
               <span className="text-red-200">{error}</span>
             </div>
           </div>
@@ -829,7 +828,7 @@ export default function AEOScorePage() {
                     disabled={!canAnalyze || !generatePromptsRateLimit.canUse}
                     className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    <LightBulbIcon className="h-4 w-4" />
+                    <Lightbulb className="h-4 w-4" />
                     Generate Smart Prompts
                   </button>
                   {!generatePromptsRateLimit.canUse && (
@@ -845,10 +844,10 @@ export default function AEOScorePage() {
               <div className="space-y-6">
                 {generatedPrompts.length === 0 ? (
                   <div className="text-center py-8">
-                    <LightBulbIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                    <Lightbulb className="h-12 w-12 text-gray-500 mx-auto mb-4" />
                     <p className="text-gray-400 mb-4">No prompts generated yet</p>
                     <p className="text-sm text-gray-500">
-                      Fill out your business information and click "Generate Smart Prompts" to create optimized queries
+                      Fill out your business information and click &quot;Generate Smart Prompts&quot; to create optimized queries
                     </p>
                   </div>
                 ) : (
@@ -863,7 +862,7 @@ export default function AEOScorePage() {
                           disabled={currentPromptIndex === 0}
                           className="p-1 text-gray-400 hover:text-white disabled:opacity-50"
                         >
-                          <ChevronLeftIcon className="h-5 w-5" />
+                          <ChevronLeft className="h-5 w-5" />
                         </button>
                         <span className="text-sm text-gray-400">
                           {currentPromptIndex + 1} of {generatedPrompts.length}
@@ -873,7 +872,7 @@ export default function AEOScorePage() {
                           disabled={currentPromptIndex === generatedPrompts.length - 1}
                           className="p-1 text-gray-400 hover:text-white disabled:opacity-50"
                         >
-                          <ChevronRightIcon className="h-5 w-5" />
+                          <ChevronRight className="h-5 w-5" />
                         </button>
                       </div>
                     </div>
@@ -981,7 +980,7 @@ export default function AEOScorePage() {
                       <ul className="text-sm space-y-1">
                         {websiteAnalysis.aeoOptimization.strengths.map((strength, index) => (
                           <li key={index} className="flex items-start">
-                            <CheckIcon className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                            <Check className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
                             {strength}
                           </li>
                         ))}
@@ -992,7 +991,7 @@ export default function AEOScorePage() {
                       <ul className="text-sm space-y-1">
                         {websiteAnalysis.aeoOptimization.weaknesses.map((weakness, index) => (
                           <li key={index} className="flex items-start">
-                            <ExclamationCircleIcon className="h-4 w-4 text-red-400 mr-2 mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-4 w-4 text-red-400 mr-2 mt-0.5 flex-shrink-0" />
                             {weakness}
                           </li>
                         ))}
@@ -1052,12 +1051,11 @@ export default function AEOScorePage() {
                         className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
                         onClick={() => {
                           const element = document.getElementById(`queries-${index}`);
-                          const isHidden = element?.classList.contains('hidden');
                           element?.classList.toggle('hidden');
                         }}
                       >
                         <span>View Details</span>
-                        <ChevronDownIcon className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4" />
                       </button>
                     </div>
                     
@@ -1149,19 +1147,19 @@ export default function AEOScorePage() {
                   <h4 className="font-semibold text-blue-400 mb-3">Immediate Actions</h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
-                        Focus on improving queries where you're not mentioned
+                        Focus on improving queries where you&apos;re not mentioned
                       </span>
                     </li>
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
-                        Analyze top-performing competitors' strategies
+                        Analyze top-performing competitors&apos; strategies
                       </span>
                     </li>
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
                         Create content targeting your missed opportunities
                       </span>
@@ -1172,19 +1170,19 @@ export default function AEOScorePage() {
                   <h4 className="font-semibold text-green-400 mb-3">Long-term Strategy</h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
                         Build authority in your industry niche
                       </span>
                     </li>
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
                         Optimize for semantic search and AI understanding
                       </span>
                     </li>
                     <li className="flex items-start">
-                      <CheckIcon className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-green-400 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-300">
                         Monitor and track your AEO progress regularly
                       </span>
@@ -1208,7 +1206,8 @@ export default function AEOScorePage() {
 
       <LoginModal 
         isOpen={loginModalOpen} 
-        onClose={() => setLoginModalOpen(false)} 
+        onClose={() => setLoginModalOpen(false)}
+        onSuccess={() => setLoginModalOpen(false)}
       />
     </div>
   );
