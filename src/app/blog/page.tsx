@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Eye } from 'lucide-react';
 
 interface BlogPost {
   id: string;
@@ -18,6 +18,7 @@ interface BlogPost {
   updatedAt: string;
   publishedAt?: string;
   readTime: number; // minutes
+  viewCount: number;
 }
 
 export default function BlogPage() {
@@ -112,6 +113,10 @@ export default function BlogPage() {
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4" />
                   <span>{post.readTime} min read</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Eye className="h-4 w-4" />
+                  <span>{post.viewCount.toLocaleString()} views</span>
                 </div>
                 <span>By {post.author}</span>
               </div>

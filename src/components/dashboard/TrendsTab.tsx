@@ -332,7 +332,14 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(parseInt(e.target.value) as 7 | 14 | 30)}
-            className="px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-gray-800 text-white text-sm font-medium border border-gray-600 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-500 hover:bg-gray-750 appearance-none cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.75rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.25rem 1.25rem',
+              paddingRight: '2.5rem'
+            }}
           >
             <option value={7}>Last 7 days</option>
             <option value={14}>Last 14 days</option>

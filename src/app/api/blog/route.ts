@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
       updatedAt: post.updatedAt.toISOString(),
       publishedAt: post.publishedAt?.toISOString(),
       readTime: Math.max(1, Math.ceil(post.content.split(' ').length / 200)), // Estimate 200 words per minute
+      viewCount: post.viewCount,
       citations: post.citations || []
     }));
 
@@ -141,6 +142,7 @@ export async function POST(request: NextRequest) {
       updatedAt: post.updatedAt.toISOString(),
       publishedAt: post.publishedAt?.toISOString(),
       readTime: Math.max(1, Math.ceil(post.content.split(' ').length / 200)),
+      viewCount: post.viewCount,
       citations: post.citations || []
     };
 

@@ -366,6 +366,9 @@ model BlogPost {
   tags          String[]  // Array of tags
   citations     String[]  @default([]) // Array of citation URLs from AI generation
   
+  // Analytics
+  viewCount     Int       @default(0) // Total view count
+  
   // Publishing
   publishedAt   DateTime? // When the post was published
   createdAt     DateTime  @default(now())
@@ -373,9 +376,26 @@ model BlogPost {
   
   // Relations
   author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  views         BlogPostView[]
   
   @@index([authorId])
   @@index([status])
   @@index([slug])
   @@index([publishedAt])
+  @@index([viewCount])
+}
+
+model BlogPostView {
+  id        Int      @id @default(autoincrement())
+  postId    Int      // Blog post that was viewed
+  ipAddress String   // IP address of viewer (for basic deduplication)
+  userAgent String?  // Browser user agent
+  viewedAt  DateTime @default(now())
+  
+  // Relations
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@index([postId])
+  @@index([viewedAt])
+  @@index([ipAddress, postId]) // For deduplication
 }
