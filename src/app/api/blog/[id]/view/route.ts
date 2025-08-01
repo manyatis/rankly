@@ -13,7 +13,6 @@ export async function POST(
     const forwarded = request.headers.get('x-forwarded-for');
     const ipAddress = forwarded ? forwarded.split(',')[0] : 
       request.headers.get('x-real-ip') ?? 
-      request.ip ?? 
       'unknown';
     const userAgent = request.headers.get('user-agent') ?? '';
 
