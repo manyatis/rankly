@@ -2,8 +2,9 @@ import { BaseAIModel } from './BaseAIModel';
 import { OpenAIModel } from './OpenAIModel';
 import { AnthropicModel } from './AnthropicModel';
 import { PerplexityModel } from './PerplexityModel';
+import { GoogleAIModel } from './GoogleAIModel';
 
-export type ModelType = 'openai' | 'anthropic' | 'perplexity';
+export type ModelType = 'openai' | 'anthropic' | 'perplexity' | 'google';
 
 export interface ModelInfo {
   type: ModelType;
@@ -17,7 +18,8 @@ export class ModelFactory {
   private static models = new Map<ModelType, () => BaseAIModel>([
     ['openai', () => new OpenAIModel()],
     ['anthropic', () => new AnthropicModel()],
-    ['perplexity', () => new PerplexityModel()]
+    ['perplexity', () => new PerplexityModel()],
+    ['google', () => new GoogleAIModel()]
   ]);
 
   static createModel(type: ModelType): BaseAIModel {

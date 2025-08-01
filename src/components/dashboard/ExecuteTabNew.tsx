@@ -141,6 +141,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
     { name: 'OpenAI', model: '', color: 'bg-green-100 text-green-800' },
     { name: 'Claude', model: '', color: 'bg-orange-100 text-orange-800' },
     { name: 'Perplexity', model: '', color: 'bg-blue-100 text-blue-800' },
+    { name: 'Google', model: '', color: 'bg-blue-100 text-blue-800' },
   ];
 
   // Check rate limits using consolidated endpoint
@@ -620,7 +621,7 @@ export default function ExecuteTab({ businessId, onBusinessCreated }: ExecuteTab
         <h3 className="text-lg font-medium text-white mb-2">About AEO Analysis</h3>
         <div className="text-sm text-gray-400 space-y-2">
           <p>
-            <strong className="text-gray-300">AEO (Answers Engine Optimization)</strong> analyzes your business visibility across multiple AI search engines including ChatGPT, Claude, and Perplexity.
+            <strong className="text-gray-300">AEO (Answers Engine Optimization)</strong> analyzes your business visibility across multiple AI search engines including ChatGPT, Claude, Perplexity, and Google.
           </p>
           <p>
             The analysis will generate targeted prompts, test them across AI platforms, and provide a comprehensive ranking score based on:

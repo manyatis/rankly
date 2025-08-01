@@ -195,6 +195,7 @@ model RankingHistory {
   openaiRank        Int?      // OpenAI ranking/score
   claudeRank        Int?      // Claude ranking/score  
   perplexityRank    Int?      // Perplexity ranking/score
+  googleRank        Int?      // Google AI ranking/score
   averageRank       Int?      // Average across all providers
   
   // Website Analysis Score (if website was analyzed)

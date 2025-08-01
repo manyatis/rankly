@@ -28,6 +28,7 @@ interface RankingData {
   openaiRank?: number;
   claudeRank?: number;
   perplexityRank?: number;
+  googleRank?: number;
   averageRank?: number;
   websiteScore?: number;
 }
@@ -167,6 +168,15 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
         data: mapDataToDateRange('perplexityRank'),
         borderColor: 'rgb(248, 113, 113)',
         backgroundColor: 'rgba(248, 113, 113, 0.1)',
+        borderWidth: 3,
+        fill: false,
+        tension: 0.4,
+      },
+      {
+        label: 'Google',
+        data: mapDataToDateRange('googleRank'),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -423,6 +433,30 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
               })()}
             </div>
           </div>
+
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4" title="Today's Google Rank">
+            <h3 className="text-sm font-medium text-gray-400 mb-1">Google Rank</h3>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold text-blue-400">
+                {latestData.googleRank || 0}
+              </span>
+              {(() => {
+                const change = calculateChange(latestData.googleRank, previousData?.googleRank);
+                const formattedChange = formatChange(change);
+                if (formattedChange !== null) {
+                  return (
+                    <span className={`ml-2 text-sm ${
+                      change === 0 ? 'text-gray-400' :
+                      change! > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {formattedChange}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+          </div>
         </div>
       )}
 
@@ -510,6 +544,7 @@ export default function TrendsTab({ businessId }: TrendsTabProps) {
                         query.aiProvider === 'openai' ? 'bg-green-900 text-green-300' :
                         query.aiProvider === 'claude' ? 'bg-orange-900 text-orange-300' :
                         query.aiProvider === 'perplexity' ? 'bg-red-900 text-red-300' :
+                        query.aiProvider === 'google' ? 'bg-blue-900 text-blue-300' :
                         'bg-gray-700 text-gray-300'
                       }`}>
                         {query.aiProvider.toUpperCase()}

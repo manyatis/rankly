@@ -72,6 +72,7 @@ export async function GET(request: NextRequest) {
         openaiRank: true,
         claudeRank: true,
         perplexityRank: true,
+        googleRank: true,
         averageRank: true,
         websiteScore: true,
         hasWebsiteAnalysis: true

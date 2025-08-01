@@ -6,14 +6,6 @@ import { SubscriptionTiers } from '@/lib/subscription-tiers';
 // Vercel cron job to run recurring scans
 export async function GET(_request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
-    // // Verify this is a legitimate cron request
-    // const authHeader = request.headers.get('authorization');
-    // const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
-    
-    // if (!authHeader || authHeader !== expectedAuth) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-
     console.log('🔄 Starting recurring scans cron job...');
     
     const now = new Date();

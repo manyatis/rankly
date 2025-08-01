@@ -80,7 +80,8 @@ export class AEOAnalysisService {
     const providerNameToType: Record<string, ModelType> = {
       'OpenAI': 'openai',
       'Claude': 'anthropic',
-      'Perplexity': 'perplexity'
+      'Perplexity': 'perplexity',
+      'Google': 'google'
     };
 
     if (provider.type && ModelFactory.isModelSupported(provider.type)) {
@@ -422,6 +423,7 @@ export class AEOAnalysisService {
         let openaiRank: number | null = null;
         let claudeRank: number | null = null;
         let perplexityRank: number | null = null;
+        let googleRank: number | null = null;
 
         for (const result of competitorResults) {
           if (result.provider.includes('openai')) {
@@ -430,11 +432,13 @@ export class AEOAnalysisService {
             claudeRank = result.score;
           } else if (result.provider.includes('perplexity')) {
             perplexityRank = result.score;
+          } else if (result.provider.includes('google')) {
+            googleRank = result.score;
           }
         }
 
         // Calculate average rank
-        const ranks = [openaiRank, claudeRank, perplexityRank].filter(rank => rank !== null) as number[];
+        const ranks = [openaiRank, claudeRank, perplexityRank, googleRank].filter(rank => rank !== null) as number[];
         const averageRank = ranks.length > 0 ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) : null;
 
         // Store competitor ranking results
@@ -450,6 +454,7 @@ export class AEOAnalysisService {
             openaiRank,
             claudeRank,
             perplexityRank,
+            googleRank,
             averageRank,
             websiteScore: null,
             hasWebsiteAnalysis: false,
@@ -692,6 +697,7 @@ export class AEOAnalysisService {
           let openaiRank: number | null = null;
           let claudeRank: number | null = null;
           let perplexityRank: number | null = null;
+          let googleRank: number | null = null;
           
           for (const result of results) {
             const providerName = result.provider.name.toLowerCase();
@@ -701,11 +707,13 @@ export class AEOAnalysisService {
               claudeRank = result.aeoScore;
             } else if (providerName.includes('perplexity')) {
               perplexityRank = result.aeoScore;
+            } else if (providerName.includes('google')) {
+              googleRank = result.aeoScore;
             }
           }
           
           // Calculate average rank
-          const ranks = [openaiRank, claudeRank, perplexityRank].filter(rank => rank !== null) as number[];
+          const ranks = [openaiRank, claudeRank, perplexityRank, googleRank].filter(rank => rank !== null) as number[];
           const averageRank = ranks.length > 0 ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) : null;
 
           // Use database transaction to ensure both records are created together
@@ -741,6 +749,7 @@ export class AEOAnalysisService {
                 openaiRank,
                 claudeRank,
                 perplexityRank,
+                googleRank,
                 averageRank,
                 websiteScore: websiteAnalysis?.aeoOptimization?.currentScore || null,
                 hasWebsiteAnalysis: !!websiteAnalysis,
@@ -750,6 +759,7 @@ export class AEOAnalysisService {
                 openaiRank,
                 claudeRank,
                 perplexityRank,
+                googleRank,
                 averageRank,
                 websiteScore: websiteAnalysis?.aeoOptimization?.currentScore || null,
                 hasWebsiteAnalysis: !!websiteAnalysis,
@@ -768,6 +778,8 @@ export class AEOAnalysisService {
                 aiProvider = 'claude';
               } else if (providerName.includes('perplexity')) {
                 aiProvider = 'perplexity';
+              } else if (providerName.includes('google')) {
+                aiProvider = 'google';
               }
 
               // Save each query result from this provider
@@ -800,7 +812,8 @@ export class AEOAnalysisService {
                 competitorId: number, 
                 openaiRank: number | null, 
                 claudeRank: number | null, 
-                perplexityRank: number | null 
+                perplexityRank: number | null,
+                googleRank: number | null 
               }>();
 
               // Collect all competitor scores across providers
@@ -816,7 +829,8 @@ export class AEOAnalysisService {
                         competitorId: competitorScore.competitorId,
                         openaiRank: null,
                         claudeRank: null,
-                        perplexityRank: null
+                        perplexityRank: null,
+                        googleRank: null
                       });
                     }
 
@@ -828,6 +842,8 @@ export class AEOAnalysisService {
                       competitorRanking.claudeRank = competitorScore.aeoScore;
                     } else if (providerName.includes('perplexity')) {
                       competitorRanking.perplexityRank = competitorScore.aeoScore;
+                    } else if (providerName.includes('google')) {
+                      competitorRanking.googleRank = competitorScore.aeoScore;
                     }
                   }
                 }
@@ -837,13 +853,13 @@ export class AEOAnalysisService {
               console.debug(`📝 Creating ranking history records for ${competitorRankings.size} competitors`);
               
               for (const [competitorId, ranking] of competitorRankings) {
-                const ranks = [ranking.openaiRank, ranking.claudeRank, ranking.perplexityRank]
+                const ranks = [ranking.openaiRank, ranking.claudeRank, ranking.perplexityRank, ranking.googleRank]
                   .filter(rank => rank !== null) as number[];
                 const averageRank = ranks.length > 0 
                   ? Math.round(ranks.reduce((sum, rank) => sum + rank, 0) / ranks.length) 
                   : null;
 
-                console.debug(`💾 Saving competitor ${competitorId} ranking: OpenAI=${ranking.openaiRank}, Claude=${ranking.claudeRank}, Perplexity=${ranking.perplexityRank}, Average=${averageRank}`);
+                console.debug(`💾 Saving competitor ${competitorId} ranking: OpenAI=${ranking.openaiRank}, Claude=${ranking.claudeRank}, Perplexity=${ranking.perplexityRank}, Google=${ranking.googleRank}, Average=${averageRank}`);
 
                 try {
                   // Upsert competitor ranking - one per competitor per day
@@ -862,6 +878,7 @@ export class AEOAnalysisService {
                       openaiRank: ranking.openaiRank,
                       claudeRank: ranking.claudeRank,
                       perplexityRank: ranking.perplexityRank,
+                      googleRank: ranking.googleRank,
                       averageRank,
                       websiteScore: null,
                       hasWebsiteAnalysis: false,
@@ -871,6 +888,7 @@ export class AEOAnalysisService {
                       openaiRank: ranking.openaiRank,
                       claudeRank: ranking.claudeRank,
                       perplexityRank: ranking.perplexityRank,
+                      googleRank: ranking.googleRank,
                       averageRank,
                       updatedAt: new Date(),
                     }

@@ -309,6 +309,7 @@ export default function AEOScorePage() {
     { name: 'OpenAI', model: '', color: 'bg-green-100 text-green-800' },
     { name: 'Claude', model: '', color: 'bg-orange-100 text-orange-800' },
     { name: 'Perplexity', model: '', color: 'bg-blue-100 text-blue-800' },
+    { name: 'Google', model: '', color: 'bg-blue-100 text-blue-800' },
   ];
 
 

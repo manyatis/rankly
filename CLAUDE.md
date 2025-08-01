@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers with Stripe subscription payments.
+Rankly is an AI Engine Optimization (AEO) platform that analyzes and scores websites based on their visibility across AI search engines (ChatGPT, Claude, Perplexity, Google). Built with Next.js 15, TypeScript, PostgreSQL/Prisma, and integrates multiple AI providers with Stripe subscription payments.
 
 ## Development Commands
 
@@ -34,7 +34,7 @@ npx prisma studio         # Database browser
 ### Multi-AI Provider System
 - **ModelFactory** (`src/lib/ai-models/ModelFactory.ts`) - Central factory for AI provider instantiation
 - **BaseAIModel** - Abstract base class for all AI providers
-- **Provider implementations**: OpenAI, Anthropic, Perplexity models in `src/lib/ai-models/`
+- **Provider implementations**: OpenAI, Anthropic, Perplexity, Google models in `src/lib/ai-models/`
 - **Prompt management**: Centralized templates in `src/prompts/` organized by system/user prompts
 
 ### Analysis Engines
@@ -120,6 +120,7 @@ Required environment variables:
 - `ANTHROPIC_API_KEY` - Claude integration
 - `OPENAI_API_KEY` - ChatGPT integration
 - `PERPLEXITY_API_KEY` - Perplexity integration
+- `GOOGLE_AI_API_KEY` - Google AI integration
 - `STRIPE_SECRET_KEY` - Stripe API access
 - `STRIPE_PUBLISHABLE_KEY` - Stripe frontend integration
 - `STRIPE_WEBHOOK_SECRET` - Webhook signature verification
