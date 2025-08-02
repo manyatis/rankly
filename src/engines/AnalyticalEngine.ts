@@ -354,10 +354,6 @@ export class AnalyticalEngine {
 
     // Check if this is a direct business query (mentions the business name directly)
     const isDirectQuery = query && this.isDirectBusinessQuery(query, businessName);
-    if (isDirectQuery) {
-      score += 5;
-      console.debug(`📊 Direct business query bonus: +5 = ${score}`);
-    }
 
     // Base score for being mentioned (adjust based on match type)
     if (matchType === 'exact') {
@@ -455,8 +451,20 @@ export class AnalyticalEngine {
       console.debug(`📊 Multiple mentions (${mentionCount}x): +${multiMentionBonus} = ${score}`);
     }
 
-    const finalScore = Math.min(100, Math.max(0, score));
-    console.debug(`🎯 Final relevance score: ${finalScore}`);
-    return finalScore;
+    // Apply major reduction for direct business queries (1/4 of normal score)
+    if (isDirectQuery) {
+      score = Math.round(score * 0.25);
+      console.debug(`📊 Direct business query reduction: score reduced to 1/4 = ${score}`);
+    }
+
+    // Scale to proper per-query point system:
+    // - Normal queries: max 10 points each
+    // - Direct queries: max 4 points each (already reduced by 0.25 above)
+    const maxPointsPerQuery = isDirectQuery ? 4 : 10;
+    const scaledScore = Math.min(maxPointsPerQuery, Math.max(0, Math.round((score / 100) * maxPointsPerQuery)));
+    
+    console.debug(`📊 Scaled to per-query system: ${score}/100 → ${scaledScore}/${maxPointsPerQuery} points`);
+    console.debug(`🎯 Final query contribution: ${scaledScore} points`);
+    return scaledScore;
   }
 }

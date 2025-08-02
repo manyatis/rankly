@@ -68,62 +68,49 @@ export class RankingEngine {
       };
     }
 
-    // Calculate position-based scores with exponential decay
-    let totalPositionScore = 0;
-    let totalWordCount = 0;
+    // Calculate scores using the new per-query system
+    // NOTE: relevanceScore from AnalyticalEngine already includes position considerations
+    // and is properly scaled to 0-10 (normal) or 0-4 (direct queries)
+    let totalRelevanceScore = 0;
     
-    queryResults.filter(r => r.mentioned).forEach(result => {
-      // Position Score: Heavy exponential decay for position
-      // Position 1 = 100, Position 2 = 75, Position 3 = 50, Position 4+ = 25-(position*2)
-      let positionScore = 0;
-      if (result.rankPosition === 1) positionScore = 100;
-      else if (result.rankPosition === 2) positionScore = 75;
-      else if (result.rankPosition === 3) positionScore = 50;
-      else if (result.rankPosition >= 4) positionScore = Math.max(0, 25 - (result.rankPosition * 2));
+    queryResults.forEach(result => {
+      // Use the relevance score from AnalyticalEngine (already includes position + all factors)
+      const relevanceScore = result.mentioned ? (result.relevanceScore || 0) : 0;
+      totalRelevanceScore += relevanceScore;
       
-      totalPositionScore += positionScore;
-      
-      // Word Count Score: Count business name mentions
-      const businessNameLower = businessName.toLowerCase();
-      const responseLower = result.response.toLowerCase();
-      const mentions = (responseLower.match(new RegExp(businessNameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
-      totalWordCount += mentions * 20; // 20 points per mention, max realistic ~100
-      
-      console.debug(`   Query: Position ${result.rankPosition} = ${positionScore}pts, ${mentions} mentions = ${mentions * 20}pts`);
+      console.debug(`   Query: "${result.query.substring(0,30)}..." = ${relevanceScore}pts (mentioned: ${result.mentioned})`);
     });
 
-    // Calculate average scores
-    const avgPositionScore = Math.round(totalPositionScore / mentionedQueries);
-    const avgWordCountScore = Math.min(100, Math.round(totalWordCount / mentionedQueries));
+    // Calculate scores for the 100-point compatibility system
+    // Total possible: 10 queries × 10 points = 100 (or 9×10 + 1×4 = 94 for direct queries)
+    const actualScore = Math.round(totalRelevanceScore); // Direct sum since already properly scaled
+    const avgRelevanceScore = totalQueries > 0 ? Math.round((totalRelevanceScore / totalQueries) * 10) : 0; // For compatibility
+    const avgPositionScore = avgRelevanceScore; // Same as relevance since position is included
     
     console.debug(`📍 Average Position Score: ${avgPositionScore}/100`);
-    console.debug(`🔢 Average Word Count Score: ${avgWordCountScore}/100`);
+    console.debug(`🔢 Average Relevance Score: ${avgRelevanceScore}/100`);
 
-    // Fill in factors for compatibility
-    factors.ranking = avgPositionScore;      // Position-based ranking
-    factors.relevance = avgWordCountScore;   // Word count-based relevance
+    // Fill in factors for compatibility (scale actualScore to 100-point system for display)
+    const scaledScore = Math.min(100, actualScore * 1.1); // Scale to ~100 max (94 theoretical max * 1.1 ≈ 100)
+    factors.ranking = scaledScore;               // Use actual total score
+    factors.relevance = avgRelevanceScore;       // Average per query for display
     factors.brandMention = factors.visibility;
     factors.accuracy = Math.round((validResponses / totalQueries) * 100);
-    factors.completeness = Math.min(100, Math.round(avgWordCountScore * 0.8)); // Derived from word count
+    factors.completeness = Math.min(100, Math.round(avgRelevanceScore * 0.8)); 
     factors.citations = 50; // Neutral score for citations
 
-    // Final AEO Score: HEAVILY weighted toward position/visibility
-    const aeoScore = Math.round(
-      (factors.ranking * 0.50) +        // Position: 50% weight
-      (factors.visibility * 0.30) +     // Visibility: 30% weight  
-      (factors.relevance * 0.20)        // Word count: 20% weight
-    );
+    // Final AEO Score: Use direct sum of per-query scores (already properly weighted)
+    const aeoScore = Math.min(100, actualScore);
 
-    console.debug(`🏆 Final AEO Score calculation (Position + Word Count Algorithm):`);
-    console.debug(`   Position (50%): ${factors.ranking} × 0.50 = ${(factors.ranking * 0.50).toFixed(1)}`);
-    console.debug(`   Visibility (30%): ${factors.visibility} × 0.30 = ${(factors.visibility * 0.30).toFixed(1)}`);
-    console.debug(`   Word Count (20%): ${factors.relevance} × 0.20 = ${(factors.relevance * 0.20).toFixed(1)}`);
-    console.debug(`🎯 TOTAL AEO SCORE: ${aeoScore}/100`);
+    console.debug(`🏆 Final AEO Score calculation (Per-Query Point System):`);
+    console.debug(`   Total relevance points: ${totalRelevanceScore}/${totalQueries > 0 ? totalQueries * 10 : 100} possible`);
+    console.debug(`   Visibility rate: ${factors.visibility}% (${mentionedQueries}/${totalQueries} queries mentioned)`);
+    console.debug(`🎯 FINAL AEO SCORE: ${aeoScore}/100 (direct sum of per-query scores)`);
 
     const overallVisibility = factors.visibility;
 
     // Generate analysis
-    const analysis = this.generatePositionAnalysis(aeoScore, businessName, mentionedQueries, totalQueries, avgPositionScore, avgWordCountScore);
+    const analysis = this.generatePositionAnalysis(aeoScore, businessName, mentionedQueries, totalQueries, avgPositionScore, avgRelevanceScore);
 
     // Perform competitor analysis
     const competitorAnalysis = this.analyzeCompetitors(queryResults, businessName);
@@ -147,7 +134,7 @@ export class RankingEngine {
     mentionedQueries: number, 
     totalQueries: number, 
     avgPositionScore: number, 
-    avgWordCountScore: number
+    avgRelevanceScore: number
   ): string {
     let analysis = '';
     
@@ -175,11 +162,11 @@ export class RankingEngine {
       analysis += `Weak positioning, appears low in responses. `;
     }
 
-    // Word count analysis
-    if (avgWordCountScore >= 60) {
-      analysis += `Good mention frequency indicates strong relevance.`;
+    // Relevance analysis
+    if (avgRelevanceScore >= 60) {
+      analysis += `Good relevance scores indicate strong context quality.`;
     } else {
-      analysis += `Low mention frequency suggests limited context relevance.`;
+      analysis += `Low relevance scores suggest limited context quality.`;
     }
 
     return analysis;

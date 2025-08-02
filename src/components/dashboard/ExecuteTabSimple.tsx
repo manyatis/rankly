@@ -290,7 +290,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       {/* Analysis Button Card */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-8 text-center">
         <div className="max-w-md mx-auto">
-          <div className="text-blue-400 text-5xl mb-4">FAST</div>
+          {/* <div className="text-blue-400 text-5xl mb-4">DISCOVER</div> */}
           <h3 className="text-xl font-semibold text-white mb-3">Quick Analysis</h3>
           <p className="text-gray-300 mb-6">
             Run AEO analysis using the stored website information and previous prompts, or generate new ones automatically.

@@ -167,6 +167,18 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
           const itemDate = new Date(item.date).toISOString().split('T')[0];
           return itemDate === dateStr;
         });
+        
+        // Skip data points where all ranking values are 0 (invalid data)
+        if (dataPoint && field !== 'websiteScore') {
+          const hasValidRankingData = (dataPoint.openaiRank || 0) > 0 || 
+                                     (dataPoint.claudeRank || 0) > 0 || 
+                                     (dataPoint.perplexityRank || 0) > 0 ||
+                                     (dataPoint.googleRank || 0) > 0;
+          if (!hasValidRankingData) {
+            return null;
+          }
+        }
+        
         return dataPoint ? dataPoint[field] || null : null;
       });
     };

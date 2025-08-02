@@ -407,7 +407,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
           {/* Main Input Card */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-8">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="text-blue-400 text-6xl mb-6">LINK</div>
+              {/* <div className="text-blue-400 text-6xl mb-6">LINK</div> */}
               <h3 className="text-xl font-semibold text-white mb-4">Add Website for Tracking</h3>
               <p className="text-gray-300 mb-8">
                 Enter any website URL and we&apos;ll automatically extract business information, generate analysis prompts, and run your first AEO analysis.

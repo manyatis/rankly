@@ -38,11 +38,11 @@ npx prisma studio         # Database browser
 - **Prompt management**: Centralized templates in `src/prompts/` organized by system/user prompts
 
 ### Analysis Engines
-- **AnalyticalEngine** (`src/engines/AnalyticalEngine.ts`) - Orchestrates query generation and execution across AI providers
-- **RankingEngine** (`src/engines/RankingEngine.ts`) - Implements AEO scoring algorithms with weighted factors:
-  - Position ranking (50%)
-  - Visibility across queries (30%) 
-  - Word count/relevance (20%)
+- **AnalyticalEngine** (`src/engines/AnalyticalEngine.ts`) - Orchestrates query generation and execution across AI providers with per-query point scoring system
+- **RankingEngine** (`src/engines/RankingEngine.ts`) - Implements AEO scoring algorithms with per-query point system:
+  - Normal queries: max 10 points each
+  - Direct business queries: max 4 points each (25% of normal scoring)
+  - Direct sum of relevance scores (no double-counting of position factors)
 
 ### Service Layer
 - **AEOAnalysisService** - Main orchestration service for AEO analysis workflow with cron support
@@ -98,6 +98,8 @@ npx prisma studio         # Database browser
 ### API Routes (`src/app/api/`)
 - `aeo-score/` - Core AEO analysis endpoint
 - `analyze-url-async/` - Background website analysis with job tracking (POST: create job, GET: check status)
+- `dashboard/execute-analysis-async/` - Manual analysis job tracking (POST: create job, GET: check job status by businessId)
+- `dashboard/query-results/` - Query results with pagination support (latestRunOnly parameter for most recent analysis)
 - `auth/` - NextAuth.js authentication routes
 - `subscriptions/` - Stripe subscription management (create, cancel, update, webhooks)
 - `cron/recurring-scans/` - Automated recurring analysis endpoint
@@ -106,7 +108,10 @@ npx prisma studio         # Database browser
 
 ### Components (`src/components/`)
 - Organized by page/feature (home/, auth/, dashboard/, payment/)
-- Dashboard components: AutomationSetupTab (recurring scans), TrendsTab (with query results), ExecuteTab, etc.
+- Dashboard components: AutomationSetupTab (recurring scans), TrendsTab (with query pagination), ExecuteTabSimple (with job persistence), LinkWebsiteTab (with usage limits)
+- **Job Persistence**: Manual analysis continues across tab switches with automatic job resumption
+- **Query Pagination**: TrendsTab shows paginated queries from latest analysis run only (10 per page)
+- **Graph Filtering**: Invalid zero-value data points filtered from trend charts
 - Payment components: SubscriptionFlow, StripeCardForm (Stripe Checkout)
 - Follow React 19 patterns with server/client component separation
 
@@ -265,6 +270,44 @@ Required environment variables:
 - **Mobile-optimized** dashboard with improved UX and navigation
 - **Comprehensive usage tracking** with real-time limit displays
 
+##### Latest Session Improvements (August 2025)
+
+###### Manual Analysis Job Persistence (Complete)
+- **Cross-Tab Job Continuity** - Manual analysis jobs persist across tab navigation, automatically resume monitoring on component mount
+- **Job Status Polling** - ExecuteTabSimple checks for existing jobs when businessId changes and resumes progress tracking
+- **Background Job Query** - `/api/dashboard/execute-analysis-async` supports querying jobs by businessId for job resumption
+- **Cleanup Handling** - Proper polling cleanup on component unmount to prevent memory leaks
+
+###### Query Analysis Pagination (Complete)
+- **Latest Run Focus** - TrendsTab shows only queries from the most recent analysis run with `latestRunOnly=true` parameter
+- **Paginated Results** - 10 queries per page with full pagination controls and metadata
+- **Performance Optimization** - Efficient query filtering by latest runUuid to reduce database load
+- **User Experience** - Clear pagination indicators showing "Page X of Y" and total query count
+
+###### Scoring System Overhaul (Complete)
+- **Per-Query Point System** - Each query can contribute max 10 points (normal) or 4 points (direct business queries)
+- **Direct Query Reduction** - Direct business queries score 25% of normal (0.25x multiplier) to prevent gaming
+- **Eliminated Double-Counting** - Removed duplicate position scoring in RankingEngine, uses only AnalyticalEngine relevance scores
+- **Scaled Point Distribution** - Total possible score: 94 points (9×10 + 1×4) for typical 10-query analysis
+- **Consistent Scoring** - All historical scoring inconsistencies resolved with proper point scaling
+
+###### Graph Data Filtering (Complete)
+- **Invalid Data Filtering** - TrendsTab filters out data points where all ranking values are 0 (invalid historical data)
+- **Visual Clarity** - Charts now show only valid data points, improving trend visualization
+- **Data Validation** - Checks for `(openaiRank || 0) > 0` across all AI providers before displaying data points
+
+###### Usage Limit Integration (Complete)
+- **LinkWebsiteTab Enhancement** - Usage display matches ExecuteTabSimple pattern with simplified UI
+- **Button State Management** - Link and analyze button disabled when daily usage limit reached (`!usageInfo?.canUse`)
+- **Consistent UX** - Removed complex usage limits display section for cleaner interface
+- **Real-time Updates** - Usage information fetched and displayed in real-time
+
+###### Technical Implementation Details
+- **TypeScript Fixes** - Resolved ModelType import issues in execute-analysis-async route
+- **Error Handling** - Comprehensive error handling for job persistence and pagination failures
+- **Performance** - Optimized database queries with proper indexing on runUuid and businessId
+- **Code Quality** - Removed unused code sections and improved component organization
+
 #### Next Steps for Production
 - Configure production Stripe API credentials
 - Set up Stripe webhook endpoints for real-time subscription events
@@ -272,3 +315,5 @@ Required environment variables:
 - Configure Stripe Customer Portal for subscription self-service
 - Monitor background job performance and optimize queue processing
 - A/B test new prompt strategies for optimal business discovery
+- Monitor per-query scoring system performance with real user data
+- Implement advanced analytics for query effectiveness across different business types
