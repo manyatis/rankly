@@ -474,23 +474,7 @@ else if (businesses.length === 0) {
           </div>
 
           {/* Content Area */}
-          <div className="h-full">
-            {!selectedBusiness && businesses.length === 0 ? (
-              <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-white mb-2">No Websites Found</h3>
-                  <p className="text-gray-400 mb-4">
-                    Link your first website to start tracking your AEO performance.
-                  </p>
-                  <button
-                    onClick={() => handleTabChange('link-website')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Link Website
-                  </button>
-                </div>
-              </div>
-            ) : (
+          <div className="h-full"> (
               <div className="h-full p-3 sm:p-6 overflow-x-hidden">
                 {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} featureFlags={featureFlags} />}
                 {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
