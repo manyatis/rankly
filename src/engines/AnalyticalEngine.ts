@@ -236,7 +236,7 @@ export class AnalyticalEngine {
           console.debug(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
 
           // Calculate relevance score using extracted method
-          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessName, matchType);
+          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessName, matchType, query);
         }
 
         // Generate word position data using AI analysis
@@ -337,8 +337,27 @@ export class AnalyticalEngine {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   }
 
-  private static calculateRelevanceScore(response: string, responseLower: string, bestMatch: string, bestIndex: number, businessName: string, matchType: string = 'exact'): number {
+  private static isDirectBusinessQuery(query: string, businessName: string): boolean {
+    const queryLower = query.toLowerCase();
+    const businessNameLower = businessName.toLowerCase();
+    
+    // Check if the query directly mentions the business name
+    return queryLower.includes(businessNameLower) || 
+           // Also check for partial matches of significant words in the business name
+           businessName.split(/\s+/).some(word => 
+             word.length > 3 && queryLower.includes(word.toLowerCase())
+           );
+  }
+
+  private static calculateRelevanceScore(response: string, responseLower: string, bestMatch: string, bestIndex: number, businessName: string, matchType: string = 'exact', query?: string): number {
     let score = 0;
+
+    // Check if this is a direct business query (mentions the business name directly)
+    const isDirectQuery = query && this.isDirectBusinessQuery(query, businessName);
+    if (isDirectQuery) {
+      score += 5;
+      console.debug(`📊 Direct business query bonus: +5 = ${score}`);
+    }
 
     // Base score for being mentioned (adjust based on match type)
     if (matchType === 'exact') {

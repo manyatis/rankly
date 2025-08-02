@@ -98,6 +98,7 @@ model User {
     
     // Relations
     organization      Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+    analysisJobs      AnalysisJob[]
     businesses        Business[]      // Businesses created by this user
     aeoScores         AeoScore[]
     inputHistory      InputHistory[]
@@ -398,4 +399,33 @@ model BlogPostView {
   @@index([postId])
   @@index([viewedAt])
   @@index([ipAddress, postId]) // For deduplication
+}
+
+model AnalysisJob {
+  id              String    @id @default(cuid())
+  websiteUrl      String
+  userId          Int
+  organizationId  Int
+  businessId      Int?      // Will be set once business is created/linked
+  status          String    @default("pending") // "pending", "processing", "completed", "failed"
+  error           String?   // Error message if failed
+  
+  // Job progress tracking
+  progressPercent Int       @default(0)
+  progressMessage String?
+  
+  // Job results
+  extractedInfo   Json?     // Business info extracted from website
+  analysisResult  Json?     // AEO analysis results
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  completedAt     DateTime?
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }

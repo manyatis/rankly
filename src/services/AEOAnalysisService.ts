@@ -74,7 +74,7 @@ export interface AuthValidationResult {
 }
 
 export class AEOAnalysisService {
-  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '5');
+  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '10');
 
   private static getModelTypeFromProvider(provider: AIProvider): ModelType {
     const providerNameToType: Record<string, ModelType> = {

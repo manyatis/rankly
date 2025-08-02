@@ -15,6 +15,30 @@ interface LinkWebsiteTabProps {
   onClearPendingUrl?: () => void;
 }
 
+interface AnalysisJob {
+  jobId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progressPercent: number;
+  progressMessage: string;
+  error?: string;
+  business?: {
+    id: number;
+    websiteName: string;
+    websiteUrl: string;
+    industry: string;
+    location?: string;
+    description: string;
+  };
+  extractedInfo?: {
+    businessName: string;
+    industry: string;
+    location?: string;
+    description: string;
+    keywords: string[];
+    confidence: number;
+  };
+}
+
 interface WebsiteAnalysisResult {
   business: {
     id: number;
@@ -43,6 +67,8 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [autoStartTriggered, setAutoStartTriggered] = useState(false);
+  const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
+  const [useAsyncMode, setUseAsyncMode] = useState(true); // Use async mode by default
 
   // Auto-populate URL and start analysis if provided from hero section
   useEffect(() => {
@@ -59,6 +85,17 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
       }, 100);
     }
   }, [pendingAnalysisUrl, websiteUrl, autoStartTriggered, onClearPendingUrl]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      const interval = (window as any).__analysisInterval;
+      if (interval) {
+        clearInterval(interval);
+        delete (window as any).__analysisInterval;
+      }
+    };
+  }, []);
 
   const handleAnalysisStart = async (urlToAnalyze: string) => {
     const trimmedUrl = urlToAnalyze.trim();
@@ -118,41 +155,104 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
       }
     };
 
-    const progressInterval = setInterval(updateProgress, 100);
+    if (useAsyncMode) {
+      // Use async endpoint for background processing
+      try {
+        const response = await fetch('/api/analyze-url-async', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ websiteUrl: normalizedUrl }),
+        });
 
-    try {
-      const response = await fetch('/api/analyze-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ websiteUrl: normalizedUrl }),
-      });
+        const data = await response.json();
 
-      const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to start analysis');
+        }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze website');
-      }
-
-      // Complete the progress
-      clearInterval(progressInterval);
-      setProgress(100);
-      setProgressMessage('Analysis complete!');
-      
-      // Show completion for a moment before showing results
-      setTimeout(() => {
-        setResult(data);
-        setStep('results');
+        // Store the job info
+        setAnalysisJob(data);
+        
+        // Start polling for job status
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusResponse = await fetch(`/api/analyze-url-async?jobId=${data.jobId}`);
+            const jobStatus = await statusResponse.json();
+            
+            setAnalysisJob(jobStatus);
+            setProgress(jobStatus.progressPercent);
+            setProgressMessage(jobStatus.progressMessage);
+            
+            if (jobStatus.status === 'completed') {
+              clearInterval(pollInterval);
+              clearInterval(progressInterval);
+              
+              // Transform to result format
+              setResult({
+                business: jobStatus.business,
+                extractedInfo: jobStatus.extractedInfo,
+              });
+              setStep('results');
+              setIsAnalyzing(false);
+            } else if (jobStatus.status === 'failed') {
+              clearInterval(pollInterval);
+              clearInterval(progressInterval);
+              throw new Error(jobStatus.error || 'Analysis failed');
+            }
+          } catch (error) {
+            console.error('Error polling job status:', error);
+          }
+        }, 1000); // Poll every second
+        
+        // Store interval ID for cleanup
+        (window as any).__analysisInterval = pollInterval;
+        
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to start analysis');
         setIsAnalyzing(false);
-      }, 500);
-      
-    } catch (err) {
-      clearInterval(progressInterval);
-      setError(err instanceof Error ? err.message : 'Failed to analyze website');
-      setIsAnalyzing(false);
-      setProgress(0);
-      setProgressMessage('');
+        setProgress(0);
+        setProgressMessage('');
+      }
+    } else {
+      // Original synchronous mode
+      const progressInterval = setInterval(updateProgress, 100);
+
+      try {
+        const response = await fetch('/api/analyze-url', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ websiteUrl: normalizedUrl }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to analyze website');
+        }
+
+        // Complete the progress
+        clearInterval(progressInterval);
+        setProgress(100);
+        setProgressMessage('Analysis complete!');
+        
+        // Show completion for a moment before showing results
+        setTimeout(() => {
+          setResult(data);
+          setStep('results');
+          setIsAnalyzing(false);
+        }, 500);
+        
+      } catch (err) {
+        clearInterval(progressInterval);
+        setError(err instanceof Error ? err.message : 'Failed to analyze website');
+        setIsAnalyzing(false);
+        setProgress(0);
+        setProgressMessage('');
+      }
     }
   };
 
@@ -316,7 +416,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                   isLoading={isAnalyzing}
                   progress={progress}
                   message={progressMessage}
-                  subtitle="This usually takes 20-30 seconds - Please keep this tab open"
+                  subtitle={useAsyncMode ? "Analysis running in background - You can navigate away" : "This usually takes 20-30 seconds - Please keep this tab open"}
                   className="mt-6"
                 />
               </form>
@@ -334,6 +434,81 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                   <p className="text-red-300 font-medium">Error</p>
                   <p className="text-red-200 text-sm mt-1">{error}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Usage Limits Display */}
+          {usageInfo && (
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+              <h3 className="text-lg font-medium text-white mb-4">Usage Limits</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Daily Usage */}
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-300">Daily Analysis</h4>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      usageInfo.dailyUsage.canUse ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+                    }`}>
+                      {usageInfo.tier.charAt(0).toUpperCase() + usageInfo.tier.slice(1)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium">
+                      {usageInfo.dailyUsage.isUnlimited ? 'Unlimited' : 
+                        `${usageInfo.dailyUsage.current}/${usageInfo.dailyUsage.limit}`
+                      }
+                    </span>
+                    <span className={`text-sm ${
+                      usageInfo.dailyUsage.canUse ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {usageInfo.dailyUsage.canUse ? '✓ Available' : '✗ Limit Reached'}
+                    </span>
+                  </div>
+                  {!usageInfo.dailyUsage.isUnlimited && (
+                    <div className="mt-2 w-full bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(usageInfo.dailyUsage.current / usageInfo.dailyUsage.limit) * 100}%` }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rate Limit */}
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-300">Rate Limit (5 min)</h4>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      usageInfo.rateLimit?.canUse !== false ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'
+                    }`}>
+                      {usageInfo.rateLimit?.canUse !== false ? 'Available' : 'Cooldown'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium">
+                      {usageInfo.rateLimit ? 
+                        `${usageInfo.rateLimit.remaining} remaining` : 
+                        'Available'
+                      }
+                    </span>
+                    {usageInfo.rateLimit && !usageInfo.rateLimit.canUse && (
+                      <span className="text-sm text-orange-400">
+                        Wait {usageInfo.rateLimit.waitMinutes}m
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Usage Help */}
+              <div className="mt-4 text-sm text-gray-400">
+                <p>
+                  <strong>Daily Limit:</strong> Total analyses per day. Resets at midnight UTC.
+                </p>
+                <p className="mt-1">
+                  <strong>Rate Limit:</strong> Prevents rapid successive requests. Resets every 5 minutes.
+                </p>
               </div>
             </div>
           )}

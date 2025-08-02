@@ -23,9 +23,12 @@ export class PromptFormationService {
   }
 
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
-    const { industry, location, marketDescription, keywords } = context;
+    const { businessName, industry, location, marketDescription, keywords } = context;
 
     try {
+      // Reserve one slot for direct business query
+      const aiGeneratedCount = Math.max(1, queryCount - 1);
+      
       // Load prompts from template files
       const systemPrompt = await PromptTemplateLoader.loadAEOSystemPrompt();
       const userPrompt = await PromptTemplateLoader.loadGenerateQueriesPrompt({
@@ -33,7 +36,7 @@ export class PromptFormationService {
         location: location ? `\n- Location: ${location}\n\n` : '',
         marketDescription,
         keywords: keywords.join(', '),
-        queryCount: queryCount.toString()
+        queryCount: aiGeneratedCount.toString()
       });
 
       const response = await this.openai.chat.completions.create({
@@ -59,11 +62,19 @@ export class PromptFormationService {
         throw new Error('Invalid response structure from OpenAI');
       }
 
+      // Add the direct business query (this will get 5 point scoring boost)
+      const directQuery = this.generateDirectBusinessQuery(context);
+      result.queries.push(directQuery);
+
       // Ensure we have the requested number of queries
       if (result.queries.length < queryCount) {
         // Fallback to default query generation if too few queries
-        result.queries = await this.generateFallbackQueries(context, queryCount);
+        const fallbackQueries = await this.generateFallbackQueries(context, queryCount - result.queries.length);
+        result.queries.push(...fallbackQueries);
       }
+
+      // Trim to exact count if we have too many
+      result.queries = result.queries.slice(0, queryCount);
 
       return result;
     } catch (templateError) {
@@ -108,29 +119,57 @@ export class PromptFormationService {
     const primaryKeyword = keywords[0] || industry;
 
     const allQueries = [
-      `Top 10 ${primaryKeyword} products for businesses`,
-      `Best ${industry.toLowerCase()} products to buy in 2025`,
-      `Which ${primaryKeyword} products should I purchase`,
-      `Most recommended ${industry.toLowerCase()} products`,
-      `Premium ${primaryKeyword} products worth buying`,
-      `What are the best ${industry.toLowerCase()} companies?`,
-      `Top ${industry.toLowerCase()} solutions for businesses`,
-      `How to choose a ${industry.toLowerCase()} provider`,
-      `${primaryKeyword} services comparison`,
-      `Best ${primaryKeyword} tools and platforms`,
-      `Leading companies in ${industry.toLowerCase()}`,
-      `${industry} recommendations for small businesses`,
-      `Who are the top ${industry.toLowerCase()} vendors?`,
-      `${primaryKeyword} market leaders`,
-      `Best ${industry.toLowerCase()} services in 2024`,
-      `${primaryKeyword} products buying guide for ${industry.toLowerCase()}`,
-      `Should I buy ${primaryKeyword} products for my business`,
-      `Cost-effective ${primaryKeyword} products for startups`,
-      `Enterprise-grade ${primaryKeyword} products comparison`,
-      `Which ${primaryKeyword} products offer best ROI`
+      `Top 10 ${industry.toLowerCase()} companies in 2025`,
+      `Who are the best ${industry.toLowerCase()} providers?`,
+      `Leading ${industry.toLowerCase()} companies to work with`,
+      `Top ${primaryKeyword} companies in the industry`,
+      `Which ${industry.toLowerCase()} companies are most trusted?`,
+      `Best ${industry.toLowerCase()} firms for businesses`,
+      `Who leads the ${industry.toLowerCase()} market?`,
+      `Most reliable ${industry.toLowerCase()} companies`,
+      `Top-rated ${industry.toLowerCase()} service providers`,
+      `Which companies dominate the ${industry.toLowerCase()} space?`,
+      `Best ${primaryKeyword} specialists and experts`,
+      `Industry leaders in ${industry.toLowerCase()}`,
+      `Top performing ${industry.toLowerCase()} companies`,
+      `Highest rated ${primaryKeyword} providers`,
+      `Most recommended ${industry.toLowerCase()} companies`,
+      `Elite ${industry.toLowerCase()} companies worth considering`,
+      `Premier ${primaryKeyword} companies in the market`,
+      `Top-tier ${industry.toLowerCase()} service providers`,
+      `Which ${industry.toLowerCase()} companies are industry leaders?`,
+      `Best ${primaryKeyword} companies for professional services`
     ];
 
     return allQueries.slice(0, queryCount);
+  }
+
+  private generateDirectBusinessQuery(context: BusinessContext): string {
+    const { businessName, industry, location } = context;
+    
+    // Create variations of direct business queries
+    const queryTemplates = [
+      `What can you tell me about ${businessName}?`,
+      `Tell me about ${businessName} company`,
+      `What does ${businessName} do?`,
+      `Information about ${businessName}`,
+      `${businessName} company overview`,
+      `What services does ${businessName} provide?`,
+      `${businessName} business information`
+    ];
+    
+    // If location is provided, add location-specific queries
+    if (location) {
+      queryTemplates.push(
+        `${businessName} in ${location}`,
+        `Tell me about ${businessName} located in ${location}`,
+        `${businessName} ${location} company`
+      );
+    }
+    
+    // Pick a random template to add variety
+    const randomIndex = Math.floor(Math.random() * queryTemplates.length);
+    return queryTemplates[randomIndex];
   }
 
   async validateApiKey(): Promise<boolean> {
