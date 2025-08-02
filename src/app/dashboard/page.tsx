@@ -50,7 +50,7 @@ const getStoredSelectedBusiness = (): number | null => {
 };
 
 const setStoredSelectedBusiness = (businessId: number | null) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window === 'undefined') {
     if (businessId) {
       localStorage.setItem('dashboard-selected-business', businessId.toString());
     } else {
@@ -87,11 +87,11 @@ function DashboardContent() {
     if (session?.user) {
       fetchOrganizations();
       fetchWebsiteLimitInfo();
-      
+
       // Check for URL parameters for website analysis
       const analyzeUrl = searchParams.get('analyzeUrl');
       const autoStart = searchParams.get('autoStart');
-      
+
       if (analyzeUrl && autoStart === 'true') {
         setPendingAnalysisUrl(analyzeUrl);
         setActiveTab('link-website');
@@ -126,17 +126,16 @@ function DashboardContent() {
       if (businesses.length > 0 && !selectedBusiness) {
         const storedBusinessId = getStoredSelectedBusiness();
         const businessExists = businesses.find(b => b.id === storedBusinessId);
-        
+
         if (businessExists) {
           setSelectedBusiness(storedBusinessId);
         } else {
           setSelectedBusiness(businesses[0].id);
         }
-      }// NEW: If no businesses exist, default to link-website tab
-else if (businesses.length === 0) {
-  setActiveTab('link-website');
-  setStoredActiveTab('link-website');
-}
+      } else if (businesses.length === 0) {
+        setActiveTab('link-website');
+        setStoredActiveTab('link-website');
+      }
 
       setIsLoading(false);
     }
@@ -154,7 +153,7 @@ else if (businesses.length === 0) {
       const response = await fetch('/api/dashboard/organizations', {
         credentials: 'include'
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setOrganizations(data.organizations || []);
@@ -171,7 +170,7 @@ else if (businesses.length === 0) {
       const response = await fetch(`/api/dashboard/businesses?organizationId=${orgId}`, {
         credentials: 'include'
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setBusinesses(data.businesses || []);
@@ -188,7 +187,7 @@ else if (businesses.length === 0) {
       const response = await fetch('/api/dashboard/website-limit-info', {
         credentials: 'include'
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setWebsiteLimitInfo(data);
@@ -197,7 +196,6 @@ else if (businesses.length === 0) {
       console.error('Error fetching website limit info:', error);
     }
   };
-
 
   const handleBusinessChange = (businessId: number) => {
     setSelectedBusiness(businessId);
@@ -237,7 +235,7 @@ else if (businesses.length === 0) {
               </div>
             </div>
           </div>
-          
+
           {/* Loading Main Content */}
           <div className="flex-1 min-w-0">
             <div className="h-full p-6">
@@ -299,25 +297,23 @@ else if (businesses.length === 0) {
     );
   }
 
-  const selectedBusinessData = businesses.find(b => b.id === selectedBusiness);
-
   return (
     <div className="min-h-screen bg-gray-900">
       <Navbar />
-      
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" 
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       <div className="flex">
         {/* Sidebar */}
-        <div className={`${
+        <div className={`$ {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+        } fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}> 
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
             <h2 className="text-xl font-semibold text-white">Dashboard</h2>
             <button
@@ -327,7 +323,7 @@ else if (businesses.length === 0) {
               ×
             </button>
           </div>
-          
+
           <div className="p-4">
             {/* Organization Selector */}
             {organizations.length > 0 && (
@@ -336,9 +332,9 @@ else if (businesses.length === 0) {
                 <select
                   value={selectedOrganization || ''}
                   onChange={(e) => setSelectedOrganization(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm font-medium shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-500 hover:bg-gray-750 appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm font-medium shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 f[...]"
                   style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-[...]"
                     backgroundPosition: 'right 0.75rem center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: '1.25rem 1.25rem',
@@ -359,9 +355,9 @@ else if (businesses.length === 0) {
                 <select
                   value={selectedBusiness || ''}
                   onChange={(e) => handleBusinessChange(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm font-medium shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-500 hover:bg-gray-750 appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm font-medium shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 f[...]"
                   style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-[...]"
                     backgroundPosition: 'right 0.75rem center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: '1.25rem 1.25rem',
@@ -374,11 +370,7 @@ else if (businesses.length === 0) {
                     </option>
                   ))}
                 </select>
-              ) : (
-                <div className="text-gray-400 text-sm p-2 border border-gray-600 rounded-lg">
-                  No websites linked yet
-                </div>
-              )}
+              ) : null}
             </div>
 
             {/* Tab Navigation */}
@@ -468,55 +460,38 @@ else if (businesses.length === 0) {
               ≡
             </button>
             <h1 className="text-lg font-semibold text-white">
-              {selectedBusinessData?.websiteName || 'Dashboard'}
+              {selectedBusiness?.websiteName || 'Dashboard'}
             </h1>
             <div></div>
           </div>
 
           {/* Content Area */}
           <div className="h-full">
-            {!selectedBusiness && businesses.length === 0 ? (
-              <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-white mb-2">No Websites Found</h3>
-                  <p className="text-gray-400 mb-4">
-                    Link your first website to start tracking your AEO performance.
-                  </p>
-                  <button
-                    onClick={() => handleTabChange('link-website')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Link Website
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full p-3 sm:p-6 overflow-x-hidden">
-                {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} featureFlags={featureFlags} />}
-                {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
-                {activeTab === 'business' && selectedBusiness && (
-                  <BusinessInfoTab 
-                    businessId={selectedBusiness} 
-                    onBusinessUnlinked={handleBusinessUpdate}
-                  />
-                )}
-                {activeTab === 'competitors' && selectedBusiness && <CompetitorsTab businessId={selectedBusiness} />}
-                {activeTab === 'automation' && selectedBusiness && <AutomationSetupTab businessId={selectedBusiness} />}
-                {activeTab === 'execute' && selectedBusiness && <ExecuteTab businessId={selectedBusiness} />}
-                {activeTab === 'link-website' && (
-                  <LinkWebsiteTab 
-                    onWebsiteLinked={handleBusinessUpdate}
-                    websiteLimitInfo={websiteLimitInfo}
-                    pendingAnalysisUrl={pendingAnalysisUrl}
-                    onClearPendingUrl={() => setPendingAnalysisUrl(null)}
-                  />
-                )}
-              </div>
-            )}
+            <div className="h-full p-3 sm:p-6 overflow-x-hidden">
+              {activeTab === 'trends' && selectedBusiness && <TrendsTab businessId={selectedBusiness} featureFlags={featureFlags} />}
+              {activeTab === 'insights' && selectedBusiness && <AIInsightsTab businessId={selectedBusiness} />}
+              {activeTab === 'business' && selectedBusiness && (
+                <BusinessInfoTab
+                  businessId={selectedBusiness}
+                  onBusinessUnlinked={handleBusinessUpdate}
+                />
+              )}
+              {activeTab === 'competitors' && selectedBusiness && <CompetitorsTab businessId={selectedBusiness} />}
+              {activeTab === 'automation' && selectedBusiness && <AutomationSetupTab businessId={selectedBusiness} />}
+              {activeTab === 'execute' && selectedBusiness && <ExecuteTab businessId={selectedBusiness} />}
+              {activeTab === 'link-website' && (
+                <LinkWebsiteTab
+                  onWebsiteLinked={handleBusinessUpdate}
+                  websiteLimitInfo={websiteLimitInfo}
+                  pendingAnalysisUrl={pendingAnalysisUrl}
+                  onClearPendingUrl={() => setPendingAnalysisUrl(null)}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
@@ -549,7 +524,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          
+
           {/* Loading Main Content */}
           <div className="flex-1 min-w-0">
             <div className="h-full p-6">
