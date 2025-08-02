@@ -23,7 +23,7 @@ export class PromptFormationService {
   }
 
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
-    const { businessName, industry, location, marketDescription, keywords } = context;
+    const { industry, location, marketDescription, keywords } = context;
 
     try {
       // Reserve one slot for direct business query
@@ -145,7 +145,7 @@ export class PromptFormationService {
   }
 
   private generateDirectBusinessQuery(context: BusinessContext): string {
-    const { businessName, industry, location } = context;
+    const { businessName, location } = context;
     
     // Create variations of direct business queries
     const queryTemplates = [

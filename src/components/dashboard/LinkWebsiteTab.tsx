@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ProgressLoader from '../ui/ProgressLoader';
 
 interface LinkWebsiteTabProps {
@@ -68,7 +68,12 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   const [progressMessage, setProgressMessage] = useState('');
   const [autoStartTriggered, setAutoStartTriggered] = useState(false);
   const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
-  const [useAsyncMode, setUseAsyncMode] = useState(true); // Use async mode by default
+  const [useAsyncMode] = useState(true); // Use async mode by default
+  const [usageInfo, setUsageInfo] = useState<{
+    dailyUsage: { canUse: boolean; current: number; limit: number; isUnlimited: boolean };
+    rateLimit: { canUse: boolean; remaining: number; resetTime: string; waitMinutes: number } | null;
+    tier: string;
+  } | null>(null);
 
   // Auto-populate URL and start analysis if provided from hero section
   useEffect(() => {
@@ -84,20 +89,43 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
         handleAnalysisStart(pendingAnalysisUrl);
       }, 100);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAnalysisUrl, websiteUrl, autoStartTriggered, onClearPendingUrl]);
 
   // Cleanup interval on unmount
   useEffect(() => {
     return () => {
-      const interval = (window as any).__analysisInterval;
+      const windowWithInterval = window as Window & { __analysisInterval?: NodeJS.Timeout };
+      const interval = windowWithInterval.__analysisInterval;
       if (interval) {
         clearInterval(interval);
-        delete (window as any).__analysisInterval;
+        delete windowWithInterval.__analysisInterval;
       }
     };
   }, []);
 
-  const handleAnalysisStart = async (urlToAnalyze: string) => {
+  // Fetch usage info on component mount
+  useEffect(() => {
+    fetchUsageInfo();
+  }, []);
+
+  const fetchUsageInfo = async () => {
+    try {
+      const response = await fetch('/api/usage-check?action=analyzeWebsite');
+      if (response.ok) {
+        const data = await response.json();
+        setUsageInfo({
+          dailyUsage: data.dailyUsage,
+          rateLimit: data.rateLimit,
+          tier: data.tier
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch usage info:', error);
+    }
+  };
+
+  const handleAnalysisStart = useCallback(async (urlToAnalyze: string) => {
     const trimmedUrl = urlToAnalyze.trim();
     if (!trimmedUrl) {
       setError('Please enter a website URL');
@@ -187,7 +215,6 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
             
             if (jobStatus.status === 'completed') {
               clearInterval(pollInterval);
-              clearInterval(progressInterval);
               
               // Transform to result format
               setResult({
@@ -198,7 +225,6 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
               setIsAnalyzing(false);
             } else if (jobStatus.status === 'failed') {
               clearInterval(pollInterval);
-              clearInterval(progressInterval);
               throw new Error(jobStatus.error || 'Analysis failed');
             }
           } catch (error) {
@@ -207,7 +233,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
         }, 1000); // Poll every second
         
         // Store interval ID for cleanup
-        (window as any).__analysisInterval = pollInterval;
+        (window as Window & { __analysisInterval?: NodeJS.Timeout }).__analysisInterval = pollInterval;
         
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to start analysis');
@@ -254,7 +280,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
         setProgressMessage('');
       }
     }
-  };
+  }, [useAsyncMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

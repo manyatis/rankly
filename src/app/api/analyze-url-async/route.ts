@@ -234,7 +234,7 @@ async function processAnalysisJob(jobId: string) {
       data: {
         progressPercent: 30,
         progressMessage: 'AI analyzing business information...',
-        extractedInfo: businessInfo as any
+        extractedInfo: businessInfo as object
       }
     });
 
@@ -348,7 +348,7 @@ async function processAnalysisJob(jobId: string) {
         status: 'completed',
         progressPercent: 100,
         progressMessage: 'Analysis complete!',
-        analysisResult: analysisResult as any,
+        analysisResult: analysisResult as object,
         completedAt: new Date()
       }
     });
