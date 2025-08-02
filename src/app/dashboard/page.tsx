@@ -475,7 +475,7 @@ else if (businesses.length === 0) {
 
           {/* Content Area */}
           <div className="h-full">
-            {!selectedBusiness && businesses.length === 0 ? (
+            {false && !selectedBusiness && businesses.length === 0 ? (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-white mb-2">No Websites Found</h3>
