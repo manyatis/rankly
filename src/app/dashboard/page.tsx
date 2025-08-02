@@ -132,7 +132,12 @@ function DashboardContent() {
         } else {
           setSelectedBusiness(businesses[0].id);
         }
-      }
+      }// NEW: If no businesses exist, default to link-website tab
+else if (businesses.length === 0) {
+  setActiveTab('link-website');
+  setStoredActiveTab('link-website');
+}
+
       setIsLoading(false);
     }
   }, [organizationsLoaded, businessesLoaded, businesses, selectedBusiness]);
