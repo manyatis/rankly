@@ -51,12 +51,24 @@ interface TrendsTabProps {
   featureFlags?: Record<string, boolean>;
 }
 
+interface PaginationData {
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  totalCount: number;
+}
+
 export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabProps) {
   const [rankingData, setRankingData] = useState<RankingData[]>([]);
   const [queryResults, setQueryResults] = useState<QueryResultData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<7 | 14 | 30>(30);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationData | null>(null);
+  const [loadingQueries, setLoadingQueries] = useState(false);
 
   const fetchRankingData = useCallback(async () => {
     setLoading(true);
@@ -74,20 +86,6 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
 
       const rankingData = await rankingResponse.json();
       setRankingData(rankingData.rankings);
-
-      // Fetch query results
-      const queryResponse = await fetch(
-        `/api/dashboard/query-results?businessId=${businessId}&days=${timeRange}`
-      );
-      
-      if (queryResponse.ok) {
-        const queryData = await queryResponse.json();
-        setQueryResults(queryData.queryResults || []);
-      } else {
-        // If query results fail, continue without them
-        console.warn('Failed to fetch query results');
-        setQueryResults([]);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch ranking data');
     } finally {
@@ -95,12 +93,48 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
     }
   }, [businessId, timeRange]);
 
+  const fetchQueryResults = useCallback(async (page: number = 1) => {
+    setLoadingQueries(true);
+
+    try {
+      // Fetch query results from the latest run only, with pagination
+      const queryResponse = await fetch(
+        `/api/dashboard/query-results?businessId=${businessId}&days=${timeRange}&page=${page}&limit=10&latestRunOnly=true`
+      );
+      
+      if (queryResponse.ok) {
+        const queryData = await queryResponse.json();
+        setQueryResults(queryData.queryResults || []);
+        setPagination(queryData.pagination);
+      } else {
+        // If query results fail, continue without them
+        console.warn('Failed to fetch query results');
+        setQueryResults([]);
+        setPagination(null);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch query results:', err);
+      setQueryResults([]);
+      setPagination(null);
+    } finally {
+      setLoadingQueries(false);
+    }
+  }, [businessId, timeRange]);
+
 
   useEffect(() => {
     if (businessId) {
       fetchRankingData();
+      fetchQueryResults(1);
+      setCurrentPage(1);
     }
-  }, [businessId, timeRange, fetchRankingData]);
+  }, [businessId, timeRange, fetchRankingData, fetchQueryResults]);
+
+  // Handle page changes
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    fetchQueryResults(newPage);
+  };
 
   // Generate chart data dynamically including competitors
   const generateChartData = () => {
@@ -507,7 +541,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
             <div className="min-w-0 flex-1">
               <h3 className="text-lg font-medium text-white">Query Analysis</h3>
               <p className="text-gray-400 text-sm mt-1 break-words">
-                Detailed results from {queryResults.length} queries across AI platforms
+                Latest analysis run {pagination ? `(${pagination.totalCount} queries total)` : `(${queryResults.length} queries)`}
               </p>
             </div>
             <div className="text-left sm:text-right flex-shrink-0">
@@ -548,8 +582,17 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
 
           {/* Individual Query Results */}
           <div className="space-y-3">
-            <h4 className="text-md font-medium text-white mb-3">Recent Queries</h4>
-            {queryResults.slice(0, 10).map((query) => (
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="text-md font-medium text-white">
+                {loadingQueries ? 'Loading Queries...' : 'Latest Run Queries'}
+              </h4>
+              {pagination && (
+                <div className="text-sm text-gray-400">
+                  Page {pagination.page} of {pagination.totalPages}
+                </div>
+              )}
+            </div>
+            {queryResults.map((query) => (
               <div key={query.id} className="border border-gray-600 rounded-lg p-3 sm:p-4 overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
                   <div className="flex-1 min-w-0 sm:pr-4">
@@ -606,12 +649,60 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
               </div>
             ))}
             
-            {queryResults.length > 10 && (
-              <div className="text-center py-4">
-                <p className="text-gray-400 text-sm">
-                  Showing 10 of {queryResults.length} queries. 
-                  <span className="text-blue-400"> View more in detailed analysis.</span>
-                </p>
+            {/* Pagination Controls */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-4 py-4">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!pagination.hasPrevPage || loadingQueries}
+                  className="px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  Previous
+                </button>
+                
+                <div className="flex space-x-2">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= pagination.totalPages - 2) {
+                      pageNum = pagination.totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        disabled={loadingQueries}
+                        className={`px-3 py-2 rounded-md text-sm ${
+                          currentPage === pageNum
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!pagination.hasNextPage || loadingQueries}
+                  className="px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+            
+            {pagination && (
+              <div className="text-center text-sm text-gray-400 py-2">
+                Showing {queryResults.length} of {pagination.totalCount} queries from latest analysis
               </div>
             )}
           </div>

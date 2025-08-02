@@ -70,10 +70,12 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
   const [useAsyncMode] = useState(true); // Use async mode by default
   const [usageInfo, setUsageInfo] = useState<{
-    dailyUsage: { canUse: boolean; current: number; limit: number; isUnlimited: boolean };
-    rateLimit: { canUse: boolean; remaining: number; resetTime: string; waitMinutes: number } | null;
+    usageCount: number;
+    maxUsage: number | string;
+    canUse: boolean;
     tier: string;
   } | null>(null);
+  const [loadingUsage, setLoadingUsage] = useState(true);
 
   // Auto-populate URL and start analysis if provided from hero section
   useEffect(() => {
@@ -111,17 +113,20 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
 
   const fetchUsageInfo = async () => {
     try {
-      const response = await fetch('/api/usage-check?action=analyzeWebsite');
+      const response = await fetch('/api/usage-check');
       if (response.ok) {
         const data = await response.json();
         setUsageInfo({
-          dailyUsage: data.dailyUsage,
-          rateLimit: data.rateLimit,
+          usageCount: data.usageCount,
+          maxUsage: data.maxUsage,
+          canUse: data.canUse,
           tier: data.tier
         });
       }
     } catch (error) {
       console.error('Failed to fetch usage info:', error);
+    } finally {
+      setLoadingUsage(false);
     }
   };
 
@@ -223,6 +228,9 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
               });
               setStep('results');
               setIsAnalyzing(false);
+              
+              // Refresh usage info after successful analysis
+              await fetchUsageInfo();
             } else if (jobStatus.status === 'failed') {
               clearInterval(pollInterval);
               throw new Error(jobStatus.error || 'Analysis failed');
@@ -266,10 +274,13 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
         setProgressMessage('Analysis complete!');
         
         // Show completion for a moment before showing results
-        setTimeout(() => {
+        setTimeout(async () => {
           setResult(data);
           setStep('results');
           setIsAnalyzing(false);
+          
+          // Refresh usage info after successful analysis
+          await fetchUsageInfo();
         }, 500);
         
       } catch (err) {
@@ -419,8 +430,8 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
 
                 <button
                   type="submit"
-                  disabled={isAnalyzing || !websiteUrl.trim()}
-                  className="w-full bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center text-lg font-medium"
+                  disabled={isAnalyzing || !websiteUrl.trim() || !usageInfo?.canUse}
+                  className="w-full bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium"
                 >
                   {isAnalyzing ? (
                     <>
@@ -436,6 +447,33 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                     </>
                   )}
                 </button>
+
+                {/* Usage Counter */}
+                {usageInfo && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-700 border border-gray-600">
+                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <span className={`${!usageInfo.canUse ? 'text-red-400' : 'text-gray-300'}`}>
+                        {usageInfo.usageCount}/{usageInfo.maxUsage === -1 ? 'unlimited' : usageInfo.maxUsage} 
+                        <span className="text-gray-400 ml-1">analyses used</span>
+                      </span>
+                    </div>
+                    {!usageInfo.canUse && (
+                      <p className="text-red-400 text-sm mt-2">Daily analysis limit reached</p>
+                    )}
+                  </div>
+                )}
+                
+                {loadingUsage && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-700 border border-gray-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400 mr-2"></div>
+                      <span className="text-gray-300">Loading usage...</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Progress Bar */}
                 <ProgressLoader
@@ -464,80 +502,6 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
             </div>
           )}
 
-          {/* Usage Limits Display */}
-          {usageInfo && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-white mb-4">Usage Limits</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Daily Usage */}
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Daily Analysis</h4>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      usageInfo.dailyUsage.canUse ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
-                    }`}>
-                      {usageInfo.tier.charAt(0).toUpperCase() + usageInfo.tier.slice(1)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-medium">
-                      {usageInfo.dailyUsage.isUnlimited ? 'Unlimited' : 
-                        `${usageInfo.dailyUsage.current}/${usageInfo.dailyUsage.limit}`
-                      }
-                    </span>
-                    <span className={`text-sm ${
-                      usageInfo.dailyUsage.canUse ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {usageInfo.dailyUsage.canUse ? '✓ Available' : '✗ Limit Reached'}
-                    </span>
-                  </div>
-                  {!usageInfo.dailyUsage.isUnlimited && (
-                    <div className="mt-2 w-full bg-gray-600 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(usageInfo.dailyUsage.current / usageInfo.dailyUsage.limit) * 100}%` }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Rate Limit */}
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Rate Limit (5 min)</h4>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      usageInfo.rateLimit?.canUse !== false ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'
-                    }`}>
-                      {usageInfo.rateLimit?.canUse !== false ? 'Available' : 'Cooldown'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-medium">
-                      {usageInfo.rateLimit ? 
-                        `${usageInfo.rateLimit.remaining} remaining` : 
-                        'Available'
-                      }
-                    </span>
-                    {usageInfo.rateLimit && !usageInfo.rateLimit.canUse && (
-                      <span className="text-sm text-orange-400">
-                        Wait {usageInfo.rateLimit.waitMinutes}m
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Usage Help */}
-              <div className="mt-4 text-sm text-gray-400">
-                <p>
-                  <strong>Daily Limit:</strong> Total analyses per day. Resets at midnight UTC.
-                </p>
-                <p className="mt-1">
-                  <strong>Rate Limit:</strong> Prevents rapid successive requests. Resets every 5 minutes.
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* How it Works */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">

@@ -49,6 +49,7 @@ npx prisma studio         # Database browser
 - **WebsiteAnalysisService** - Website content extraction and business information parsing
 - **WordPositionAnalysisService** - Ranking position analysis and competitor identification
 - **RecurringScansService** - Manages automated recurring analysis with subscription tier validation
+- **Background Job System** - Asynchronous processing for website analysis with job tracking and status polling
 
 ### Database Design (Prisma)
 - **Organization model**: Multi-tenant structure for grouping users and businesses
@@ -56,6 +57,7 @@ npx prisma studio         # Database browser
 - **User model**: Authentication, subscription management, rate limiting, linked to Organization
 - **AeoScore**: Historical score tracking linked to Business
 - **InputHistory/RankingHistory/QueryResults**: Complete audit trail linked by `runUuid` and Business
+- **AnalysisJob**: Background job tracking for asynchronous website analysis with progress monitoring
 - **Rate limiting**: Separate tracking for website analysis vs prompt generation
 
 ## Key Implementation Details
@@ -95,10 +97,11 @@ npx prisma studio         # Database browser
 
 ### API Routes (`src/app/api/`)
 - `aeo-score/` - Core AEO analysis endpoint
+- `analyze-url-async/` - Background website analysis with job tracking (POST: create job, GET: check status)
 - `auth/` - NextAuth.js authentication routes
 - `subscriptions/` - Stripe subscription management (create, cancel, update, webhooks)
 - `cron/recurring-scans/` - Automated recurring analysis endpoint
-- `usage-check/` - Rate limiting validation
+- `usage-check/` - Rate limiting validation with usage limit display
 - `dashboard/` - Dashboard-specific endpoints (organizations, businesses, ranking history, recurring scans)
 
 ### Components (`src/components/`)
@@ -221,8 +224,51 @@ Required environment variables:
 - STRIPE_WEBHOOK_SECRET for webhook signature verification
 - CRON_SECRET for secure cron job authentication
 
+#### Latest Enhancements (January 2025)
+
+##### Mobile & UX Improvements (Complete)
+- **Mobile Dashboard** - Fixed sidebar menu to properly close after tab selection on mobile devices
+- **Dashboard Code Cleanup** - Removed hardcoded conditions preventing proper "No Websites Found" state display
+- **Responsive Design** - Enhanced mobile experience with proper touch interactions and menu behavior
+
+##### Background Processing System (Complete)
+- **Asynchronous Website Analysis** - New `AnalysisJob` model for tracking long-running analysis operations
+- **Background API Endpoint** - `/api/analyze-url-async` for non-blocking website linking and analysis
+- **Job Status Polling** - Real-time progress updates with automatic status checking every second
+- **Session Persistence** - Users can navigate away during analysis; jobs continue running in background
+- **Robust Error Handling** - Comprehensive error tracking and recovery for background operations
+
+##### Enhanced Usage Limits Display (Complete)
+- **Real-time Usage Monitoring** - Live display of daily analysis limits and 5-minute rate limits
+- **Visual Progress Indicators** - Progress bars and status badges showing current usage vs. limits
+- **Tier-based Information** - Clear indication of subscription tier capabilities and restrictions
+- **Rate Limit Explanations** - Educational tooltips explaining daily limits vs. rate limiting windows
+
+##### Advanced Prompt Generation (Complete)
+- **Increased Prompt Count** - Expanded from 5 to 10 analysis prompts per business for comprehensive coverage
+- **Direct Business Queries** - Added targeted queries that specifically mention the business name
+- **Smart Scoring System** - 5-point bonus for direct business queries while maintaining balanced scoring
+- **Industry-Focused Prompts** - Enhanced prompt quality with direct "top companies" and "industry leaders" targeting
+- **Improved Query Templates** - More specific language designed to surface industry leaders and top performers
+
+##### Prompt Quality & Targeting Improvements (Complete)
+- **Strategic Query Design** - Queries now focus on "Who leads the X market?" and "Which X companies are most trusted?"
+- **Company Discovery Optimization** - Prompts specifically designed to surface top companies and industry leaders
+- **Enhanced Fallback Queries** - Improved backup prompt templates with company-focused language
+- **Location-Aware Queries** - Smart geographic targeting when location data is available
+- **Authority-Based Questions** - Queries targeting expertise, reputation, and market leadership
+
+#### Current Production Status
+- **Build successful** with all TypeScript issues resolved
+- **Background processing** fully operational with job persistence
+- **Enhanced prompt system** generating 10 targeted queries with direct business targeting
+- **Mobile-optimized** dashboard with improved UX and navigation
+- **Comprehensive usage tracking** with real-time limit displays
+
 #### Next Steps for Production
 - Configure production Stripe API credentials
 - Set up Stripe webhook endpoints for real-time subscription events
 - Test complete payment flow in Stripe test mode
 - Configure Stripe Customer Portal for subscription self-service
+- Monitor background job performance and optimize queue processing
+- A/B test new prompt strategies for optimal business discovery

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ProgressLoader from '../ui/ProgressLoader';
 
 interface ExecuteTabSimpleProps {
@@ -30,6 +30,15 @@ interface UsageInfo {
   tier: string;
 }
 
+interface AnalysisJob {
+  jobId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progressPercent: number;
+  progressMessage: string;
+  error?: string;
+  analysisResult?: unknown;
+}
+
 export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -38,6 +47,8 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
   const [loadingUsage, setLoadingUsage] = useState(true);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
+  const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch usage information on component mount and when analysis completes
   const fetchUsageInfo = async () => {
@@ -61,7 +72,117 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
 
   useEffect(() => {
     fetchUsageInfo();
+    checkForExistingJob();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId]);
+
+  // Check for existing running jobs when component mounts or businessId changes
+  const checkForExistingJob = async () => {
+    if (!businessId) return;
+
+    try {
+      // Look for existing pending or processing jobs for this business
+      const response = await fetch(`/api/dashboard/execute-analysis-async?businessId=${businessId}`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // If we find a running job, resume monitoring it
+        if (data.jobs && data.jobs.length > 0) {
+          const runningJob = data.jobs.find((job: AnalysisJob) => 
+            job.status === 'pending' || job.status === 'processing'
+          );
+          
+          if (runningJob) {
+            console.log('📊 Found existing job, resuming monitoring:', runningJob.jobId);
+            setAnalysisJob(runningJob);
+            setIsAnalyzing(true);
+            setProgress(runningJob.progressPercent);
+            setProgressMessage(runningJob.progressMessage || 'Resuming analysis...');
+            
+            // Start polling for this existing job
+            startJobPolling(runningJob.jobId);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for existing jobs:', error);
+    }
+  };
+
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
   }, []);
+
+  // Start polling for job status
+  const startJobPolling = (jobId: string) => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+    
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const statusResponse = await fetch(`/api/dashboard/execute-analysis-async?jobId=${jobId}`);
+        const jobStatus = await statusResponse.json();
+        
+        setAnalysisJob(jobStatus);
+        setProgress(jobStatus.progressPercent);
+        setProgressMessage(jobStatus.progressMessage);
+        
+        if (jobStatus.status === 'completed') {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          
+          // Get business data for result transformation
+          const businessResponse = await fetch(`/api/dashboard/business/${businessId}`);
+          const businessData = await businessResponse.json();
+          const business = businessData.business;
+          const recentInput = businessData.recentInput || {};
+          
+          // Transform to result format
+          setResult({
+            success: true,
+            message: `Analysis completed for ${business.websiteName}`,
+            business: {
+              id: business.id,
+              name: business.websiteName,
+              url: business.websiteUrl,
+              industry: business.industry,
+              location: business.location,
+              description: business.description
+            },
+            usedStoredData: {
+              keywords: recentInput.keywords ? 'Used stored keywords' : 'Generated default keywords',
+              prompts: recentInput.prompts ? 'Used stored prompts' : 'Generated new prompts'
+            },
+            analysisResult: jobStatus.analysisResult
+          });
+          setIsAnalyzing(false);
+          
+          // Refresh usage info after successful analysis
+          await fetchUsageInfo();
+        } else if (jobStatus.status === 'failed') {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          setError(jobStatus.error || 'Analysis failed');
+          setIsAnalyzing(false);
+          setProgress(0);
+          setProgressMessage('');
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error);
+      }
+    }, 1000); // Poll every second
+  };
 
   const handleRunAnalysis = async () => {
     if (!businessId) {
@@ -75,76 +196,55 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
     setProgress(0);
     setProgressMessage('Initializing analysis...');
 
-    // Progress tracking with realistic timing for manual analysis
-    const progressSteps = [
-      { progress: 10, message: 'Loading stored business data...', duration: 1000 },
-      { progress: 25, message: 'Retrieving previous prompts...', duration: 1500 },
-      { progress: 40, message: 'Generating AEO analysis queries...', duration: 2000 },
-      { progress: 60, message: 'Running queries across AI platforms...', duration: 8000 },
-      { progress: 80, message: 'Processing rankings and competitors...', duration: 2000 },
-      { progress: 95, message: 'Saving results to your dashboard...', duration: 1000 },
-    ];
-
-    // const currentStepIndex = 0; // Unused - kept for potential future use
-    const startTime = Date.now();
-
-    // Update progress based on realistic timing
-    const updateProgress = () => {
-      const elapsed = Date.now() - startTime;
-      
-      // Find the appropriate step based on elapsed time
-      let cumulativeTime = 0;
-      for (let i = 0; i < progressSteps.length; i++) {
-        cumulativeTime += progressSteps[i].duration;
-        if (elapsed < cumulativeTime) {
-          const step = progressSteps[i];
-          const stepStartTime = cumulativeTime - step.duration;
-          const stepProgress = Math.min((elapsed - stepStartTime) / step.duration, 1);
-          
-          const prevProgress = i > 0 ? progressSteps[i - 1].progress : 0;
-          const currentProgress = prevProgress + (step.progress - prevProgress) * stepProgress;
-          
-          setProgress(Math.min(currentProgress, step.progress));
-          if (stepProgress < 1) {
-            setProgressMessage(step.message);
-          }
-          break;
-        }
-      }
-    };
-
-    const progressInterval = setInterval(updateProgress, 100);
 
     try {
-      const response = await fetch('/api/dashboard/execute-analysis', {
+      // First, fetch the business data
+      const businessResponse = await fetch(`/api/dashboard/business/${businessId}`);
+      if (!businessResponse.ok) {
+        throw new Error('Failed to fetch business data');
+      }
+      const businessData = await businessResponse.json();
+      const business = businessData.business;
+      
+      // Get the most recent input data
+      const recentInput = businessData.recentInput || {};
+      
+      // Create analysis job
+      const response = await fetch('/api/dashboard/execute-analysis-async', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ businessId }),
+        body: JSON.stringify({
+          businessId: business.id,
+          businessName: business.websiteName,
+          industry: business.industry || 'Technology',
+          location: business.useLocationInAnalysis && business.location ? business.location : '',
+          marketDescription: business.description || `Business website at ${business.websiteUrl}`,
+          keywords: recentInput.keywords || [business.websiteName, 'business', 'services'],
+          websiteUrl: business.websiteUrl || undefined,
+          providers: [
+            { name: 'OpenAI GPT-4', model: 'gpt-4', color: '#10B981', type: 'openai' },
+            { name: 'Claude 3.5 Sonnet', model: 'claude-3-5-sonnet-20241022', color: '#8B5CF6', type: 'anthropic' },
+            { name: 'Perplexity Pro', model: 'llama-3.1-sonar-large-128k-online', color: '#F59E0B', type: 'perplexity' }
+          ],
+          customPrompts: recentInput.prompts || undefined
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Analysis failed');
+        throw new Error(data.error || 'Failed to start analysis');
       }
 
-      // Complete the progress
-      clearInterval(progressInterval);
-      setProgress(100);
-      setProgressMessage('Analysis complete!');
+      // Store the job info
+      setAnalysisJob(data);
       
-      // Show completion for a moment before showing results
-      setTimeout(() => {
-        setResult(data);
-        setIsAnalyzing(false);
-      }, 500);
+      // Start polling for job status
+      startJobPolling(data.jobId);
       
-      // Refresh usage info after successful analysis
-      await fetchUsageInfo();
     } catch (err) {
-      clearInterval(progressInterval);
       setError(err instanceof Error ? err.message : 'Analysis failed');
       setIsAnalyzing(false);
       setProgress(0);
@@ -248,7 +348,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
             isLoading={isAnalyzing}
             progress={progress}
             message={progressMessage}
-            subtitle="This usually takes 15-25 seconds - Please keep this tab open"
+            subtitle="Analysis running in background - You can navigate away"
             className="mt-6"
           />
         </div>

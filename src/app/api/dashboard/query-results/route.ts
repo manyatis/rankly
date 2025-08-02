@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const businessIdParam = searchParams.get('businessId');
     const daysParam = searchParams.get('days') || '30';
+    const pageParam = searchParams.get('page') || '1';
+    const limitParam = searchParams.get('limit') || '10';
+    const latestRunOnlyParam = searchParams.get('latestRunOnly') || 'false';
     
     if (!businessIdParam) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
@@ -21,6 +24,9 @@ export async function GET(request: NextRequest) {
 
     const businessId = parseInt(businessIdParam);
     const days = parseInt(daysParam);
+    const page = parseInt(pageParam);
+    const limit = parseInt(limitParam);
+    const latestRunOnly = latestRunOnlyParam === 'true';
 
     // Get user from database
     const user = await prisma.user.findUnique({
@@ -52,32 +58,117 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Fetch query results for the business
-    const queryResults = await prisma.queryResult.findMany({
-      where: {
-        businessId: businessId,
-        createdAt: {
-          gte: startDate,
-          lte: endDate
+    let queryResults;
+    let totalCount = 0;
+
+    if (latestRunOnly) {
+      // First, find the most recent runUuid for this business
+      const latestRun = await prisma.queryResult.findFirst({
+        where: {
+          businessId: businessId,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        select: {
+          runUuid: true
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      select: {
-        id: true,
-        query: true,
-        aiProvider: true,
-        response: true,
-        mentioned: true,
-        rankPosition: true,
-        relevanceScore: true,
-        wordCount: true,
-        businessDensity: true,
-        createdAt: true,
-        runUuid: true
+      });
+
+      if (!latestRun?.runUuid) {
+        return NextResponse.json({ 
+          queryResults: [],
+          groupedResults: {},
+          totalQueries: 0,
+          mentionedQueries: 0,
+          averagePosition: null,
+          pagination: {
+            page,
+            limit,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false
+          }
+        });
       }
-    });
+
+      // Get total count for the latest run
+      totalCount = await prisma.queryResult.count({
+        where: {
+          businessId: businessId,
+          runUuid: latestRun.runUuid
+        }
+      });
+
+      // Fetch paginated results from the latest run only
+      queryResults = await prisma.queryResult.findMany({
+        where: {
+          businessId: businessId,
+          runUuid: latestRun.runUuid
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          query: true,
+          aiProvider: true,
+          response: true,
+          mentioned: true,
+          rankPosition: true,
+          relevanceScore: true,
+          wordCount: true,
+          businessDensity: true,
+          createdAt: true,
+          runUuid: true
+        }
+      });
+    } else {
+      // Original behavior - all results within date range
+      totalCount = await prisma.queryResult.count({
+        where: {
+          businessId: businessId,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      });
+
+      queryResults = await prisma.queryResult.findMany({
+        where: {
+          businessId: businessId,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          query: true,
+          aiProvider: true,
+          response: true,
+          mentioned: true,
+          rankPosition: true,
+          relevanceScore: true,
+          wordCount: true,
+          businessDensity: true,
+          createdAt: true,
+          runUuid: true
+        }
+      });
+    }
 
     // Group by runUuid to organize by analysis runs
     const groupedResults = queryResults.reduce((acc, result) => {
@@ -89,14 +180,27 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {} as Record<string, typeof queryResults>);
 
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
     return NextResponse.json({ 
       queryResults,
       groupedResults,
-      totalQueries: queryResults.length,
+      totalQueries: totalCount,
       mentionedQueries: queryResults.filter(q => q.mentioned).length,
       averagePosition: queryResults
         .filter(q => q.mentioned && q.rankPosition)
-        .reduce((sum, q, _, arr) => sum + (q.rankPosition! / arr.length), 0) || null
+        .reduce((sum, q, _, arr) => sum + (q.rankPosition! / arr.length), 0) || null,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+        totalCount
+      }
     });
 
   } catch (error) {

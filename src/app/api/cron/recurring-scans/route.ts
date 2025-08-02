@@ -111,8 +111,56 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
 
         console.log(`🚀 Running analysis for ${business.websiteName}...`);
 
-        // Run the analysis (this will bypass user auth since it's a cron job)
-        const analysisResult = await AEOAnalysisService.runAnalysisForCron(analysisRequest, primaryUser.id);
+        // Create an analysis job for tracking
+        const job = await prisma.analysisJob.create({
+          data: {
+            websiteUrl: `recurring-scan-${business.id}`,
+            userId: primaryUser.id,
+            organizationId: business.organizations[0]?.organizationId || 0,
+            businessId: business.id,
+            status: 'processing',
+            progressPercent: 50,
+            progressMessage: 'Running recurring scan analysis...',
+            extractedInfo: {
+              businessName: business.websiteName,
+              industry: business.industry,
+              location: business.location,
+              description: business.description,
+              keywords: recentInput?.keywords || [],
+              isRecurringScan: true,
+              scanFrequency: business.scanFrequency
+            }
+          }
+        });
+
+        let analysisResult;
+        try {
+          // Run the analysis (this will bypass user auth since it's a cron job)
+          analysisResult = await AEOAnalysisService.runAnalysisForCron(analysisRequest, primaryUser.id);
+
+          // Update job as completed
+          await prisma.analysisJob.update({
+            where: { id: job.id },
+            data: {
+              status: 'completed',
+              progressPercent: 100,
+              progressMessage: 'Recurring scan completed',
+              analysisResult: analysisResult as object,
+              completedAt: new Date()
+            }
+          });
+        } catch (analysisError) {
+          // Update job as failed
+          await prisma.analysisJob.update({
+            where: { id: job.id },
+            data: {
+              status: 'failed',
+              error: analysisError instanceof Error ? analysisError.message : 'Analysis failed',
+              completedAt: new Date()
+            }
+          });
+          throw analysisError;
+        }
 
         // Calculate next scan date based on frequency
         const nextScanDate = calculateNextScanDate(business.scanFrequency || 'weekly');
