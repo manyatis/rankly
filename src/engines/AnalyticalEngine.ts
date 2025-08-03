@@ -1,4 +1,6 @@
 import { WordPositionAnalysisService, WordMatch } from '../services/WordPositionAnalysisService';
+import { TextRankingEngine, type BusinessMatch } from './TextRankingEngine';
+import { isFeatureEnabled } from '../lib/feature-flags';
 
 export interface QueryResult {
   query: string;
@@ -12,6 +14,12 @@ export interface QueryResult {
     averagePosition: number;
     lineNumbers: number[];
     businessMentionDensity: number;
+  };
+  textRankingData?: {
+    totalMatches: number;
+    matches: BusinessMatch[];
+    averageConfidence: number;
+    highestConfidenceMatch: BusinessMatch | null;
   };
 }
 
@@ -327,41 +335,77 @@ export class AnalyticalEngine {
 
     // Process all queries in parallel
     const queryPromises = customQueries.map(async (query, index) => {
+      const queryStartTime = Date.now();
       console.debug(`\n📤 Query ${index + 1}/${customQueries.length}: "${query}" (parallel)`);
+      console.log(`🔄 ANALYTICAL_ENGINE - PARALLEL_QUERY_START - Query ${index + 1}: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
 
       try {
         const response = await queryFunction(query);
+        const queryDuration = Date.now() - queryStartTime;
         console.debug(`📥 Response length for query ${index + 1}: ${response.length} characters`);
+        console.log(`⚡ ANALYTICAL_ENGINE - PARALLEL_QUERY_COMPLETE - Query ${index + 1} (${queryDuration}ms, ${response.length} chars)`);;
 
-        const responseLower = response.toLowerCase();
-
-        // Check if the business name appears in the response
+        // Choose ranking method based on feature flag
         let mentioned = false;
         let bestMatch = '';
         let bestIndex = -1;
         let matchType = 'none';
+        let textRankingData = undefined;
+        
+        // Pre-calculate responseLower for both ranking methods
+        const responseLower = response.toLowerCase();
 
-        // First try exact match
-        const nameIndex = responseLower.indexOf(businessName.toLowerCase());
-        if (nameIndex !== -1) {
-          console.debug(`✅ EXACT MATCH "${businessName}" at position ${nameIndex} (query ${index + 1})`);
-          mentioned = true;
-          bestIndex = nameIndex;
-          bestMatch = businessName;
-          matchType = 'exact';
-        }
+        if (isFeatureEnabled('textRankingEngine')) {
+          // Use non-AI TextRankingEngine
+          console.debug(`🔍 Using TextRankingEngine for business mention analysis (query ${index + 1})`);
+          const textRankingResult = TextRankingEngine.analyzeBusinessPresence(response, businessName);
+          
+          textRankingData = {
+            totalMatches: textRankingResult.totalMatches,
+            matches: textRankingResult.matches,
+            averageConfidence: textRankingResult.averageConfidence,
+            highestConfidenceMatch: textRankingResult.highestConfidenceMatch
+          };
 
-        // If no exact match, try fuzzy matching
-        if (!mentioned) {
-          console.debug(`🔍 No exact match found, trying AI fuzzy matching... (query ${index + 1})`);
-          const fuzzyMatches = this.findFuzzyMatches(businessName, responseLower);
-          if (fuzzyMatches.length > 0) {
-            const match = fuzzyMatches[0];
-            console.debug(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index} (query ${index + 1})`);
+          if (textRankingResult.totalMatches > 0 && textRankingResult.highestConfidenceMatch) {
             mentioned = true;
-            bestIndex = match.index;
-            bestMatch = match.match;
-            matchType = 'fuzzy';
+            bestMatch = textRankingResult.highestConfidenceMatch.text;
+            bestIndex = textRankingResult.highestConfidenceMatch.characterPosition;
+            matchType = textRankingResult.highestConfidenceMatch.matchType;
+            
+            console.debug(`✅ TEXT_RANKING_MATCH "${bestMatch}" (${matchType}, ${textRankingResult.highestConfidenceMatch.confidence}% confidence) at position ${bestIndex} (query ${index + 1})`);
+          } else {
+            console.debug(`❌ No matches found with TextRankingEngine (query ${index + 1})`);
+          }
+        } else {
+          // Use legacy AI-based analysis
+
+          // First try exact match
+          const nameIndex = responseLower.indexOf(businessName.toLowerCase());
+          if (nameIndex !== -1) {
+            console.debug(`✅ EXACT MATCH "${businessName}" at position ${nameIndex} (query ${index + 1})`);
+            mentioned = true;
+            bestIndex = nameIndex;
+            bestMatch = businessName;
+            matchType = 'exact';
+          }
+
+          // If no exact match, try fuzzy matching
+          if (!mentioned) {
+            console.debug(`🔍 No exact match found, trying AI fuzzy matching... (query ${index + 1})`);
+            const fuzzyMatches = this.findFuzzyMatches(businessName, responseLower);
+            if (fuzzyMatches.length > 0) {
+              const match = fuzzyMatches[0];
+              console.debug(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index} (query ${index + 1})`);
+              mentioned = true;
+              bestIndex = match.index;
+              bestMatch = match.match;
+              matchType = 'fuzzy';
+            }
+          }
+
+          if (!mentioned) {
+            console.debug(`❌ Business name NOT found in AI analysis for query ${index + 1}`);
           }
         }
 
@@ -441,7 +485,8 @@ export class AnalyticalEngine {
           mentioned,
           rankPosition,
           relevanceScore,
-          wordPositionData
+          wordPositionData,
+          textRankingData
         };
 
       } catch (error) {
@@ -451,7 +496,8 @@ export class AnalyticalEngine {
           response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
           mentioned: false,
           rankPosition: 0,
-          relevanceScore: 0
+          relevanceScore: 0,
+          textRankingData: undefined
         };
       }
     });

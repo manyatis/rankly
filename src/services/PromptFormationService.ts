@@ -128,6 +128,9 @@ export class PromptFormationService {
         queryCount: aiGeneratedCount.toString()
       });
 
+      console.log(`🔄 PROMPT_GEN - DIRECT_API_CALL - OPENAI - Generating ${aiGeneratedCount} optimized queries for "${context.businessName}"`);
+      const startTime = Date.now();
+      
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -137,6 +140,9 @@ export class PromptFormationService {
         temperature: 0.7,
         max_tokens: 1000,
       });
+      
+      const duration = Date.now() - startTime;
+      console.log(`✅ PROMPT_GEN - DIRECT_API_RESPONSE - OPENAI - Success (${duration}ms, generated queries for optimization)`);
 
       const content = response.choices[0]?.message?.content;
       if (!content) {

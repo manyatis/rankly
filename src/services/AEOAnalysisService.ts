@@ -245,14 +245,21 @@ export class AEOAnalysisService {
     }
 
     console.debug(`\n🚀 Starting parallel analysis of ${providers.length} providers with optimized queries...`);
+    const totalApiCalls = providers.length * optimizedQueries.length;
+    console.log(`📊 AEO_ANALYSIS - BATCH_START - Starting analysis batch: ${providers.length} providers × ${optimizedQueries.length} queries = ${totalApiCalls} total API calls`);
 
     // Create analysis promises for all providers to run in parallel
     const analysisPromises = providers.map(async (provider, index) => {
       console.debug(`🔄 Starting analysis for provider ${index + 1}/${providers.length}: ${provider.name}`);
+      console.log(`🚀 AEO_ANALYSIS - PROVIDER_START - ${provider.name.toUpperCase()} - Starting ${optimizedQueries.length} parallel queries for "${businessName}"`);
+      const providerStartTime = Date.now();
 
       try {
         const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
         const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(queryFunction, businessName, optimizedQueries);
+        
+        const providerDuration = Date.now() - providerStartTime;
+        console.log(`✅ AEO_ANALYSIS - PROVIDER_COMPLETE - ${provider.name.toUpperCase()} - Success (${providerDuration}ms, ${queryResults.length} results)`);
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 
@@ -314,9 +321,12 @@ export class AEOAnalysisService {
 
     // Wait for all analyses to complete in parallel
     console.debug(`⏳ Waiting for all ${providers.length} provider analyses to complete...`);
+    const batchStartTime = Date.now();
     const results = await Promise.all(analysisPromises);
+    const batchDuration = Date.now() - batchStartTime;
 
     console.debug(`\n🏁 === PARALLEL ANALYSIS COMPLETE ===`);
+    console.log(`📊 AEO_ANALYSIS - BATCH_COMPLETE - Completed ${totalApiCalls} API calls across ${providers.length} providers (${batchDuration}ms total)`);
     console.debug(`📊 Results summary:`);
     results.forEach((result, index) => {
       console.debug(`   ${index + 1}. ${result.provider.name}: ${result.aeoScore}/100 (${result.overallVisibility}% visibility)`);
@@ -403,7 +413,7 @@ export class AEOAnalysisService {
         const competitorAnalysisPromises = providers.map(async (provider) => {
           try {
             const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
-            const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, competitor.name, optimizedQueries);
+            const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(queryFunction, competitor.name, optimizedQueries);
             const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, competitor.name);
 
             const providerName = provider.name.toLowerCase();

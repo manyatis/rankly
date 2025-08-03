@@ -429,12 +429,18 @@ export class StagedAnalysisService {
 
     for (const provider of providers) {
       try {
+        console.log(`🚀 STAGED_ANALYSIS - PROVIDER_START - ${provider.name.toUpperCase()} - Starting ${prompts.length} parallel queries`);
+        const providerStartTime = Date.now();
+        
         const queryFunction = (prompt: string) => ModelFactory.queryModel(provider.type, prompt);
         const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(
           queryFunction, 
           business.websiteName, 
           prompts
         );
+        
+        const providerDuration = Date.now() - providerStartTime;
+        console.log(`✅ STAGED_ANALYSIS - PROVIDER_COMPLETE - ${provider.name.toUpperCase()} - Success (${providerDuration}ms, ${queryResults.length} results)`);
         
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, business.websiteName);
         

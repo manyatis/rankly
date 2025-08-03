@@ -12,6 +12,16 @@ export const featureFlags = {
     enabled: process.env.FEATURE_FLAG_GOOGLE_AI === 'true',
     name: 'Google AI Integration',
     description: 'Enables Google AI (Gemini) model for AEO analysis'
+  },
+
+  /**
+   * Text-based ranking engine
+   * When enabled, uses non-AI TextRankingEngine instead of AI-based analysis for business mention detection
+   */
+  textRankingEngine: {
+    enabled: process.env.USE_TEXT_RANKING_ENGINE === 'true',
+    name: 'Text Ranking Engine',
+    description: 'Uses non-AI text analysis for business mention detection and ranking'
   }
 };
 

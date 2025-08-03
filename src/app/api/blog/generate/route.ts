@@ -65,6 +65,9 @@ export async function POST(request: NextRequest) {
       search_recency_filter: 'month',
     };
 
+    console.log(`🔄 BLOG_GEN - DIRECT_API_CALL - PERPLEXITY - Generating blog post: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`);
+    const startTime = Date.now();
+    
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -73,10 +76,12 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(requestData),
     });
+    
+    const duration = Date.now() - startTime;
 
     if (!perplexityResponse.ok) {
       const errorText = await perplexityResponse.text();
-      console.error('Perplexity API error:', errorText);
+      console.error(`❌ BLOG_GEN - DIRECT_API_ERROR - PERPLEXITY - Failed (${duration}ms):`, errorText);
       return NextResponse.json({ error: 'Failed to generate content' }, { status: 500 });
     }
 
@@ -84,12 +89,12 @@ export async function POST(request: NextRequest) {
     const response = data.choices?.[0]?.message?.content;
     const citations = data.citations || [];
     
-    // Debug: Log the full response to see what we're getting
-    console.log('Perplexity API response:', JSON.stringify(data, null, 2));
-    
     if (!response) {
+      console.error(`❌ BLOG_GEN - DIRECT_API_ERROR - PERPLEXITY - No content in response (${duration}ms)`);
       return NextResponse.json({ error: 'Failed to generate content' }, { status: 500 });
     }
+    
+    console.log(`✅ BLOG_GEN - DIRECT_API_RESPONSE - PERPLEXITY - Success (${duration}ms, ${response.length} chars, ${citations.length} citations)`);
 
     try {
       const generatedContent = JSON.parse(response);
