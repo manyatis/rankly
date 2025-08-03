@@ -767,7 +767,8 @@ export class AEOAnalysisService {
               }
             });
 
-            // Save individual query results for detailed analysis
+            // Save individual query results for detailed analysis using bulk operation
+            const queryData = [];
             for (const result of results) {
               const providerName = result.provider.name.toLowerCase();
               let aiProvider = 'unknown';
@@ -782,24 +783,29 @@ export class AEOAnalysisService {
                 aiProvider = 'google';
               }
 
-              // Save each query result from this provider
+              // Collect query data for bulk insert
               for (const queryResult of result.queryVariations) {
-                await tx.queryResult.create({
-                  data: {
-                    userId: userRecord?.id || null,
-                    businessId: request.businessId,
-                    runUuid,
-                    query: queryResult.query,
-                    aiProvider,
-                    response: queryResult.response,
-                    mentioned: queryResult.mentioned,
-                    rankPosition: queryResult.rankPosition || null,
-                    relevanceScore: queryResult.relevanceScore || null,
-                    wordCount: queryResult.response.split(' ').length,
-                    businessDensity: queryResult.wordPositionData?.businessMentionDensity || null,
-                  }
+                queryData.push({
+                  userId: userRecord?.id || null,
+                  businessId: request.businessId,
+                  runUuid,
+                  query: queryResult.query,
+                  aiProvider,
+                  response: queryResult.response,
+                  mentioned: queryResult.mentioned,
+                  rankPosition: queryResult.rankPosition || null,
+                  relevanceScore: queryResult.relevanceScore || null,
+                  wordCount: queryResult.response.split(' ').length,
+                  businessDensity: queryResult.wordPositionData?.businessMentionDensity || null,
                 });
               }
+            }
+
+            // Bulk insert all query results in one operation
+            if (queryData.length > 0) {
+              await tx.queryResult.createMany({
+                data: queryData
+              });
             }
 
             // Save competitor ranking history - aggregate all providers for each competitor
@@ -903,6 +909,8 @@ export class AEOAnalysisService {
             } else {
               console.debug(`ℹ️ No competitors found for ranking storage`);
             }
+          }, {
+            timeout: 10000 // 10 second timeout for bulk operations
           });
 
           console.debug(`✅ Database transaction completed successfully for analysis run ${runUuid}`);

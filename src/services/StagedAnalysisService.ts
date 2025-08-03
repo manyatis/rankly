@@ -591,7 +591,8 @@ export class StagedAnalysisService {
         }
       });
 
-      // Save query results
+      // Save query results using bulk operation
+      const queryData = [];
       for (const result of results) {
         const providerName = result.provider.name.toLowerCase();
         let aiProvider = 'unknown';
@@ -607,22 +608,27 @@ export class StagedAnalysisService {
         }
 
         for (const queryResult of result.queryVariations) {
-          await tx.queryResult.create({
-            data: {
-              userId,
-              businessId,
-              runUuid,
-              query: queryResult.query,
-              aiProvider,
-              response: queryResult.response,
-              mentioned: queryResult.mentioned,
-              rankPosition: queryResult.rankPosition || null,
-              relevanceScore: queryResult.relevanceScore || null,
-              wordCount: queryResult.response.split(' ').length,
-              businessDensity: queryResult.wordPositionData?.businessMentionDensity || null,
-            }
+          queryData.push({
+            userId,
+            businessId,
+            runUuid,
+            query: queryResult.query,
+            aiProvider,
+            response: queryResult.response,
+            mentioned: queryResult.mentioned,
+            rankPosition: queryResult.rankPosition || null,
+            relevanceScore: queryResult.relevanceScore || null,
+            wordCount: queryResult.response.split(' ').length,
+            businessDensity: queryResult.wordPositionData?.businessMentionDensity || null,
           });
         }
+      }
+
+      // Bulk insert all query results in one operation
+      if (queryData.length > 0) {
+        await tx.queryResult.createMany({
+          data: queryData
+        });
       }
 
       // Save competitor rankings
@@ -698,6 +704,8 @@ export class StagedAnalysisService {
           });
         }
       }
+    }, {
+      timeout: 10000 // 10 second timeout for bulk operations
     });
   }
 }
