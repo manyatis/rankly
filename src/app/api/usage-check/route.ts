@@ -67,13 +67,15 @@ export async function GET(request: Request) {
       usageCount: usageInfo.usageCount,
       maxUsage: usageInfo.maxUsage,
       tier: usageInfo.tier,
+      period: usageInfo.period,
       
       // Enhanced validation info
-      dailyUsage: {
+      manualScans: {
         canUse: usageInfo.canUse,
         current: usageInfo.usageCount,
-        limit: usageLimits.dailyAnalysisLimit,
-        isUnlimited: usageLimits.isUnlimited
+        limit: tier === 'free' ? usageLimits.dailyAnalysisLimit : usageLimits.weeklyManualScans,
+        period: usageInfo.period || (tier === 'free' ? 'day' : 'week'),
+        isUnlimited: false
       },
       
       rateLimit: rateLimitInfo ? {

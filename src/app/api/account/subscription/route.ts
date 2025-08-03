@@ -35,9 +35,10 @@ export async function GET() {
           name: 'Free',
           price: 0,
           features: [
-            '1 AEO analysis per day',
-            'Basic website insights',
-            'Limited competitor tracking'
+            '1 website',
+            'Basic AEO analysis',
+            '2 manual scans per day',
+            'Basic insights'
           ]
         },
         status: SubscriptionStatus.FREE,

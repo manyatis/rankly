@@ -91,7 +91,7 @@ export class RankingEngine {
     console.debug(`🔢 Average Relevance Score: ${avgRelevanceScore}/100`);
 
     // Fill in factors for compatibility (scale actualScore to 100-point system for display)
-    const scaledScore = Math.min(100, actualScore * 1.5); // Scale to ~100 max (64 theoretical max * 1.5 ≈ 96)
+    const scaledScore = Math.min(100, actualScore * 2.9); // Scale to ~100 max (34 theoretical max * 2.9 ≈ 99)
     factors.ranking = scaledScore;               // Use actual total score
     factors.relevance = avgRelevanceScore;       // Average per query for display
     factors.brandMention = factors.visibility;
@@ -103,7 +103,7 @@ export class RankingEngine {
     const aeoScore = Math.min(100, actualScore);
 
     console.debug(`🏆 Final AEO Score calculation (Per-Query Point System):`);
-    console.debug(`   Total relevance points: ${totalRelevanceScore}/${totalQueries > 0 ? totalQueries * 10 : 70} possible`);
+    console.debug(`   Total relevance points: ${totalRelevanceScore}/${totalQueries > 0 ? (totalQueries - 1) * 10 + 4 : 34} possible`);
     console.debug(`   Visibility rate: ${factors.visibility}% (${mentionedQueries}/${totalQueries} queries mentioned)`);
     console.debug(`🎯 FINAL AEO SCORE: ${aeoScore}/100 (direct sum of per-query scores)`);
 

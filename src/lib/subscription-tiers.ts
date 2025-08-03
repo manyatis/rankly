@@ -6,6 +6,7 @@ export interface SubscriptionTier {
   features: string[];
   usageLimits: {
     dailyAnalysisLimit: number | null; // null = unlimited
+    weeklyManualScans: number | null; // null = unlimited
     rateLimitPerWindow: number;
     isUnlimited: boolean;
   };
@@ -23,6 +24,7 @@ export class SubscriptionTiers {
     ],
     usageLimits: {
       dailyAnalysisLimit: 2,
+      weeklyManualScans: 2,
       rateLimitPerWindow: 2,
       isUnlimited: false
     }
@@ -30,18 +32,19 @@ export class SubscriptionTiers {
 
   static readonly INDIE: SubscriptionTier = {
     name: 'Indie',
-    websiteLimit: 3,
+    websiteLimit: 1,
     price: '$20/month',
     priceCents: 2000, // $20.00 in cents
     features: [
-      '3 websites',
+      '1 website with daily scan',
       'Advanced AEO analysis',
-      'Recurring scans (daily/weekly/monthly)',
+      '3 manual scans per week',
       'Detailed insights',
       'Query results visibility'
     ],
     usageLimits: {
-      dailyAnalysisLimit: 3,
+      dailyAnalysisLimit: null, // No daily limit, but weekly limit
+      weeklyManualScans: 3,
       rateLimitPerWindow: 5,
       isUnlimited: false
     }
@@ -49,33 +52,35 @@ export class SubscriptionTiers {
 
   static readonly PROFESSIONAL: SubscriptionTier = {
     name: 'Professional',
-    websiteLimit: 10,
-    price: '$75/month',
-    priceCents: 7500, // $75.00 in cents
+    websiteLimit: 5,
+    price: '$100/month',
+    priceCents: 10000, // $100.00 in cents
     features: [
-      '10 websites',
+      'Up to 5 websites with daily scans',
       'Premium AEO analysis',
-      'Unlimited manual scans',
+      '10 manual scans per week',
       'Daily recurring scans',
       'AI-powered insights',
       'Competitor tracking',
       'Priority support'
     ],
     usageLimits: {
-      dailyAnalysisLimit: null,
-      rateLimitPerWindow: 999,
-      isUnlimited: true
+      dailyAnalysisLimit: null, // No daily limit, but weekly limit
+      weeklyManualScans: 10,
+      rateLimitPerWindow: 10,
+      isUnlimited: false
     }
   };
 
   static readonly ENTERPRISE: SubscriptionTier = {
     name: 'Enterprise',
     websiteLimit: -1, // -1 represents unlimited
-    price: '$250/month',
-    priceCents: 25000, // $250.00 in cents
+    price: '$300/month',
+    priceCents: 30000, // $300.00 in cents
     features: [
-      'Unlimited websites',
+      'Unlimited websites with daily scans',
       'Enterprise AEO analysis',
+      '100 manual scans per week',
       'Custom scan frequency',
       'Advanced AI insights',
       'Expert consultation',
@@ -84,9 +89,10 @@ export class SubscriptionTiers {
       'API access'
     ],
     usageLimits: {
-      dailyAnalysisLimit: null,
-      rateLimitPerWindow: 999,
-      isUnlimited: true
+      dailyAnalysisLimit: null, // No daily limit, but weekly limit
+      weeklyManualScans: 100,
+      rateLimitPerWindow: 20,
+      isUnlimited: false
     }
   };
 
@@ -143,7 +149,7 @@ export class SubscriptionTiers {
       case 'recurring_scans':
         return tier.name !== 'Free';
       case 'daily_scans':
-        return tier.name === 'Professional' || tier.name === 'Enterprise';
+        return tier.name !== 'Free'; // All paid tiers have daily scans
       case 'api_access':
         return tier.name === 'Enterprise';
       default:
@@ -156,6 +162,7 @@ export class SubscriptionTiers {
    */
   static getUsageLimits(tierName: string): {
     dailyAnalysisLimit: number | null; // null = unlimited
+    weeklyManualScans: number | null; // null = unlimited
     rateLimitPerWindow: number;
     isUnlimited: boolean;
   } {

@@ -13,13 +13,13 @@ async function seedSubscriptionPlans() {
     {
       planId: 'indie',
       name: 'Indie',
-      priceCents: 1000, // $10.00 (SALE PRICE)
+      priceCents: 2000, // $20.00
       billingPeriod: 'month',
       description: 'Perfect for indie developers and small projects',
       features: [
-        '3 websites',
+        '1 website with daily scan',
         'Advanced AEO analysis',
-        'Recurring scans (daily/weekly/monthly)',
+        '3 manual scans per week',
         'Detailed insights',
         'Query results visibility'
       ],
@@ -30,13 +30,13 @@ async function seedSubscriptionPlans() {
     {
       planId: 'professional',
       name: 'Professional',
-      priceCents: 3500, // $35.00 (SALE PRICE)
+      priceCents: 10000, // $100.00
       billingPeriod: 'month',
       description: 'Ideal for growing businesses and agencies',
       features: [
-        '10 websites',
+        'Up to 5 websites with daily scans',
         'Premium AEO analysis',
-        'Unlimited manual scans',
+        '10 manual scans per week',
         'Daily recurring scans',
         'AI-powered insights',
         'Competitor tracking',
@@ -49,12 +49,13 @@ async function seedSubscriptionPlans() {
     {
       planId: 'enterprise',
       name: 'Enterprise',
-      priceCents: 12500, // $125.00 (SALE PRICE)
+      priceCents: 30000, // $300.00
       billingPeriod: 'month',
       description: 'Advanced features for large organizations',
       features: [
-        'Unlimited websites',
+        'Unlimited websites with daily scans',
         'Enterprise AEO analysis',
+        '100 manual scans per week',
         'Custom scan frequency',
         'Advanced AI insights',
         'Expert consultation',

@@ -250,9 +250,9 @@ Required environment variables:
 - **Rate Limit Explanations** - Educational tooltips explaining daily limits vs. rate limiting windows
 
 ##### Advanced Prompt Generation (Complete)
-- **Increased Prompt Count** - Expanded from 5 to 10 analysis prompts per business for comprehensive coverage
+- **Optimized Query Count** - Refined to 4 targeted analysis queries per business for focused coverage
 - **Direct Business Queries** - Added targeted queries that specifically mention the business name
-- **Smart Scoring System** - 5-point bonus for direct business queries while maintaining balanced scoring
+- **Smart Scoring System** - Reduced scoring for direct business queries while maintaining balanced analysis
 - **Industry-Focused Prompts** - Enhanced prompt quality with direct "top companies" and "industry leaders" targeting
 - **Improved Query Templates** - More specific language designed to surface industry leaders and top performers
 
@@ -266,9 +266,31 @@ Required environment variables:
 #### Current Production Status
 - **Build successful** with all TypeScript issues resolved
 - **Background processing** fully operational with job persistence
-- **Enhanced prompt system** generating 7 targeted queries with direct business targeting
+- **Enhanced prompt system** generating 4 targeted queries with direct business targeting
 - **Mobile-optimized** dashboard with improved UX and navigation
 - **Comprehensive usage tracking** with real-time limit displays
+
+##### Latest Session Improvements (August 2025)
+
+###### Performance Optimization - Parallel AI Query Execution (Complete)
+- **Parallel Query Processing** - Created `analyzeWithCustomQueriesParallel()` method in AnalyticalEngine
+- **Concurrent Provider Analysis** - All AI providers (OpenAI, Claude, Perplexity, Google) now run in parallel
+- **Dramatic Speed Improvement** - Reduced from 28 sequential API calls to ~4 parallel calls (7x faster)
+- **Robust Error Handling** - Individual query/provider failures don't block other operations
+- **Progress Tracking** - Real-time updates as each provider completes analysis
+
+###### Smart Location-Based Query Generation (Complete)
+- **Industry Classification** - Comprehensive list of location-independent industries (technology, software, banking, etc.)
+- **Intelligent Location Filtering** - Automatically skips location queries for national/global industries
+- **Location-Dependent Industries** - Preserves location queries for brick-and-mortar businesses (restaurants, retail, law firms)
+- **Industries Excluded from Location**:
+  - Technology, Software, SaaS, Cloud Computing
+  - Banking, Finance, FinTech, Insurance
+  - E-commerce, Digital Marketing, SEO
+  - AI/ML, Cybersecurity, Blockchain
+  - Consulting, Analytics, Enterprise Software
+  - And 50+ other digital/global industries
+- **Debug Logging** - Clear indicators when location is skipped for specific industries
 
 ##### Latest Session Improvements (August 2025)
 
@@ -288,7 +310,7 @@ Required environment variables:
 - **Per-Query Point System** - Each query can contribute max 10 points (normal) or 4 points (direct business queries)
 - **Direct Query Reduction** - Direct business queries score 25% of normal (0.25x multiplier) to prevent gaming
 - **Eliminated Double-Counting** - Removed duplicate position scoring in RankingEngine, uses only AnalyticalEngine relevance scores
-- **Scaled Point Distribution** - Total possible score: 64 points (6×10 + 1×4) for typical 7-query analysis
+- **Scaled Point Distribution** - Total possible score: 34 points (3×10 + 1×4) for typical 4-query analysis
 - **Consistent Scoring** - All historical scoring inconsistencies resolved with proper point scaling
 
 ###### Graph Data Filtering (Complete)
@@ -354,3 +376,5 @@ Required environment variables:
 - A/B test new AEO messaging effectiveness on homepage conversion rates
 - Monitor per-query scoring system performance with real user data
 - Implement advanced analytics for query effectiveness across different business types
+- Consider implementing rate limiting for parallel AI API calls to avoid provider limits
+- Add configurable concurrency limits per AI provider based on their specific rate limits

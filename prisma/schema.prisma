@@ -93,6 +93,11 @@ model User {
     analyzeWebsiteResetTime DateTime? // When the 5-minute window resets
     generatePromptsCount    Int       @default(0)  // Count of generate prompts button uses  
     generatePromptsResetTime DateTime? // When the 5-minute window resets
+    
+    // Weekly manual scan tracking
+    weeklyManualScanCount    Int       @default(0)  // Count of manual scans this week
+    weeklyManualScanResetDate DateTime? // When the weekly counter resets (Sunday midnight)
+    
     createdAt         DateTime        @default(now())
     updatedAt         DateTime        @updatedAt
     

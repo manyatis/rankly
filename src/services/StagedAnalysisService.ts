@@ -430,7 +430,7 @@ export class StagedAnalysisService {
     for (const provider of providers) {
       try {
         const queryFunction = (prompt: string) => ModelFactory.queryModel(provider.type, prompt);
-        const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(
+        const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(
           queryFunction, 
           business.websiteName, 
           prompts

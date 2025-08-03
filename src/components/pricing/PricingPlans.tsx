@@ -86,8 +86,11 @@ export default function PricingPlans({
       return;
     }
 
-    // For subscription flow, only allow free and indie plans
-    if (isSubscriptionFlow && plan.planId !== 'indie' && plan.planId !== 'free') {
+    // For subscription flow, allow all plans except free
+    if (isSubscriptionFlow && plan.planId === 'free') {
+      if (onCreateAccount) {
+        onCreateAccount();
+      }
       return;
     }
 
@@ -128,8 +131,8 @@ export default function PricingPlans({
   const isPlanDisabled = (planId: string): boolean => {
     // Free plan is never disabled
     if (planId === 'free') return false;
-    // In subscription flow, only indie is enabled
-    return isSubscriptionFlow ? planId !== 'indie' : false;
+    // In subscription flow, all paid plans are enabled
+    return false;
   };
 
   const getPlanButtonText = (plan: SubscriptionPlan | FreePlan): string => {

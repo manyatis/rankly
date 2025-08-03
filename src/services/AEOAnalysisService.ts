@@ -252,7 +252,7 @@ export class AEOAnalysisService {
 
       try {
         const queryFunction = (prompt: string) => this.queryAIModel(provider, prompt);
-        const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(queryFunction, businessName, optimizedQueries);
+        const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(queryFunction, businessName, optimizedQueries);
         const scoring = RankingEngine.calculateEnhancedAEOScore(queryResults, businessName);
         const mainResponse = queryResults.length > 0 ? queryResults[0].response : 'No response generated';
 

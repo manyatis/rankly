@@ -10,14 +10,14 @@ export async function getUser() {
   return session?.user || null;
 }
 
-export async function checkUsageLimit(email: string): Promise<{ canUse: boolean; usageCount: number; maxUsage: number | string; tier: string }> {
+export async function checkUsageLimit(email: string): Promise<{ canUse: boolean; usageCount: number; maxUsage: number | string; tier: string; period?: string }> {
   const user = await prisma.user.findFirst({
     where: { email }
   });
 
   if (!user) {
-    const freeLimit = SubscriptionTiers.FREE.usageLimits.dailyAnalysisLimit!;
-    return { canUse: false, usageCount: 0, maxUsage: freeLimit, tier: 'free' };
+    const freeLimit = SubscriptionTiers.FREE.usageLimits.weeklyManualScans!;
+    return { canUse: false, usageCount: 0, maxUsage: freeLimit, tier: 'free', period: 'week' };
   }
 
   // Check if user has a canceled subscription that's still active
@@ -34,33 +34,58 @@ export async function checkUsageLimit(email: string): Promise<{ canUse: boolean;
   // Get tier-specific usage limits
   const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
   
-  // Professional and Enterprise users get unlimited usage
-  if (usageLimits.isUnlimited) {
-    return { canUse: true, usageCount: user.dailyUsageCount, maxUsage: 'unlimited', tier: effectivePlan };
+  // Free tier has daily limits
+  if (effectivePlan === 'free') {
+    const dailyLimit = usageLimits.dailyAnalysisLimit!;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if last usage was today
+    const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
+    const lastUsageToday = lastUsageDate && lastUsageDate >= today;
+
+    // Reset count if it's a new day
+    if (!lastUsageToday) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          dailyUsageCount: 0,
+          lastUsageDate: new Date()
+        }
+      });
+      return { canUse: true, usageCount: 0, maxUsage: dailyLimit, tier: effectivePlan, period: 'day' };
+    }
+
+    const canUse = user.dailyUsageCount < dailyLimit;
+    return { canUse, usageCount: user.dailyUsageCount, maxUsage: dailyLimit, tier: effectivePlan, period: 'day' };
   }
-
-  const dailyLimit = usageLimits.dailyAnalysisLimit!;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // Check if last usage was today
-  const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
-  const lastUsageToday = lastUsageDate && lastUsageDate >= today;
-
-  // Reset count if it's a new day
-  if (!lastUsageToday) {
+  
+  // Paid tiers have weekly limits
+  const weeklyLimit = usageLimits.weeklyManualScans!;
+  const now = new Date();
+  
+  // Get the start of the current week (Sunday midnight)
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  // Check if we need to reset the weekly counter
+  const lastReset = user.weeklyManualScanResetDate ? new Date(user.weeklyManualScanResetDate) : null;
+  const needsReset = !lastReset || lastReset < startOfWeek;
+  
+  if (needsReset) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        dailyUsageCount: 0,
-        lastUsageDate: new Date()
+        weeklyManualScanCount: 0,
+        weeklyManualScanResetDate: startOfWeek
       }
     });
-    return { canUse: true, usageCount: 0, maxUsage: dailyLimit, tier: effectivePlan };
+    return { canUse: true, usageCount: 0, maxUsage: weeklyLimit, tier: effectivePlan, period: 'week' };
   }
-
-  const canUse = user.dailyUsageCount < dailyLimit;
-  return { canUse, usageCount: user.dailyUsageCount, maxUsage: dailyLimit, tier: effectivePlan };
+  
+  const canUse = user.weeklyManualScanCount < weeklyLimit;
+  return { canUse, usageCount: user.weeklyManualScanCount, maxUsage: weeklyLimit, tier: effectivePlan, period: 'week' };
 }
 
 export async function incrementUsage(email: string): Promise<boolean> {
@@ -86,39 +111,65 @@ export async function incrementUsage(email: string): Promise<boolean> {
     // Get tier-specific usage limits
     const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
 
-    // Professional and Enterprise users get unlimited usage
-    if (usageLimits.isUnlimited) {
-      // Still increment for tracking, but always allow usage
+    // Free tier uses daily limits
+    if (effectivePlan === 'free') {
+      const dailyLimit = usageLimits.dailyAnalysisLimit!;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Check if last usage was today
+      const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
+      const lastUsageToday = lastUsageDate && lastUsageDate >= today;
+
+      // Reset or increment count
+      const newCount = lastUsageToday ? user.dailyUsageCount + 1 : 1;
+
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          dailyUsageCount: user.dailyUsageCount + 1,
+          dailyUsageCount: newCount,
           lastUsageDate: new Date()
+        }
+      });
+
+      return newCount <= dailyLimit;
+    }
+    
+    // Paid tiers use weekly limits
+    const weeklyLimit = usageLimits.weeklyManualScans!;
+    const now = new Date();
+    
+    // Get the start of the current week (Sunday midnight)
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    // Check if we need to reset the weekly counter
+    const lastReset = user.weeklyManualScanResetDate ? new Date(user.weeklyManualScanResetDate) : null;
+    const needsReset = !lastReset || lastReset < startOfWeek;
+    
+    if (needsReset) {
+      // Reset and count this as the first usage
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          weeklyManualScanCount: 1,
+          weeklyManualScanResetDate: startOfWeek
         }
       });
       return true;
     }
-
-    const dailyLimit = usageLimits.dailyAnalysisLimit!;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Check if last usage was today
-    const lastUsageDate = user.lastUsageDate ? new Date(user.lastUsageDate) : null;
-    const lastUsageToday = lastUsageDate && lastUsageDate >= today;
-
-    // Reset or increment count
-    const newCount = lastUsageToday ? user.dailyUsageCount + 1 : 1;
-
+    
+    // Increment the weekly counter
+    const newCount = user.weeklyManualScanCount + 1;
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        dailyUsageCount: newCount,
-        lastUsageDate: new Date()
+        weeklyManualScanCount: newCount
       }
     });
-
-    return newCount <= dailyLimit;
+    
+    return newCount <= weeklyLimit;
   } catch (error) {
     console.error('Error incrementing usage:', error);
     return false;
@@ -176,11 +227,6 @@ export async function checkRateLimit(
   // Get tier-specific rate limits
   const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
 
-  // Professional and Enterprise users get unlimited usage
-  if (usageLimits.isUnlimited) {
-    return { canUse: true, remainingUses: 999, resetTime: null, waitMinutes: 0 };
-  }
-
   const rateLimit = usageLimits.rateLimitPerWindow;
   const now = new Date();
   
@@ -235,11 +281,6 @@ export async function incrementRateLimit(
 
     // Get tier-specific rate limits
     const usageLimits = SubscriptionTiers.getUsageLimits(effectivePlan);
-
-    // Professional and Enterprise users get unlimited usage
-    if (usageLimits.isUnlimited) {
-      return true;
-    }
 
     const rateLimit = usageLimits.rateLimitPerWindow;
     const now = new Date();

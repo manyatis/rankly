@@ -29,6 +29,7 @@ interface UsageInfo {
   maxUsage: number | string;
   canUse: boolean;
   tier: string;
+  period?: string;
 }
 
 interface AnalysisJob {
@@ -357,11 +358,15 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
                 </svg>
                 <span className={`${!usageInfo.canUse ? 'text-red-400' : 'text-gray-300'}`}>
                   {usageInfo.usageCount}/{usageInfo.maxUsage === -1 ? 'unlimited' : usageInfo.maxUsage} 
-                  <span className="text-gray-400 ml-1">analyses used</span>
+                  <span className="text-gray-400 ml-1">
+                    {usageInfo.period === 'week' ? 'weekly' : 'daily'} scans used
+                  </span>
                 </span>
               </div>
               {!usageInfo.canUse && (
-                <p className="text-red-400 text-sm mt-2">Daily analysis limit reached</p>
+                <p className="text-red-400 text-sm mt-2">
+                  {usageInfo.period === 'week' ? 'Weekly' : 'Daily'} scan limit reached
+                </p>
               )}
             </div>
           )}
