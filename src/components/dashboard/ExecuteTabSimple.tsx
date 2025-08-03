@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import ProgressLoader from '../ui/ProgressLoader';
+import JobsInProgress from './JobsInProgress';
 
 interface ExecuteTabSimpleProps {
   businessId: number | null;
@@ -49,6 +50,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
+  const [jobsRefreshTrigger, setJobsRefreshTrigger] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch usage information on component mount and when analysis completes
@@ -88,34 +90,34 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
         const data = await response.json();
         
         // If we find a running job, resume monitoring it
-        if (data && data.id) {
+        if (data && data.jobId) {
           // Single job returned
           const runningJob = data;
           if (runningJob.status !== 'completed' && runningJob.status !== 'failed') {
-            console.log('📊 Found existing job, resuming monitoring:', runningJob.id);
-            setAnalysisJob(runningJob);
+            console.log('📊 Found existing job, resuming monitoring:', runningJob.jobId);
+            setAnalysisJob({ ...runningJob, id: runningJob.jobId });
             setIsAnalyzing(true);
             setProgress(runningJob.progressPercent || 0);
             setProgressMessage(runningJob.progressMessage || 'Resuming analysis...');
             
             // Start polling for this existing job
-            startJobPolling(runningJob.id);
+            startJobPolling(runningJob.jobId);
           }
         } else if (data.jobs && data.jobs.length > 0) {
           // Array of jobs returned - find a running one
-          const runningJob = data.jobs.find((job: AnalysisJob) => 
+          const runningJob = data.jobs.find((job: { status: string; jobId: string; progressPercent?: number; progressMessage?: string }) => 
             job.status !== 'completed' && job.status !== 'failed'
           );
           
           if (runningJob) {
-            console.log('📊 Found existing job, resuming monitoring:', runningJob.id);
-            setAnalysisJob(runningJob);
+            console.log('📊 Found existing job, resuming monitoring:', runningJob.jobId);
+            setAnalysisJob({ ...runningJob, id: runningJob.jobId });
             setIsAnalyzing(true);
             setProgress(runningJob.progressPercent || 0);
             setProgressMessage(runningJob.progressMessage || 'Resuming analysis...');
             
             // Start polling for this existing job
-            startJobPolling(runningJob.id);
+            startJobPolling(runningJob.jobId);
           }
         }
       }
@@ -183,6 +185,8 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
           
           // Refresh usage info after successful analysis
           await fetchUsageInfo();
+          // Refresh jobs list
+          setJobsRefreshTrigger(prev => prev + 1);
         } else if (jobStatus.status === 'failed') {
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
@@ -242,11 +246,14 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
         throw new Error(data.error || 'Failed to start analysis');
       }
 
-      // Store the job info
-      setAnalysisJob(data);
+      // Store the job info  
+      setAnalysisJob({ ...data, id: data.jobId });
       
       // Start polling for job status
-      startJobPolling(data.id);
+      startJobPolling(data.jobId);
+      
+      // Refresh jobs list
+      setJobsRefreshTrigger(prev => prev + 1);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
@@ -254,6 +261,27 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       setProgress(0);
       setProgressMessage('');
     }
+  };
+
+  // Handle selecting a job from the jobs list
+  const handleJobSelect = (jobId: string) => {
+    console.log('📊 Selected job:', jobId);
+    
+    // Check if this job is already being monitored
+    if (analysisJob?.id === jobId) {
+      return;
+    }
+    
+    // Start monitoring the selected job
+    setAnalysisJob({ id: jobId } as AnalysisJob);
+    setIsAnalyzing(true);
+    setError(null);
+    setResult(null);
+    setProgress(0);
+    setProgressMessage('Connecting to job...');
+    
+    // Start polling for this job
+    startJobPolling(jobId);
   };
 
   if (!businessId) {
@@ -357,6 +385,12 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
           />
         </div>
       </div>
+
+      {/* Jobs in Progress */}
+      <JobsInProgress 
+        refreshTrigger={jobsRefreshTrigger}
+        onJobSelect={handleJobSelect}
+      />
 
       {/* How it Works */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">

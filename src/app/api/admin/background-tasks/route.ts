@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BackgroundTaskManager } from '@/services/BackgroundTaskManager';
+import { PoolBasedBackgroundTaskManager } from '@/services/background/PoolBasedBackgroundTaskManager';
 
 export async function GET() {
   try {
-    const taskManager = BackgroundTaskManager.getInstance();
+    const taskManager = PoolBasedBackgroundTaskManager.getInstance();
+    const systemStatus = taskManager.getSystemStatus();
     
     return NextResponse.json({
-      running: taskManager.isActive(),
+      ...systemStatus,
       message: taskManager.isActive() 
-        ? 'Background tasks are running' 
-        : 'Background tasks are stopped'
+        ? 'Pool-based background tasks are running' 
+        : 'Pool-based background tasks are stopped',
+      performance: taskManager.getPerformanceMetrics(),
+      healthReport: taskManager.getHealthReport()
     });
   } catch (error) {
     console.error('❌ Error checking background task status:', error);
@@ -23,36 +26,66 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { action } = await request.json();
-    const taskManager = BackgroundTaskManager.getInstance();
+    const taskManager = PoolBasedBackgroundTaskManager.getInstance();
     
     switch (action) {
       case 'start':
-        taskManager.start();
+        await taskManager.start();
         return NextResponse.json({ 
           success: true, 
-          message: 'Background tasks started',
-          running: taskManager.isActive()
+          message: 'Pool-based background tasks started',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
         });
         
       case 'stop':
         taskManager.stop();
         return NextResponse.json({ 
           success: true, 
-          message: 'Background tasks stopped',
-          running: taskManager.isActive()
+          message: 'Pool-based background tasks stopped',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
         });
         
       case 'run-once':
         await taskManager.runOnce();
         return NextResponse.json({ 
           success: true, 
-          message: 'Single cycle completed',
-          running: taskManager.isActive()
+          message: 'Single processing cycle completed',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
+        });
+
+      case 'force-scan':
+        await taskManager.forceScan();
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Force scan completed',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
+        });
+
+      case 'force-cleanup':
+        await taskManager.forceCleanup();
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Force cleanup completed',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
+        });
+
+      case 'emergency-reset':
+        taskManager.emergencyReset();
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Emergency reset completed',
+          running: taskManager.isActive(),
+          status: taskManager.getSystemStatus()
         });
         
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Use: start, stop, or run-once' },
+          { error: 'Invalid action. Use: start, stop, run-once, force-scan, force-cleanup, or emergency-reset' },
           { status: 400 }
         );
     }

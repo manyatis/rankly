@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import ProgressLoader from '../ui/ProgressLoader';
+import JobsInProgress from './JobsInProgress';
 
 interface LinkWebsiteTabProps {
   onWebsiteLinked: (businessId: number) => void;
@@ -77,6 +78,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
     tier: string;
   } | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(true);
+  const [jobsRefreshTrigger, setJobsRefreshTrigger] = useState(0);
 
   // Auto-populate URL if provided from hero section
   useEffect(() => {
@@ -175,6 +177,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
           
           setIsAnalyzing(false);
           await fetchUsageInfo();
+          setJobsRefreshTrigger(prev => prev + 1);
         } else if (jobStatus.status === 'failed') {
           if (pollingInterval) {
             clearInterval(pollingInterval);
@@ -228,6 +231,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
       // Store the job info and start polling
       setAnalysisJob(data);
       startJobPolling(data.jobId);
+      setJobsRefreshTrigger(prev => prev + 1);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start analysis');
@@ -261,6 +265,26 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
     setIsAnalyzing(false);
     setProgress(0);
     setProgressMessage('');
+  };
+
+  // Handle selecting a job from the jobs list
+  const handleJobSelect = (jobId: string) => {
+    console.log('📊 Selected job for monitoring:', jobId);
+    
+    // Check if this job is already being monitored
+    if (analysisJob?.id === jobId) {
+      return;
+    }
+    
+    // Start monitoring the selected job
+    setAnalysisJob({ id: jobId } as AnalysisJob);
+    setIsAnalyzing(true);
+    setError(null);
+    setProgress(0);
+    setProgressMessage('Connecting to job...');
+    
+    // Start polling for this job
+    startJobPolling(jobId);
   };
 
   // Check if user has reached website limit
@@ -446,6 +470,11 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
             </div>
           )}
 
+          {/* Jobs in Progress */}
+          <JobsInProgress 
+            refreshTrigger={jobsRefreshTrigger}
+            onJobSelect={handleJobSelect}
+          />
 
           {/* How it Works */}
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">

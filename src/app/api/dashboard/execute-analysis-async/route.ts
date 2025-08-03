@@ -11,20 +11,13 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { 
-      businessId, 
-      businessName, 
-      industry, 
-      location, 
-      marketDescription, 
-      keywords, 
-      providers
-    } = data;
+    console.log(data)
+    const { businessId, customPrompts } = data;
 
-    // Validate required fields
-    if (!businessId || !businessName || !industry || !marketDescription || !keywords || !providers) {
+    // Validate required fields - only businessId is needed
+    if (!businessId) {
       return NextResponse.json({ 
-        error: 'Missing required fields' 
+        error: 'Business ID is required' 
       }, { status: 400 });
     }
 
@@ -38,15 +31,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User organization not found' }, { status: 400 });
     }
 
-    // Get the website URL for the business
+    // Get the business details for the analysis
     const business = await prisma.business.findUnique({
       where: { id: businessId },
-      select: { websiteUrl: true }
+      select: { 
+        websiteUrl: true,
+        websiteName: true,
+        industry: true,
+        location: true,
+        description: true
+      }
     });
 
     if (!business || !business.websiteUrl) {
-      return NextResponse.json({ error: 'Business website URL not found' }, { status: 400 });
+      return NextResponse.json({ error: 'Business not found or missing website URL' }, { status: 400 });
     }
+
+    // Get the most recent keywords and prompts from InputHistory for this business
+    const recentInput = await prisma.inputHistory.findFirst({
+      where: { businessId: businessId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        keywords: true,
+        prompts: true
+      }
+    });
 
     // Create the analysis job with 'not-started' status
     const job = await prisma.analysisJob.create({
@@ -60,14 +69,14 @@ export async function POST(request: NextRequest) {
         progressPercent: 0,
         progressMessage: 'Analysis job created and queued for processing',
         extractedInfo: {
-          businessName,
-          industry,
-          location,
-          description: marketDescription,
-          keywords,
+          businessName: business.websiteName,
+          industry: business.industry || 'General',
+          location: business.location,
+          description: business.description || `Analysis for ${business.websiteName}`,
+          keywords: recentInput?.keywords || [business.websiteName, 'business', 'services'],
           isManualAnalysis: true
         },
-        prompts: data.customPrompts ? { queries: data.customPrompts } : undefined
+        prompts: customPrompts ? { queries: customPrompts } : (recentInput?.prompts ? { queries: recentInput.prompts } : undefined)
       }
     });
 
