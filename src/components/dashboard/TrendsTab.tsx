@@ -637,7 +637,7 @@ export default function TrendsTab({ businessId, featureFlags = {} }: TrendsTabPr
                           <div className="text-xs text-gray-400">Position {query.rankPosition}</div>
                         )}
                         {query.relevanceScore && (
-                          <div className="text-xs text-gray-400">Relevance {query.relevanceScore}%</div>
+                          <div className="text-xs text-gray-400">Relevance {(query.relevanceScore * 10)}%</div>
                         )}
                       </div>
                     ) : (

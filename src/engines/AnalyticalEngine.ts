@@ -357,11 +357,11 @@ export class AnalyticalEngine {
 
     // Base score for being mentioned (adjust based on match type)
     if (matchType === 'exact') {
-      score += 20;
-      console.debug(`📊 Base score (exact match): +20 = ${score}`);
+      score += 40;  // Increased from 20 - being mentioned at all is very valuable
+      console.debug(`📊 Base score (exact match): +40 = ${score}`);
     } else if (matchType === 'fuzzy') {
-      score += 15;
-      console.debug(`📊 Base score (fuzzy match): +15 = ${score}`);
+      score += 30;  // Increased from 15
+      console.debug(`📊 Base score (fuzzy match): +30 = ${score}`);
     }
 
     // Enhanced logic for compound company names - significant partial matches
@@ -400,23 +400,29 @@ export class AnalyticalEngine {
       }
     }
 
-    // Bonus for early mention
+    // Bonus for early mention - heavily weight position importance
     if (bestIndex < 50) {
-      score += 30;
-      console.debug(`📊 Early mention bonus: +30 = ${score}`);
+      score += 50;  // First few words - extremely valuable
+      console.debug(`📊 Early mention bonus (top): +50 = ${score}`);
     } else if (bestIndex < 150) {
-      score += 20;
-      console.debug(`📊 Early mention bonus: +20 = ${score}`);
+      score += 45;  // First sentence/line - very valuable  
+      console.debug(`📊 Early mention bonus (first line): +45 = ${score}`);
     } else if (bestIndex < 300) {
-      score += 10;
-      console.debug(`📊 Early mention bonus: +10 = ${score}`);
+      score += 40;  // Second line - should hit ~90% total
+      console.debug(`📊 Early mention bonus (second line): +40 = ${score}`);
+    } else if (bestIndex < 500) {
+      score += 25;  // Third line - still good
+      console.debug(`📊 Early mention bonus (third line): +25 = ${score}`);
+    } else {
+      score += 10;  // Later mention - basic bonus
+      console.debug(`📊 Late mention bonus: +10 = ${score}`);
     }
 
-    // Bonus for being in first sentence
+    // Bonus for being in first sentence (smaller since position already heavily weighted)
     const firstSentence = response.split(/[.!?]/)[0];
     if (firstSentence.toLowerCase().includes(bestMatch.toLowerCase())) {
-      score += 25;
-      console.debug(`📊 First sentence bonus: +25 = ${score}`);
+      score += 10;  // Reduced from 25 to avoid double-counting with position bonus
+      console.debug(`📊 First sentence bonus: +10 = ${score}`);
     }
 
     // Bonus for context quality (mentioned with positive terms)

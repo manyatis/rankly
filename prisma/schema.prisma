@@ -317,7 +317,7 @@ model QueryResult {
   response          String    @db.Text // Full AI response
   mentioned         Boolean   // Whether the business was mentioned
   rankPosition      Int?      // Position in the response (1-based, null if not mentioned)
-  relevanceScore    Int?      // Relevance score (0-100)
+  relevanceScore    Int?      // Relevance score (0-10 points, displayed as 0-100%)
   
   // Analysis metadata
   wordCount         Int?      // Number of words in response

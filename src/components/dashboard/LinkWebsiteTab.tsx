@@ -146,7 +146,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
     setIsAnalyzing(true);
     setError(null);
     setProgress(0);
-    setProgressMessage('Initializing analysis...');
+    setProgressMessage('Initializing analysis... (estimated 4 minutes)');
 
     // Progress tracking with realistic timing
     const progressSteps = [
@@ -410,7 +410,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
               {/* <div className="text-blue-400 text-6xl mb-6">LINK</div> */}
               <h3 className="text-xl font-semibold text-white mb-4">Add Website for Tracking</h3>
               <p className="text-gray-300 mb-8">
-                Enter any website URL and we&apos;ll automatically extract business information, generate analysis prompts, and run your first AEO analysis.
+                Enter any website URL and we&apos;ll automatically extract business information, generate analysis prompts, and run your first AEO analysis. <span className="text-gray-400">(~4 minutes)</span>
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-6">

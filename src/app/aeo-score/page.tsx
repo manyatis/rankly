@@ -1100,7 +1100,7 @@ export default function AEOScorePage() {
                                     #{query.rankPosition}
                                   </span>
                                   <span className="px-2 py-1 bg-blue-900 text-blue-200 rounded text-xs">
-                                    {query.relevanceScore}%
+                                    {(query.relevanceScore * 10)}%
                                   </span>
                                 </>
                               ) : (

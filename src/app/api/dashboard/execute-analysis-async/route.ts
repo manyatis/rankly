@@ -198,50 +198,77 @@ async function processManualAnalysisJob(jobId: string, analysisRequest: ManualAn
     // Import services dynamically to avoid circular dependencies
     const { AEOAnalysisService } = await import('../../../../services/AEOAnalysisService');
 
-    // Update job status to processing
+    // Progress tracking helper
+    const updateProgress = async (percent: number, message: string) => {
+      await prisma.analysisJob.update({
+        where: { id: jobId },
+        data: {
+          progressPercent: percent,
+          progressMessage: message
+        }
+      });
+    };
+
+    // Initial setup
     await prisma.analysisJob.update({
       where: { id: jobId },
       data: {
         status: 'processing',
-        progressPercent: 10,
-        progressMessage: 'Starting manual analysis...'
+        progressPercent: 5,
+        progressMessage: 'Initializing analysis... (estimated 4 minutes)'
       }
     });
 
-    // Progress updates throughout the analysis
-    const progressSteps = [
-      { percent: 20, message: 'Generating optimized prompts...' },
-      { percent: 40, message: 'Running queries across AI platforms...' },
-      { percent: 60, message: 'Analyzing ChatGPT responses...' },
-      { percent: 70, message: 'Analyzing Claude responses...' },
-      { percent: 80, message: 'Analyzing Perplexity responses...' },
-      { percent: 90, message: 'Processing rankings and competitors...' }
+    // Since we can't easily hook into the AEOAnalysisService stages, 
+    // we'll run the analysis and update progress based on realistic timing
+    const analysisStartTime = Date.now();
+    
+    // Stage 1: Competitor identification (5-15%)
+    await updateProgress(10, 'Identifying competitors...');
+    
+    // Small delay to show this stage
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await updateProgress(15, 'Competitors identified, generating prompts...');
+
+    // Stage 2: Prompt generation (15-25%)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await updateProgress(25, 'Starting AI provider analysis...');
+
+    // Start the actual analysis
+    const analysisPromise = AEOAnalysisService.runAnalysis(analysisRequest);
+
+    // Progress tracking during analysis (25-85% - the main analysis phase)
+    const analysisProgressSteps = [
+      { percent: 35, message: 'Querying ChatGPT...', delay: 2000 },
+      { percent: 45, message: 'Processing ChatGPT responses...', delay: 3000 },
+      { percent: 55, message: 'Querying Claude...', delay: 2000 },
+      { percent: 65, message: 'Processing Claude responses...', delay: 3000 },
+      { percent: 75, message: 'Querying Perplexity...', delay: 2000 },
+      { percent: 85, message: 'Processing all AI responses...', delay: 3000 }
     ];
 
-    let currentStep = 0;
-    const updateProgress = async () => {
-      if (currentStep < progressSteps.length) {
-        const step = progressSteps[currentStep];
-        await prisma.analysisJob.update({
-          where: { id: jobId },
-          data: {
-            progressPercent: step.percent,
-            progressMessage: step.message
-          }
-        });
-        currentStep++;
+    let stepIndex = 0;
+    const progressInterval = setInterval(async () => {
+      if (stepIndex < analysisProgressSteps.length) {
+        const step = analysisProgressSteps[stepIndex];
+        await updateProgress(step.percent, step.message);
+        stepIndex++;
       }
-    };
-
-    // Set up progress interval
-    const progressInterval = setInterval(updateProgress, 3000);
+    }, 4000); // Update every 4 seconds during analysis
 
     try {
-      // Run the actual analysis
-      const analysisResult = await AEOAnalysisService.runAnalysis(analysisRequest);
+      // Wait for the analysis to complete
+      const analysisResult = await analysisPromise;
 
       // Clear the progress interval
       clearInterval(progressInterval);
+
+      // Final stages (85-100%)
+      await updateProgress(90, 'Analyzing website content...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      await updateProgress(95, 'Aggregating results and saving data...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Complete the job
       await prisma.analysisJob.update({
@@ -255,7 +282,8 @@ async function processManualAnalysisJob(jobId: string, analysisRequest: ManualAn
         }
       });
 
-      console.log(`✅ Manual analysis job ${jobId} completed successfully`);
+      const totalTime = Math.round((Date.now() - analysisStartTime) / 1000);
+      console.log(`✅ Manual analysis job ${jobId} completed successfully in ${totalTime}s`);
 
     } catch (analysisError) {
       clearInterval(progressInterval);

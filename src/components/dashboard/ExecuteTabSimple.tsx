@@ -194,7 +194,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
     setError(null);
     setResult(null);
     setProgress(0);
-    setProgressMessage('Initializing analysis...');
+    setProgressMessage('Initializing analysis... (estimated 4 minutes)');
 
 
     try {
