@@ -14,10 +14,11 @@ export default function HeroSection({ onCreateAccount }: HeroSectionProps) {
           {/* Left Column - Text Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-              Boost your site&apos;s rank among the top AI models
+              Track Your Brand&apos;s AI Engine Visibility
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 mb-6 leading-relaxed">
-              Increase exposure to millions of customers as AI usages continue to soar.
+              Monitor how ChatGPT, Claude, Perplexity, Google AI Overviews, and more recommend your business. 
+              Get AEO insights to improve your brand visibility in AI search results.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-8 sm:mb-12">
               <Link href="/dashboard" className="bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-gray-600 transition-colors font-medium shadow-lg text-sm">

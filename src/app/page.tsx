@@ -55,10 +55,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Track Your Progress with Real-Time Analytics
+              Answers Engine Optimization (AEO) Analytics Dashboard
             </h2>
             <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              Monitor your website&apos;s visibility across AI engines and watch your rankings improve over time
+              Track your brand&apos;s visibility across AI search engines. Monitor GEO performance and optimize for Generative Engine Optimization to improve how AI models recommend your business.
             </p>
           </div>
 
@@ -87,23 +87,23 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-400 mb-1">+42%</div>
-                <p className="text-sm text-gray-400">Average visibility increase</p>
+                <p className="text-sm text-gray-400">Average brand visibility boost</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400 mb-1">5 AI Engines</div>
-                <p className="text-sm text-gray-400">Tracked simultaneously</p>
+                <div className="text-2xl font-bold text-blue-400 mb-1">4 AI Engines</div>
+                <p className="text-sm text-gray-400">ChatGPT, Claude, Perplexity, Google</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400 mb-1">Real-time</div>
-                <p className="text-sm text-gray-400">Performance monitoring</p>
+                <div className="text-2xl font-bold text-purple-400 mb-1">AEO Scoring</div>
+                <p className="text-sm text-gray-400">AI Engine Optimization metrics</p>
               </div>
             </div>
           </div>
 
           <div className="mt-8 text-center">
             <p className="text-gray-300 text-base sm:text-lg">
-              We use a <strong className="text-blue-600">multi-agentic AI workflow</strong> to handle prompt generation, 
-              analysis, and recommendations automatically.
+              Our <strong className="text-blue-600">multi-agentic AI workflow</strong> automatically generates AEO queries, 
+              analyzes brand mentions across AI engines, and provides Answers Engine Optimization recommendations.
             </p>
           </div>
 
@@ -111,10 +111,10 @@ export default function Home() {
           <div className="mt-16 sm:mt-20">
             <div className="text-center mb-12">
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                Research-Backed Ranking Methodology
+                Research-Backed AEO Methodology
               </h3>
               <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-                Our AEO scoring methodology incorporates established research principles and known ranking factors that influence AI search visibility.
+                Our Answers Engine Optimization scoring system uses established research principles to analyze how AI models rank and recommend brands. Get actionable GEO insights for better visibility in AI search results.
               </p>
             </div>
 
@@ -207,17 +207,17 @@ export default function Home() {
             <div className="mt-12 bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-8 border border-gray-600">
               <div className="text-center">
                 <h4 className="text-xl font-bold text-white mb-4">
-                  Built on Established Research Principles
+                  Advanced Answers Engine Optimization Technology
                 </h4>
                 <p className="text-gray-300 mb-6 max-w-3xl mx-auto">
-                  Our methodology draws from established research in natural language processing, information retrieval, and AI system behavior 
-                  to create a comprehensive AEO scoring approach.
+                  Our AEO platform combines research in natural language processing, AI system behavior, and Generative Engine Optimization 
+                  to deliver comprehensive brand visibility insights across AI search engines.
                 </p>
                 <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-300">
-                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Natural Language Processing</span>
-                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Information Retrieval</span>
-                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">AI System Behavior</span>
-                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Search Quality Guidelines</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Answers Engine Optimization</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Generative Engine Optimization</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">Brand Visibility Tracking</span>
+                  <span className="bg-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-600">AI Search Optimization</span>
                 </div>
               </div>
             </div>
@@ -229,30 +229,29 @@ export default function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div>
                   <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                    Track Your Competitors
+                    Compare Brand Visibility vs Competitors  
                   </h3>
                   <p className="text-gray-300 mb-6 text-base sm:text-lg">
-                    See how your website ranks against competitors across AI search engines. 
-                    Identify opportunities and stay ahead of the competition in the age of AI-powered search.
+                    Monitor how AI engines recommend your brand compared to competitors. Track AEO performance gaps and discover GEO opportunities to improve your AI search rankings.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center text-gray-300">
                       <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span>Compare rankings across ChatGPT, Claude, Perplexity, and Google</span>
+                      <span>Track brand mentions across ChatGPT, Claude, Perplexity, Google AI Overviews, and more</span>
                     </div>
                     <div className="flex items-center text-gray-300">
                       <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span>Identify top-performing competitor strategies</span>
+                      <span>Discover which competitors dominate AI search results</span>
                     </div>
                     <div className="flex items-center text-gray-300">
                       <svg className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                      <span>Track competitive positioning over time</span>
+                      <span>Monitor AEO performance trends vs competition</span>
                     </div>
                   </div>
                 </div>
@@ -365,9 +364,9 @@ export default function Home() {
       <div className="bg-gray-900 py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            {/* <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional Reports for SEOs & Businesses</h2> */}
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Professional AEO Reports for Brands & Businesses</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Get your first site analysis free to see how your website ranks across AI engines.
+              Get your first Answers Engine Optimization analysis free. See how AI models recommend your brand and discover opportunities to improve your visibility.
             </p>
           </div>
 
@@ -394,8 +393,8 @@ export default function Home() {
               
               {/* Dashboard Title */}
               <div className="text-center mt-6">
-                <h3 className="text-xl font-bold text-white mb-1">Get Automatic Insights to Boost Your Visibility</h3>
-                <p className="text-gray-400 text-sm">AI-powered recommendations to improve your rankings across all search engines</p>
+                <h3 className="text-xl font-bold text-white mb-1">Get AEO Insights to Boost Your Brand Visibility</h3>
+                <p className="text-gray-400 text-sm">AI-powered recommendations to improve how AI engines recommend your business</p>
               </div>
             </div>
           </div>
@@ -408,8 +407,8 @@ export default function Home() {
                   <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Free Site Analysis</h3>
-              <p className="text-sm sm:text-base text-gray-300">Get your first comprehensive site analysis at no cost. Perfect for businesses wanting to understand their visibility.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Free Brand Visibility Analysis</h3>
+              <p className="text-sm sm:text-base text-gray-300">Get your first comprehensive AEO analysis at no cost. See how AI engines currently recommend your brand.</p>
             </div>
             <div className="text-center">
               <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -417,8 +416,8 @@ export default function Home() {
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">AI-Powered Recommendations</h3>
-              <p className="text-sm sm:text-base text-gray-300">Our multi-agentic AI analyzes your rankings and automatically generates actionable optimization strategies.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">GEO Strategy Recommendations</h3>
+              <p className="text-sm sm:text-base text-gray-300">Our multi-agentic AI analyzes how AI engines rank your brand and generates actionable Generative Engine Optimization strategies.</p>
             </div>
             <div className="text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -426,8 +425,8 @@ export default function Home() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Simple Analysis Process</h3>
-              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for business owners to understand their visibility without technical expertise required.</p>
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Simple AEO Analysis</h3>
+              <p className="text-sm sm:text-base text-gray-300">Easy-to-use platform designed for business owners to track their brand visibility across AI engines without technical expertise.</p>
             </div>
           </div>
 
@@ -463,8 +462,8 @@ export default function Home() {
       <div className="bg-gray-900 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get your first site analysis free. See how your website ranks across all major AI engines and discover 
-            actionable optimization opportunities.
+            Get your first AEO analysis free. See how AI engines recommend your brand and discover 
+            actionable Answers Engine Optimization opportunities to improve your visibility.
           </p>
           <div className="flex justify-center">
             <WebsiteAnalysisInput
