@@ -7,6 +7,7 @@ interface BusinessContext {
   location?: string;
   marketDescription: string;
   keywords: string[];
+  useLocationInAnalysis?: boolean;
 }
 
 interface OptimizedPrompts {
@@ -105,13 +106,21 @@ export class PromptFormationService {
   }
 
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
-    const { industry, location, marketDescription, keywords } = context;
+    const { industry, location, marketDescription, keywords, useLocationInAnalysis } = context;
 
-    // Check if we should use location for this industry
-    const shouldUseLocation = location && !this.isLocationIndependentIndustry(industry);
+    // Check if we should use location based on:
+    // 1. User's explicit preference (useLocationInAnalysis)
+    // 2. Industry type (location-independent industries)
+    const userWantsLocation = useLocationInAnalysis !== false; // Default to true if not specified
+    const industrySupportsLocation = !this.isLocationIndependentIndustry(industry);
+    const shouldUseLocation = location && userWantsLocation && industrySupportsLocation;
     
     if (location && !shouldUseLocation) {
-      console.debug(`🌍 Skipping location "${location}" for location-independent industry: ${industry}`);
+      if (!userWantsLocation) {
+        console.debug(`🌍 Skipping location "${location}" - disabled by user preference (useLocationInAnalysis=false)`);
+      } else if (!industrySupportsLocation) {
+        console.debug(`🌍 Skipping location "${location}" for location-independent industry: ${industry}`);
+      }
     }
 
     try {

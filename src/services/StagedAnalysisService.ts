@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import { JsonValue } from '@prisma/client/runtime/library';
 
 export class StagedAnalysisService {
-  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '7');
+  private static readonly MAX_QUERIES = parseInt(process.env.MAX_AEO_QUERIES || '4');
   private static readonly MAX_RETRIES = 3;
 
   /**
@@ -315,13 +315,20 @@ export class StagedAnalysisService {
       const extractedInfo = job.extractedInfo as Record<string, unknown>;
       const promptService = new PromptFormationService();
       
+      // Get business data to include useLocationInAnalysis preference
+      const business = await prisma.business.findUnique({
+        where: { id: job.businessId! },
+        select: { useLocationInAnalysis: true }
+      });
+      
       // Generate optimized prompts
       const promptResult = await promptService.generateOptimizedPrompts({
         businessName: (extractedInfo.businessName as string) || '',
         industry: (extractedInfo.industry as string) || 'General',
         location: extractedInfo.location as string | undefined,
         marketDescription: (extractedInfo.description as string) || '',
-        keywords: (extractedInfo.keywords as string[]) || []
+        keywords: (extractedInfo.keywords as string[]) || [],
+        useLocationInAnalysis: business?.useLocationInAnalysis
       }, this.MAX_QUERIES);
 
       // Store prompts and move to next stage
@@ -433,7 +440,7 @@ export class StagedAnalysisService {
         const providerStartTime = Date.now();
         
         const queryFunction = (prompt: string) => ModelFactory.queryModel(provider.type, prompt);
-        const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(
+        const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(
           queryFunction, 
           business.websiteName, 
           prompts

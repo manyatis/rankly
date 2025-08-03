@@ -170,180 +170,29 @@ export class AnalyticalEngine {
     return Math.min(1.0, score);
   }
 
+
+  /**
+   * Analyze business mentions across multiple queries using parallel processing
+   */
   static async analyzeWithCustomQueries(
     queryFunction: (query: string) => Promise<string>,
     businessName: string,
     customQueries: string[]
   ): Promise<QueryResult[]> {
     console.debug(`🚀 Starting AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
-
-    console.debug(`🔍 Searching for business name: "${businessName}"`);
-
-    const results: QueryResult[] = [];
-
-    for (let i = 0; i < customQueries.length; i++) {
-      const query = customQueries[i];
-      console.debug(`\n📤 Query ${i + 1}/${customQueries.length}: "${query}"`);
-
-      try {
-        const response = await queryFunction(query);
-        console.debug(`📥 Response length: ${response.length} characters`);
-        console.debug(`📄 Response preview: "${response.substring(0, 200)}..."`);
-
-        const responseLower = response.toLowerCase();
-
-        // Check if the business name appears in the response
-        let mentioned = false;
-        let bestMatch = '';
-        let bestIndex = -1;
-        let matchType = 'none';
-
-        console.debug(`🔎 Searching for business name in response...`);
-
-        // First try exact match
-        const nameIndex = responseLower.indexOf(businessName.toLowerCase());
-        if (nameIndex !== -1) {
-          console.debug(`✅ EXACT MATCH "${businessName}" at position ${nameIndex}`);
-          mentioned = true;
-          bestIndex = nameIndex;
-          bestMatch = businessName;
-          matchType = 'exact';
-        }
-
-        // If no exact match, try fuzzy matching with AI reasoning
-        if (!mentioned) {
-          console.debug(`🔍 No exact match found, trying AI fuzzy matching...`);
-          const fuzzyMatches = this.findFuzzyMatches(businessName, responseLower);
-          if (fuzzyMatches.length > 0) {
-            const match = fuzzyMatches[0];
-            console.debug(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index}`);
-            mentioned = true;
-            bestIndex = match.index;
-            bestMatch = match.match;
-            matchType = 'fuzzy';
-          }
-        }
-
-        if (!mentioned) {
-          console.debug(`❌ Business name NOT found in this response`);
-        } else {
-          console.debug(`🎯 Best match: "${bestMatch}" at position ${bestIndex}`);
-        }
-
-        let rankPosition = 0;
-        let relevanceScore = 0;
-
-        if (mentioned) {
-          // Calculate rank position based on where business appears in response
-          if (bestIndex < 50) rankPosition = 1;
-          else if (bestIndex < 150) rankPosition = 2;
-          else if (bestIndex < 300) rankPosition = 3;
-          else if (bestIndex < 500) rankPosition = 4;
-          else rankPosition = 5;
-
-          console.debug(`📍 Rank position: ${rankPosition} (found at character ${bestIndex})`);
-
-          // Calculate relevance score using extracted method
-          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessName, matchType, query);
-        }
-
-        // Generate word position data using AI analysis
-        let wordPositionData;
-        try {
-          console.debug(`🔍 Generating detailed word position analysis...`);
-          const wordAnalysis = await WordPositionAnalysisService.analyzeWordPositions({
-            businessName,
-            responses: [{
-              id: `query-${i}`,
-              modelName: 'AI-Model',
-              responseText: response,
-              query
-            }],
-            variations: [businessName]
-          });
-
-          if (wordAnalysis.responseAnalyses.length > 0) {
-            const analysis = wordAnalysis.responseAnalyses[0];
-            wordPositionData = {
-              matches: analysis.matches,
-              totalMatches: analysis.totalMatches,
-              averagePosition: analysis.matches.length > 0 ? 
-                analysis.matches.reduce((sum, match) => sum + match.position, 0) / analysis.matches.length : 0,
-              lineNumbers: analysis.matches.map(match => match.lineNumber),
-              businessMentionDensity: analysis.businessMentionDensity
-            };
-            console.debug(`📊 Word position analysis: ${wordPositionData.totalMatches} matches, avg position: ${wordPositionData.averagePosition.toFixed(1)}`);
-          }
-        } catch (error) {
-          console.error(`⚠️ Word position analysis failed, using fallback:`, error);
-          // Fallback to basic position data
-          if (mentioned) {
-            wordPositionData = {
-              matches: [{
-                matchedText: bestMatch,
-                position: bestIndex,
-                lineNumber: this.getLineNumber(response, bestIndex),
-                confidence: matchType === 'exact' ? 100 : 75,
-                matchType: matchType as 'exact' | 'fuzzy' | 'partial',
-                context: this.extractContext(response, bestIndex, bestMatch.length)
-              }],
-              totalMatches: 1,
-              averagePosition: bestIndex,
-              lineNumbers: [this.getLineNumber(response, bestIndex)],
-              businessMentionDensity: (1 / this.countWords(response)) * 100
-            };
-          }
-        }
-
-        results.push({
-          query,
-          response,
-          mentioned,
-          rankPosition,
-          relevanceScore,
-          wordPositionData
-        });
-
-        console.debug(`✅ Query ${i + 1} completed: mentioned=${mentioned}, rank=${rankPosition}, score=${relevanceScore}`);
-
-      } catch (error) {
-        console.error(`❌ Error with query ${i + 1}: "${query}":`, error);
-        results.push({
-          query,
-          response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          mentioned: false,
-          rankPosition: 0,
-          relevanceScore: 0
-        });
-      }
-    }
-
-    console.debug(`🏁 Analysis complete. Processed ${results.length} queries.`);
-    return results;
-  }
-
-  /**
-   * Parallel version of analyzeWithCustomQueries that processes all queries concurrently
-   */
-  static async analyzeWithCustomQueriesParallel(
-    queryFunction: (query: string) => Promise<string>,
-    businessName: string,
-    customQueries: string[]
-  ): Promise<QueryResult[]> {
-    console.debug(`🚀 Starting PARALLEL AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
     console.debug(`🔍 Searching for business name: "${businessName}"`);
 
     // Process all queries in parallel
     const queryPromises = customQueries.map(async (query, index) => {
       const queryStartTime = Date.now();
-      console.debug(`\n📤 Query ${index + 1}/${customQueries.length}: "${query}" (parallel)`);
-      console.log(`🔄 ANALYTICAL_ENGINE - PARALLEL_QUERY_START - Query ${index + 1}: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
+      console.debug(`\n📤 Query ${index + 1}/${customQueries.length}: "${query}"`);
+      console.log(`🔄 ANALYTICAL_ENGINE - QUERY_START - Query ${index + 1}: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
 
       try {
         const response = await queryFunction(query);
         const queryDuration = Date.now() - queryStartTime;
         console.debug(`📥 Response length for query ${index + 1}: ${response.length} characters`);
-        console.log(`⚡ ANALYTICAL_ENGINE - PARALLEL_QUERY_COMPLETE - Query ${index + 1} (${queryDuration}ms, ${response.length} chars)`);;
+        console.log(`⚡ ANALYTICAL_ENGINE - QUERY_COMPLETE - Query ${index + 1} (${queryDuration}ms, ${response.length} chars)`);;
 
         // Choose ranking method based on feature flag
         let mentioned = false;
@@ -505,7 +354,7 @@ export class AnalyticalEngine {
     // Wait for all queries to complete
     const results = await Promise.all(queryPromises);
 
-    console.debug(`🏁 Parallel analysis complete. Processed ${results.length} queries.`);
+    console.debug(`🏁 Analysis complete. Processed ${results.length} queries.`);
     return results;
   }
 

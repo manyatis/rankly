@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PromptFormationService } from '../../../services/PromptFormationService';
-import { AEOAnalysisService } from '../../../services/AEOAnalysisService';
+import { AuthUsageService } from '../../../services/AuthUsageService';
 import { getUser, checkRateLimit, incrementRateLimit } from '../../../lib/auth';
 
 interface GeneratePromptsRequest {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate daily usage limit
-    const authResult = await AEOAnalysisService.validateAuthAndUsage();
+    const authResult = await AuthUsageService.validateAuthAndUsage();
     if (!authResult.isValid) {
       return NextResponse.json(
         { error: authResult.error || 'Authentication failed' },

@@ -93,7 +93,6 @@ export class ModelFactory {
     if (stack.includes('WordPositionAnalysisService')) return 'WORD_ANALYSIS';
     if (stack.includes('WebsiteInfoExtractionService')) return 'WEBSITE_EXTRACT';
     if (stack.includes('StagedAnalysisService')) return 'STAGED_ANALYSIS';
-    if (stack.includes('AEOAnalysisService')) return 'AEO_ANALYSIS';
     if (stack.includes('blog/generate')) return 'BLOG_GEN';
     if (stack.includes('generate-prompts')) return 'API_PROMPT_GEN';
     if (stack.includes('AnalyticalEngine')) return 'ANALYTICAL_ENGINE';

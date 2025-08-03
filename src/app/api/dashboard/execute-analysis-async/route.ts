@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
         websiteName: true,
         industry: true,
         location: true,
-        description: true
+        description: true,
+        useLocationInAnalysis: true
       }
     });
 
