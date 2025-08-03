@@ -266,7 +266,7 @@ Required environment variables:
 #### Current Production Status
 - **Build successful** with all TypeScript issues resolved
 - **Background processing** fully operational with job persistence
-- **Enhanced prompt system** generating 10 targeted queries with direct business targeting
+- **Enhanced prompt system** generating 7 targeted queries with direct business targeting
 - **Mobile-optimized** dashboard with improved UX and navigation
 - **Comprehensive usage tracking** with real-time limit displays
 
@@ -288,7 +288,7 @@ Required environment variables:
 - **Per-Query Point System** - Each query can contribute max 10 points (normal) or 4 points (direct business queries)
 - **Direct Query Reduction** - Direct business queries score 25% of normal (0.25x multiplier) to prevent gaming
 - **Eliminated Double-Counting** - Removed duplicate position scoring in RankingEngine, uses only AnalyticalEngine relevance scores
-- **Scaled Point Distribution** - Total possible score: 94 points (9×10 + 1×4) for typical 10-query analysis
+- **Scaled Point Distribution** - Total possible score: 64 points (6×10 + 1×4) for typical 7-query analysis
 - **Consistent Scoring** - All historical scoring inconsistencies resolved with proper point scaling
 
 ###### Graph Data Filtering (Complete)
