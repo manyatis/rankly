@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { AEOAnalysisService } from '@/services/AEOAnalysisService';
 import { SubscriptionTiers } from '@/lib/subscription-tiers';
 
 // Vercel cron job to run recurring scans
@@ -92,35 +91,21 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
           }
         });
 
-        // Prepare analysis request
-        const analysisRequest = {
-          businessId: business.id,
-          businessName: business.websiteName,
-          industry: business.industry || 'Technology',
-          location: business.useLocationInAnalysis && business.location ? business.location : '',
-          marketDescription: business.description || `Recurring scan for ${business.websiteName}`,
-          keywords: recentInput?.keywords || [business.websiteName, 'business', 'services'],
-          websiteUrl: business.websiteUrl || undefined,
-          providers: [
-            { name: 'OpenAI GPT-4', model: 'gpt-4', color: '#10B981', type: 'openai' as const },
-            { name: 'Claude 3.5 Sonnet', model: 'claude-3-5-sonnet-20241022', color: '#8B5CF6', type: 'anthropic' as const },
-            { name: 'Perplexity Pro', model: 'llama-3.1-sonar-large-128k-online', color: '#F59E0B', type: 'perplexity' as const }
-          ],
-          customPrompts: recentInput?.prompts || undefined
-        };
+        console.log(`🚀 Creating background job for ${business.websiteName}...`);
 
-        console.log(`🚀 Running analysis for ${business.websiteName}...`);
-
-        // Create an analysis job for tracking
+        // Create an analysis job as 'not-started' - the BackgroundTaskManager will process it
         const job = await prisma.analysisJob.create({
           data: {
-            websiteUrl: `recurring-scan-${business.id}`,
+            websiteUrl: business.websiteUrl || `https://${business.websiteName}`,
             userId: primaryUser.id,
             organizationId: business.organizations[0]?.organizationId || 0,
             businessId: business.id,
-            status: 'processing',
-            progressPercent: 50,
-            progressMessage: 'Running recurring scan analysis...',
+            status: 'not-started',
+            currentStep: 'not-started',
+            progressPercent: 0,
+            progressMessage: 'Queued for recurring scan...',
+            inProgress: false,
+            retryCount: 0,
             extractedInfo: {
               businessName: business.websiteName,
               industry: business.industry,
@@ -128,39 +113,14 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
               description: business.description,
               keywords: recentInput?.keywords || [],
               isRecurringScan: true,
-              scanFrequency: business.scanFrequency
-            }
+              scanFrequency: business.scanFrequency,
+              isManualAnalysis: true // Skip website extraction since we already have business data
+            },
+            prompts: recentInput?.prompts ? { queries: recentInput.prompts } : undefined
           }
         });
 
-        let analysisResult;
-        try {
-          // Run the analysis (this will bypass user auth since it's a cron job)
-          analysisResult = await AEOAnalysisService.runAnalysisForCron(analysisRequest, primaryUser.id);
-
-          // Update job as completed
-          await prisma.analysisJob.update({
-            where: { id: job.id },
-            data: {
-              status: 'completed',
-              progressPercent: 100,
-              progressMessage: 'Recurring scan completed',
-              analysisResult: analysisResult as object,
-              completedAt: new Date()
-            }
-          });
-        } catch (analysisError) {
-          // Update job as failed
-          await prisma.analysisJob.update({
-            where: { id: job.id },
-            data: {
-              status: 'failed',
-              error: analysisError instanceof Error ? analysisError.message : 'Analysis failed',
-              completedAt: new Date()
-            }
-          });
-          throw analysisError;
-        }
+        console.log(`✅ Created background job ${job.id} for ${business.websiteName}`);
 
         // Calculate next scan date based on frequency
         const nextScanDate = calculateNextScanDate(business.scanFrequency || 'weekly');
@@ -178,13 +138,12 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
         results.push({
           businessId: business.id,
           businessName: business.websiteName,
-          status: 'success',
-          averageScore: analysisResult.results.length > 0 ? 
-            Math.round(analysisResult.results.reduce((sum, r) => sum + r.aeoScore, 0) / analysisResult.results.length) : null,
+          status: 'queued',
+          jobId: job.id,
           nextScanDate: nextScanDate.toISOString()
         });
 
-        console.log(`✅ Successfully scanned ${business.websiteName}, next scan: ${nextScanDate.toISOString()}`);
+        console.log(`✅ Successfully queued ${business.websiteName} for background processing, next scan: ${nextScanDate.toISOString()}`);
 
       } catch (error) {
         console.error(`❌ Error scanning business ${business.id}:`, error);
@@ -208,15 +167,16 @@ export async function GET(_request: NextRequest) { // eslint-disable-line @types
       }
     }
 
-    console.log(`🏁 Recurring scans completed: ${scannedCount} successful, ${errorCount} errors`);
+    console.log(`🏁 Recurring scans completed: ${scannedCount} jobs queued, ${errorCount} errors`);
 
     return NextResponse.json({
       success: true,
       summary: {
         totalBusinesses: businessesToScan.length,
-        scannedSuccessfully: scannedCount,
+        jobsQueued: scannedCount,
         errors: errorCount,
-        timestamp: now.toISOString()
+        timestamp: now.toISOString(),
+        message: 'Jobs queued for background processing'
       },
       results
     });
