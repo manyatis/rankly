@@ -314,6 +314,155 @@ export class AnalyticalEngine {
     return results;
   }
 
+  /**
+   * Parallel version of analyzeWithCustomQueries that processes all queries concurrently
+   */
+  static async analyzeWithCustomQueriesParallel(
+    queryFunction: (query: string) => Promise<string>,
+    businessName: string,
+    customQueries: string[]
+  ): Promise<QueryResult[]> {
+    console.debug(`🚀 Starting PARALLEL AI analysis for "${businessName}" with ${customQueries.length} custom queries`);
+    console.debug(`🔍 Searching for business name: "${businessName}"`);
+
+    // Process all queries in parallel
+    const queryPromises = customQueries.map(async (query, index) => {
+      console.debug(`\n📤 Query ${index + 1}/${customQueries.length}: "${query}" (parallel)`);
+
+      try {
+        const response = await queryFunction(query);
+        console.debug(`📥 Response length for query ${index + 1}: ${response.length} characters`);
+
+        const responseLower = response.toLowerCase();
+
+        // Check if the business name appears in the response
+        let mentioned = false;
+        let bestMatch = '';
+        let bestIndex = -1;
+        let matchType = 'none';
+
+        // First try exact match
+        const nameIndex = responseLower.indexOf(businessName.toLowerCase());
+        if (nameIndex !== -1) {
+          console.debug(`✅ EXACT MATCH "${businessName}" at position ${nameIndex} (query ${index + 1})`);
+          mentioned = true;
+          bestIndex = nameIndex;
+          bestMatch = businessName;
+          matchType = 'exact';
+        }
+
+        // If no exact match, try fuzzy matching
+        if (!mentioned) {
+          console.debug(`🔍 No exact match found, trying AI fuzzy matching... (query ${index + 1})`);
+          const fuzzyMatches = this.findFuzzyMatches(businessName, responseLower);
+          if (fuzzyMatches.length > 0) {
+            const match = fuzzyMatches[0];
+            console.debug(`🎯 FUZZY MATCH "${match.match}" (score: ${match.score}) at position ${match.index} (query ${index + 1})`);
+            mentioned = true;
+            bestIndex = match.index;
+            bestMatch = match.match;
+            matchType = 'fuzzy';
+          }
+        }
+
+        if (!mentioned) {
+          console.debug(`❌ Business name NOT found in response for query ${index + 1}`);
+        }
+
+        let rankPosition = 0;
+        let relevanceScore = 0;
+
+        if (mentioned) {
+          // Calculate rank position based on where business appears in response
+          if (bestIndex < 50) rankPosition = 1;
+          else if (bestIndex < 150) rankPosition = 2;
+          else if (bestIndex < 300) rankPosition = 3;
+          else if (bestIndex < 500) rankPosition = 4;
+          else rankPosition = 5;
+
+          console.debug(`📍 Rank position: ${rankPosition} (found at character ${bestIndex}) for query ${index + 1}`);
+
+          // Calculate relevance score
+          relevanceScore = this.calculateRelevanceScore(response, responseLower, bestMatch, bestIndex, businessName, matchType, query);
+        }
+
+        // Generate word position data
+        let wordPositionData;
+        try {
+          console.debug(`🔍 Generating detailed word position analysis for query ${index + 1}...`);
+          const wordAnalysis = await WordPositionAnalysisService.analyzeWordPositions({
+            businessName,
+            responses: [{
+              id: `query-${index}`,
+              modelName: 'AI-Model',
+              responseText: response,
+              query
+            }],
+            variations: [businessName]
+          });
+
+          if (wordAnalysis.responseAnalyses.length > 0) {
+            const analysis = wordAnalysis.responseAnalyses[0];
+            wordPositionData = {
+              matches: analysis.matches,
+              totalMatches: analysis.totalMatches,
+              averagePosition: analysis.matches.length > 0 ? 
+                analysis.matches.reduce((sum, match) => sum + match.position, 0) / analysis.matches.length : 0,
+              lineNumbers: analysis.matches.map(match => match.lineNumber),
+              businessMentionDensity: analysis.businessMentionDensity
+            };
+          }
+        } catch (error) {
+          console.error(`⚠️ Word position analysis failed for query ${index + 1}, using fallback:`, error);
+          // Fallback to basic position data
+          if (mentioned) {
+            wordPositionData = {
+              matches: [{
+                matchedText: bestMatch,
+                position: bestIndex,
+                lineNumber: this.getLineNumber(response, bestIndex),
+                confidence: matchType === 'exact' ? 100 : 75,
+                matchType: matchType as 'exact' | 'fuzzy' | 'partial',
+                context: this.extractContext(response, bestIndex, bestMatch.length)
+              }],
+              totalMatches: 1,
+              averagePosition: bestIndex,
+              lineNumbers: [this.getLineNumber(response, bestIndex)],
+              businessMentionDensity: (1 / this.countWords(response)) * 100
+            };
+          }
+        }
+
+        console.debug(`✅ Query ${index + 1} completed: mentioned=${mentioned}, rank=${rankPosition}, score=${relevanceScore}`);
+
+        return {
+          query,
+          response,
+          mentioned,
+          rankPosition,
+          relevanceScore,
+          wordPositionData
+        };
+
+      } catch (error) {
+        console.error(`❌ Error with query ${index + 1}: "${query}":`, error);
+        return {
+          query,
+          response: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          mentioned: false,
+          rankPosition: 0,
+          relevanceScore: 0
+        };
+      }
+    });
+
+    // Wait for all queries to complete
+    const results = await Promise.all(queryPromises);
+
+    console.debug(`🏁 Parallel analysis complete. Processed ${results.length} queries.`);
+    return results;
+  }
+
   private static getLineNumber(text: string, position: number): number {
     const beforePosition = text.substring(0, position);
     return beforePosition.split('\n').length;

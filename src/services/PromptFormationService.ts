@@ -15,15 +15,104 @@ interface OptimizedPrompts {
 
 export class PromptFormationService {
   private openai: OpenAI;
+  
+  // Industries that typically operate nationally/globally and don't benefit from location-based queries
+  private static readonly LOCATION_INDEPENDENT_INDUSTRIES = new Set([
+    'technology',
+    'software',
+    'saas',
+    'banking',
+    'finance',
+    'fintech',
+    'insurance',
+    'telecommunications',
+    'telecom',
+    'cybersecurity',
+    'cloud computing',
+    'data analytics',
+    'artificial intelligence',
+    'ai',
+    'machine learning',
+    'blockchain',
+    'cryptocurrency',
+    'crypto',
+    'e-commerce',
+    'ecommerce',
+    'online retail',
+    'digital marketing',
+    'seo',
+    'web development',
+    'mobile development',
+    'app development',
+    'game development',
+    'enterprise software',
+    'hr software',
+    'crm',
+    'erp',
+    'project management',
+    'collaboration tools',
+    'productivity software',
+    'devops',
+    'cloud services',
+    'hosting',
+    'domain services',
+    'payment processing',
+    'online education',
+    'edtech',
+    'streaming services',
+    'digital media',
+    'online gaming',
+    'venture capital',
+    'private equity',
+    'investment banking',
+    'hedge fund',
+    'stock trading',
+    'forex',
+    'consulting',
+    'management consulting',
+    'it consulting',
+    'business intelligence',
+    'market research',
+    'analytics',
+    'big data'
+  ]);
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
   }
+  
+  /**
+   * Check if an industry typically operates location-independently
+   */
+  private isLocationIndependentIndustry(industry: string): boolean {
+    const normalizedIndustry = industry.toLowerCase().trim();
+    
+    // Check exact match
+    if (PromptFormationService.LOCATION_INDEPENDENT_INDUSTRIES.has(normalizedIndustry)) {
+      return true;
+    }
+    
+    // Check if industry contains any of the location-independent keywords
+    for (const keyword of PromptFormationService.LOCATION_INDEPENDENT_INDUSTRIES) {
+      if (normalizedIndustry.includes(keyword)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 
   async generateOptimizedPrompts(context: BusinessContext, queryCount: number = 2): Promise<OptimizedPrompts> {
     const { industry, location, marketDescription, keywords } = context;
+
+    // Check if we should use location for this industry
+    const shouldUseLocation = location && !this.isLocationIndependentIndustry(industry);
+    
+    if (location && !shouldUseLocation) {
+      console.debug(`🌍 Skipping location "${location}" for location-independent industry: ${industry}`);
+    }
 
     try {
       // Reserve one slot for direct business query
@@ -33,7 +122,7 @@ export class PromptFormationService {
       const systemPrompt = await PromptTemplateLoader.loadAEOSystemPrompt();
       const userPrompt = await PromptTemplateLoader.loadGenerateQueriesPrompt({
         industry,
-        location: location ? `\n- Location: ${location}\n\n` : '',
+        location: shouldUseLocation ? `\n- Location: ${location}\n\n` : '',
         marketDescription,
         keywords: keywords.join(', '),
         queryCount: aiGeneratedCount.toString()
@@ -145,7 +234,10 @@ export class PromptFormationService {
   }
 
   private generateDirectBusinessQuery(context: BusinessContext): string {
-    const { businessName, location } = context;
+    const { businessName, location, industry } = context;
+    
+    // Check if we should use location for this industry
+    const shouldUseLocation = location && !this.isLocationIndependentIndustry(industry);
     
     // Create variations of direct business queries
     const queryTemplates = [
@@ -158,8 +250,8 @@ export class PromptFormationService {
       `${businessName} business information`
     ];
     
-    // If location is provided, add location-specific queries
-    if (location) {
+    // If location is provided AND it's a location-dependent industry, add location-specific queries
+    if (shouldUseLocation) {
       queryTemplates.push(
         `${businessName} in ${location}`,
         `Tell me about ${businessName} located in ${location}`,

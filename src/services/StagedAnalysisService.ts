@@ -598,14 +598,18 @@ export class StagedAnalysisService {
           }
         });
 
-        // Run analysis for each provider
-        const results = [];
-        let completedProviders = 0;
-
-        for (const provider of providers) {
+        // Run analysis for all providers in parallel
+        console.debug(`🚀 Running parallel analysis for ${providers.length} providers...`);
+        
+        const providerPromises = providers.map(async (provider) => {
           try {
+            console.debug(`🤖 Starting analysis for ${provider.name}...`);
+            const startTime = Date.now();
+            
             const queryFunction = (prompt: string) => ModelFactory.queryModel(provider.type, prompt);
-            const queryResults = await AnalyticalEngine.analyzeWithCustomQueries(
+            
+            // Use the new parallel analysis method
+            const queryResults = await AnalyticalEngine.analyzeWithCustomQueriesParallel(
               queryFunction, 
               business.websiteName, 
               prompts
@@ -625,7 +629,10 @@ export class StagedAnalysisService {
               };
             });
 
-            results.push({
+            const endTime = Date.now();
+            console.debug(`✅ ${provider.name} analysis completed in ${(endTime - startTime) / 1000}s`);
+
+            return {
               provider,
               aeoScore: scoring.aeoScore,
               factors: scoring.factors,
@@ -634,8 +641,24 @@ export class StagedAnalysisService {
               overallVisibility: scoring.overallVisibility,
               competitorAnalysis: scoring.competitorAnalysis,
               competitorScores
-            });
+            };
 
+          } catch (error) {
+            console.error(`❌ Failed to analyze with ${provider.name}:`, error);
+            return null; // Return null for failed providers
+          }
+        });
+
+        // Wait for all providers to complete
+        const allResults = await Promise.all(providerPromises);
+        
+        // Filter out failed providers and update progress
+        const results = [];
+        let completedProviders = 0;
+        
+        for (const result of allResults) {
+          if (result !== null) {
+            results.push(result);
             completedProviders++;
             
             // Update progress
@@ -647,10 +670,13 @@ export class StagedAnalysisService {
                 progressMessage: `Analyzed ${completedProviders}/${providers.length} AI models...`
               }
             });
-
-          } catch (error) {
-            console.error(`Failed to analyze with ${provider.name}:`, error);
           }
+        }
+        
+        console.debug(`🏁 All providers completed. Successful: ${results.length}/${providers.length}`);
+        
+        if (results.length === 0) {
+          throw new Error('All AI providers failed to analyze');
         }
 
         // Save analysis results to database
