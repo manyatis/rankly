@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import LoginModal from '../components/LoginModal';
@@ -16,12 +16,30 @@ export default function Home() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
+  // Check for pending redirect when user logs in
+  useEffect(() => {
+    if (user && !loading) {
+      const pendingRedirect = localStorage.getItem('pending-analysis-redirect');
+      if (pendingRedirect) {
+        localStorage.removeItem('pending-analysis-redirect');
+        router.push(pendingRedirect);
+      }
+    }
+  }, [user, loading, router]);
+
   const handleCreateAccount = () => {
     setLoginModalOpen(true);
   };
 
   const handleLogin = () => {
     setLoginModalOpen(false);
+    
+    // Check if there's a pending redirect after login
+    const pendingRedirect = localStorage.getItem('pending-analysis-redirect');
+    if (pendingRedirect) {
+      localStorage.removeItem('pending-analysis-redirect');
+      router.push(pendingRedirect);
+    }
   };
 
   const handlePlanSelection = () => {

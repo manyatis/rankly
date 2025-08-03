@@ -37,6 +37,13 @@ export default function WebsiteAnalysisInput({
 
     // Check if user is authenticated
     if (status === 'unauthenticated') {
+      // Store the intended analysis URL for after login
+      const params = new URLSearchParams({
+        analyzeUrl: normalizedUrl,
+        autoStart: 'true'
+      });
+      localStorage.setItem('pending-analysis-redirect', `/dashboard?${params.toString()}`);
+      
       if (onLoginRequired) {
         onLoginRequired();
       }

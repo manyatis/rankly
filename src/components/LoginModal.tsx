@@ -32,9 +32,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     setError('');
     try {
       if (provider === 'Google') {
-        // Get current URL to redirect back to after login
-        const currentUrl = window.location.href;
-        await signIn('google', { callbackUrl: currentUrl });
+        // Check for pending analysis redirect, otherwise use current URL
+        const pendingRedirect = localStorage.getItem('pending-analysis-redirect');
+        const redirectUrl = pendingRedirect || window.location.href;
+        
+        // Clear the pending redirect since we're using it
+        if (pendingRedirect) {
+          localStorage.removeItem('pending-analysis-redirect');
+        }
+        
+        await signIn('google', { callbackUrl: redirectUrl });
         onClose(); // Close modal after initiating Google sign-in
       } else {
         // TODO: Implement other social providers
