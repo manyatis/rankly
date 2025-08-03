@@ -16,11 +16,13 @@ interface LinkWebsiteTabProps {
 }
 
 interface AnalysisJob {
-  jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  id: string;
+  status: 'not-started' | 'processing' | 'prompt-forming' | 'model-analysis' | 'completed' | 'failed';
+  currentStep: string;
   progressPercent: number;
-  progressMessage: string;
+  progressMessage?: string;
   error?: string;
+  businessId?: number;
   business?: {
     id: number;
     websiteName: string;
@@ -66,9 +68,8 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   const [step, setStep] = useState<'input' | 'results'>('input');
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
-  const [autoStartTriggered, setAutoStartTriggered] = useState(false);
   const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
-  const [useAsyncMode] = useState(true); // Use async mode by default
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [usageInfo, setUsageInfo] = useState<{
     usageCount: number;
     maxUsage: number | string;
@@ -77,34 +78,24 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
   } | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(true);
 
-  // Auto-populate URL and start analysis if provided from hero section
+  // Auto-populate URL if provided from hero section
   useEffect(() => {
-    if (pendingAnalysisUrl && !websiteUrl && !autoStartTriggered) {
+    if (pendingAnalysisUrl && !websiteUrl) {
       setWebsiteUrl(pendingAnalysisUrl);
-      setAutoStartTriggered(true);
       if (onClearPendingUrl) {
         onClearPendingUrl();
       }
-      
-      // Auto-start the analysis after a brief delay to ensure state is set
-      setTimeout(() => {
-        handleAnalysisStart(pendingAnalysisUrl);
-      }, 100);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingAnalysisUrl, websiteUrl, autoStartTriggered, onClearPendingUrl]);
+  }, [pendingAnalysisUrl, websiteUrl, onClearPendingUrl]);
 
-  // Cleanup interval on unmount
+  // Cleanup polling interval on unmount
   useEffect(() => {
     return () => {
-      const windowWithInterval = window as Window & { __analysisInterval?: NodeJS.Timeout };
-      const interval = windowWithInterval.__analysisInterval;
-      if (interval) {
-        clearInterval(interval);
-        delete windowWithInterval.__analysisInterval;
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
     };
-  }, []);
+  }, [pollingInterval]);
 
   // Fetch usage info on component mount
   useEffect(() => {
@@ -130,6 +121,76 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
     }
   };
 
+  const startJobPolling = useCallback((jobId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const statusResponse = await fetch(`/api/analyze-url-async?jobId=${jobId}`);
+        if (!statusResponse.ok) {
+          console.error('Failed to fetch job status');
+          return;
+        }
+        
+        const jobStatus = await statusResponse.json();
+        setAnalysisJob(jobStatus);
+        setProgress(jobStatus.progressPercent || 0);
+        setProgressMessage(jobStatus.progressMessage || 'Processing...');
+        
+        if (jobStatus.status === 'completed') {
+          if (pollingInterval) {
+            clearInterval(pollingInterval);
+            setPollingInterval(null);
+          }
+          
+          // Get business info from completed job
+          if (jobStatus.businessId) {
+            // Fetch business details for results display
+            try {
+              const businessResponse = await fetch(`/api/dashboard/businesses/${jobStatus.businessId}`);
+              if (businessResponse.ok) {
+                const businessData = await businessResponse.json();
+                setResult({
+                  business: {
+                    id: businessData.id,
+                    name: businessData.websiteName,
+                    url: businessData.websiteUrl,
+                    industry: businessData.industry,
+                    location: businessData.location,
+                    description: businessData.description
+                  },
+                  extractedInfo: jobStatus.extractedInfo || {
+                    businessName: businessData.websiteName,
+                    industry: businessData.industry,
+                    location: businessData.location,
+                    description: businessData.description,
+                    keywords: [],
+                    confidence: 100
+                  }
+                });
+                setStep('results');
+              }
+            } catch (error) {
+              console.error('Failed to fetch business details:', error);
+            }
+          }
+          
+          setIsAnalyzing(false);
+          await fetchUsageInfo();
+        } else if (jobStatus.status === 'failed') {
+          if (pollingInterval) {
+            clearInterval(pollingInterval);
+            setPollingInterval(null);
+          }
+          setError(jobStatus.error || 'Analysis failed');
+          setIsAnalyzing(false);
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+    
+    setPollingInterval(interval);
+  }, [pollingInterval]);
+
   const handleAnalysisStart = useCallback(async (urlToAnalyze: string) => {
     const trimmedUrl = urlToAnalyze.trim();
     if (!trimmedUrl) {
@@ -146,152 +207,35 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
     setIsAnalyzing(true);
     setError(null);
     setProgress(0);
-    setProgressMessage('Initializing analysis... (estimated 4 minutes)');
+    setProgressMessage('Creating analysis job...');
 
-    // Progress tracking with realistic timing
-    const progressSteps = [
-      { progress: 5, message: 'Connecting to website...', duration: 1000 },
-      { progress: 15, message: 'Extracting website content...', duration: 2000 },
-      { progress: 30, message: 'AI analyzing business information...', duration: 3000 },
-      { progress: 45, message: 'Identifying industry and keywords...', duration: 2000 },
-      { progress: 60, message: 'Generating AEO analysis prompts...', duration: 3000 },
-      { progress: 75, message: 'Running queries across AI platforms...', duration: 8000 },
-      { progress: 90, message: 'Processing rankings and competitors...', duration: 2000 },
-      { progress: 95, message: 'Saving results to your dashboard...', duration: 1000 },
-    ];
+    try {
+      // Create analysis job
+      const response = await fetch('/api/analyze-url-async', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ websiteUrl: normalizedUrl }),
+      });
 
-    // const currentStepIndex = 0; // Unused - kept for potential future use
-    const startTime = Date.now();
+      const data = await response.json();
 
-    // Update progress based on realistic timing
-    const updateProgress = () => {
-      const elapsed = Date.now() - startTime;
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to start analysis');
+      }
+
+      // Store the job info and start polling
+      setAnalysisJob(data);
+      startJobPolling(data.jobId);
       
-      // Find the appropriate step based on elapsed time
-      let cumulativeTime = 0;
-      for (let i = 0; i < progressSteps.length; i++) {
-        cumulativeTime += progressSteps[i].duration;
-        if (elapsed < cumulativeTime) {
-          const step = progressSteps[i];
-          const stepStartTime = cumulativeTime - step.duration;
-          const stepProgress = Math.min((elapsed - stepStartTime) / step.duration, 1);
-          
-          const prevProgress = i > 0 ? progressSteps[i - 1].progress : 0;
-          const currentProgress = prevProgress + (step.progress - prevProgress) * stepProgress;
-          
-          setProgress(Math.min(currentProgress, step.progress));
-          if (stepProgress < 1) {
-            setProgressMessage(step.message);
-          }
-          break;
-        }
-      }
-    };
-
-    if (useAsyncMode) {
-      // Use async endpoint for background processing
-      try {
-        const response = await fetch('/api/analyze-url-async', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ websiteUrl: normalizedUrl }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to start analysis');
-        }
-
-        // Store the job info
-        setAnalysisJob(data);
-        
-        // Start polling for job status
-        const pollInterval = setInterval(async () => {
-          try {
-            const statusResponse = await fetch(`/api/analyze-url-async?jobId=${data.jobId}`);
-            const jobStatus = await statusResponse.json();
-            
-            setAnalysisJob(jobStatus);
-            setProgress(jobStatus.progressPercent);
-            setProgressMessage(jobStatus.progressMessage);
-            
-            if (jobStatus.status === 'completed') {
-              clearInterval(pollInterval);
-              
-              // Transform to result format
-              setResult({
-                business: jobStatus.business,
-                extractedInfo: jobStatus.extractedInfo,
-              });
-              setStep('results');
-              setIsAnalyzing(false);
-              
-              // Refresh usage info after successful analysis
-              await fetchUsageInfo();
-            } else if (jobStatus.status === 'failed') {
-              clearInterval(pollInterval);
-              throw new Error(jobStatus.error || 'Analysis failed');
-            }
-          } catch (error) {
-            console.error('Error polling job status:', error);
-          }
-        }, 1000); // Poll every second
-        
-        // Store interval ID for cleanup
-        (window as Window & { __analysisInterval?: NodeJS.Timeout }).__analysisInterval = pollInterval;
-        
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to start analysis');
-        setIsAnalyzing(false);
-        setProgress(0);
-        setProgressMessage('');
-      }
-    } else {
-      // Original synchronous mode
-      const progressInterval = setInterval(updateProgress, 100);
-
-      try {
-        const response = await fetch('/api/analyze-url', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ websiteUrl: normalizedUrl }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to analyze website');
-        }
-
-        // Complete the progress
-        clearInterval(progressInterval);
-        setProgress(100);
-        setProgressMessage('Analysis complete!');
-        
-        // Show completion for a moment before showing results
-        setTimeout(async () => {
-          setResult(data);
-          setStep('results');
-          setIsAnalyzing(false);
-          
-          // Refresh usage info after successful analysis
-          await fetchUsageInfo();
-        }, 500);
-        
-      } catch (err) {
-        clearInterval(progressInterval);
-        setError(err instanceof Error ? err.message : 'Failed to analyze website');
-        setIsAnalyzing(false);
-        setProgress(0);
-        setProgressMessage('');
-      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start analysis');
+      setIsAnalyzing(false);
+      setProgress(0);
+      setProgressMessage('');
     }
-  }, [useAsyncMode]);
+  }, [startJobPolling]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -480,7 +424,7 @@ export default function LinkWebsiteTab({ onWebsiteLinked, websiteLimitInfo, pend
                   isLoading={isAnalyzing}
                   progress={progress}
                   message={progressMessage}
-                  subtitle={useAsyncMode ? "Analysis running in background - You can navigate away" : "This usually takes 20-30 seconds - Please keep this tab open"}
+                  subtitle="Analysis running in background - You can navigate away and return later"
                   className="mt-6"
                 />
               </form>

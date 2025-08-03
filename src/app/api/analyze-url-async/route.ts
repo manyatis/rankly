@@ -46,29 +46,28 @@ export async function POST(request: NextRequest) {
       }, { status: 429 });
     }
 
-    // Create the analysis job
+    // Create the analysis job with 'not-started' status
     const job = await prisma.analysisJob.create({
       data: {
         websiteUrl: normalizedUrl,
         userId: user.id,
         organizationId: user.organizationId,
-        status: 'pending',
+        status: 'not-started',
+        currentStep: 'not-started',
         progressPercent: 0,
-        progressMessage: 'Analysis job created'
+        progressMessage: 'Analysis job created and queued for processing'
       }
     });
 
-    console.log(`📊 Created analysis job ${job.id} for URL: ${normalizedUrl}`);
+    console.log(`📊 Created analysis job ${job.id} for URL: ${normalizedUrl} with status: not-started`);
 
-    // Start processing the job asynchronously
-    processAnalysisJob(job.id).catch(error => {
-      console.error(`❌ Error processing job ${job.id}:`, error);
-    });
+    // The job will be picked up by the cron processors
+    // No need to process it here
 
     return NextResponse.json({
       jobId: job.id,
-      status: 'pending',
-      message: 'Analysis job created successfully'
+      status: 'not-started',
+      message: 'Analysis job created successfully and queued for processing'
     });
 
   } catch (error) {
@@ -191,180 +190,4 @@ async function checkWebsiteLimits(userId: number) {
     tier: user.subscriptionTier,
     isUnlimited
   };
-}
-
-// Background job processor
-async function processAnalysisJob(jobId: string) {
-  try {
-    // Import services dynamically to avoid circular dependencies
-    const { WebsiteAnalysisService } = await import('../../../services/WebsiteAnalysisService');
-    const { AEOAnalysisService } = await import('../../../services/AEOAnalysisService');
-
-    // Update job status to processing
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        status: 'processing',
-        progressPercent: 5,
-        progressMessage: 'Starting website analysis...'
-      }
-    });
-
-    const job = await prisma.analysisJob.findUnique({
-      where: { id: jobId }
-    });
-
-    if (!job) {
-      throw new Error('Job not found');
-    }
-
-    // Step 1: Extract business information
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        progressPercent: 15,
-        progressMessage: 'Extracting website content...'
-      }
-    });
-
-    const businessInfo = await WebsiteAnalysisService.extractBusinessInfo(job.websiteUrl);
-
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        progressPercent: 30,
-        progressMessage: 'AI analyzing business information...',
-        extractedInfo: businessInfo as object
-      }
-    });
-
-    // Step 2: Check if business already exists
-    let business = await prisma.business.findFirst({
-      where: { websiteUrl: job.websiteUrl }
-    });
-
-    if (!business) {
-      // Create new business
-      await prisma.analysisJob.update({
-        where: { id: jobId },
-        data: {
-          progressPercent: 45,
-          progressMessage: 'Creating business profile...'
-        }
-      });
-
-      business = await prisma.business.create({
-        data: {
-          websiteName: businessInfo.businessName,
-          websiteUrl: job.websiteUrl,
-          industry: businessInfo.industry,
-          location: businessInfo.location,
-          description: businessInfo.description,
-          isCompetitor: false,
-          userId: null
-        }
-      });
-    }
-
-    // Link business to organization
-    const existingLink = await prisma.organizationBusiness.findUnique({
-      where: {
-        organizationId_businessId: {
-          organizationId: job.organizationId,
-          businessId: business.id
-        }
-      }
-    });
-
-    if (!existingLink) {
-      await prisma.organizationBusiness.create({
-        data: {
-          organizationId: job.organizationId,
-          businessId: business.id,
-          role: 'owner'
-        }
-      });
-
-      // Update organization website count
-      await prisma.organization.update({
-        where: { id: job.organizationId },
-        data: {
-          websiteCount: {
-            increment: 1
-          }
-        }
-      });
-    }
-
-    // Update job with business ID
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        businessId: business.id,
-        progressPercent: 60,
-        progressMessage: 'Generating AEO analysis prompts...'
-      }
-    });
-
-    // Step 3: Run AEO analysis
-    const analysisRequest = {
-      businessId: business.id,
-      businessName: businessInfo.businessName,
-      industry: businessInfo.industry,
-      location: business.useLocationInAnalysis && businessInfo.location ? businessInfo.location : '',
-      marketDescription: businessInfo.description,
-      keywords: businessInfo.keywords,
-      websiteUrl: job.websiteUrl,
-      providers: [
-        { name: 'OpenAI GPT-4', model: 'gpt-4', color: '#10B981', type: 'openai' as const },
-        { name: 'Claude 3.5 Sonnet', model: 'claude-3-5-sonnet-20241022', color: '#8B5CF6', type: 'anthropic' as const },
-        { name: 'Perplexity Pro', model: 'llama-3.1-sonar-large-128k-online', color: '#F59E0B', type: 'perplexity' as const }
-      ],
-      customPrompts: undefined
-    };
-
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        progressPercent: 75,
-        progressMessage: 'Running queries across AI platforms...'
-      }
-    });
-
-    const analysisResult = await AEOAnalysisService.runAnalysis(analysisRequest);
-
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        progressPercent: 90,
-        progressMessage: 'Processing rankings and competitors...'
-      }
-    });
-
-    // Complete the job
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        status: 'completed',
-        progressPercent: 100,
-        progressMessage: 'Analysis complete!',
-        analysisResult: analysisResult as object,
-        completedAt: new Date()
-      }
-    });
-
-    console.log(`✅ Job ${jobId} completed successfully`);
-
-  } catch (error) {
-    console.error(`❌ Error processing job ${jobId}:`, error);
-    
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        completedAt: new Date()
-      }
-    });
-  }
 }

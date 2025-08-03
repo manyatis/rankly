@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/nextauth';
 import { prisma } from '../../../../lib/prisma';
-import type { ModelType } from '../../../../lib/ai-models';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,48 +38,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User organization not found' }, { status: 400 });
     }
 
-    // Create the analysis job
+    // Get the website URL for the business
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { websiteUrl: true }
+    });
+
+    if (!business || !business.websiteUrl) {
+      return NextResponse.json({ error: 'Business website URL not found' }, { status: 400 });
+    }
+
+    // Create the analysis job with 'not-started' status
     const job = await prisma.analysisJob.create({
       data: {
-        websiteUrl: `manual-analysis-${businessId}`, // Use a special format for manual analysis
+        websiteUrl: business.websiteUrl,
         userId: user.id,
         organizationId: user.organizationId,
         businessId: businessId,
-        status: 'pending',
+        status: 'not-started',
+        currentStep: 'not-started',
         progressPercent: 0,
-        progressMessage: 'Analysis job created',
+        progressMessage: 'Analysis job created and queued for processing',
         extractedInfo: {
           businessName,
           industry,
           location,
-          marketDescription,
+          description: marketDescription,
           keywords,
           isManualAnalysis: true
-        }
+        },
+        prompts: data.customPrompts ? { queries: data.customPrompts } : undefined
       }
     });
 
-    console.log(`📊 Created manual analysis job ${job.id} for business ${businessId}`);
+    console.log(`📊 Created manual analysis job ${job.id} for business ${businessId} with status: not-started`);
 
-    // Start processing the job asynchronously
-    processManualAnalysisJob(job.id, {
-      businessId,
-      businessName,
-      industry,
-      location,
-      marketDescription,
-      keywords,
-      websiteUrl: data.websiteUrl,
-      providers,
-      customPrompts: data.customPrompts
-    }).catch(error => {
-      console.error(`❌ Error processing manual analysis job ${job.id}:`, error);
-    });
+    // The job will be picked up by the cron processors
+    // No need to process it here
 
     return NextResponse.json({
       jobId: job.id,
-      status: 'pending',
-      message: 'Analysis job created successfully'
+      status: 'not-started',
+      message: 'Analysis job created successfully and queued for processing'
     });
 
   } catch (error) {
@@ -119,7 +118,7 @@ export async function GET(request: NextRequest) {
         where: {
           businessId: parseInt(businessId),
           userId: user.id,
-          websiteUrl: { startsWith: 'manual-analysis-' } // Only manual analysis jobs
+          extractedInfo: { path: ['isManualAnalysis'], equals: true } // Only manual analysis jobs
         },
         orderBy: { createdAt: 'desc' },
         take: 5 // Last 5 jobs
@@ -175,131 +174,5 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Background job processor for manual analysis
-interface ManualAnalysisRequest {
-  businessId: number;
-  businessName: string;
-  industry: string;
-  location?: string;
-  marketDescription: string;
-  keywords: string[];
-  websiteUrl?: string;
-  providers: Array<{
-    name: string;
-    model: string;
-    color: string;
-    type: ModelType;
-  }>;
-  customPrompts?: string[];
-}
-
-async function processManualAnalysisJob(jobId: string, analysisRequest: ManualAnalysisRequest) {
-  try {
-    // Import services dynamically to avoid circular dependencies
-    const { AEOAnalysisService } = await import('../../../../services/AEOAnalysisService');
-
-    // Progress tracking helper
-    const updateProgress = async (percent: number, message: string) => {
-      await prisma.analysisJob.update({
-        where: { id: jobId },
-        data: {
-          progressPercent: percent,
-          progressMessage: message
-        }
-      });
-    };
-
-    // Initial setup
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        status: 'processing',
-        progressPercent: 5,
-        progressMessage: 'Initializing analysis... (estimated 4 minutes)'
-      }
-    });
-
-    // Since we can't easily hook into the AEOAnalysisService stages, 
-    // we'll run the analysis and update progress based on realistic timing
-    const analysisStartTime = Date.now();
-    
-    // Stage 1: Competitor identification (5-15%)
-    await updateProgress(10, 'Identifying competitors...');
-    
-    // Small delay to show this stage
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await updateProgress(15, 'Competitors identified, generating prompts...');
-
-    // Stage 2: Prompt generation (15-25%)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await updateProgress(25, 'Starting AI provider analysis...');
-
-    // Start the actual analysis
-    const analysisPromise = AEOAnalysisService.runAnalysis(analysisRequest);
-
-    // Progress tracking during analysis (25-85% - the main analysis phase)
-    const analysisProgressSteps = [
-      { percent: 35, message: 'Querying ChatGPT...', delay: 2000 },
-      { percent: 45, message: 'Processing ChatGPT responses...', delay: 3000 },
-      { percent: 55, message: 'Querying Claude...', delay: 2000 },
-      { percent: 65, message: 'Processing Claude responses...', delay: 3000 },
-      { percent: 75, message: 'Querying Perplexity...', delay: 2000 },
-      { percent: 85, message: 'Processing all AI responses...', delay: 3000 }
-    ];
-
-    let stepIndex = 0;
-    const progressInterval = setInterval(async () => {
-      if (stepIndex < analysisProgressSteps.length) {
-        const step = analysisProgressSteps[stepIndex];
-        await updateProgress(step.percent, step.message);
-        stepIndex++;
-      }
-    }, 4000); // Update every 4 seconds during analysis
-
-    try {
-      // Wait for the analysis to complete
-      const analysisResult = await analysisPromise;
-
-      // Clear the progress interval
-      clearInterval(progressInterval);
-
-      // Final stages (85-100%)
-      await updateProgress(90, 'Analyzing website content...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await updateProgress(95, 'Aggregating results and saving data...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Complete the job
-      await prisma.analysisJob.update({
-        where: { id: jobId },
-        data: {
-          status: 'completed',
-          progressPercent: 100,
-          progressMessage: 'Analysis complete!',
-          analysisResult: analysisResult as object,
-          completedAt: new Date()
-        }
-      });
-
-      const totalTime = Math.round((Date.now() - analysisStartTime) / 1000);
-      console.log(`✅ Manual analysis job ${jobId} completed successfully in ${totalTime}s`);
-
-    } catch (analysisError) {
-      clearInterval(progressInterval);
-      throw analysisError;
-    }
-
-  } catch (error) {
-    console.error(`❌ Error processing manual analysis job ${jobId}:`, error);
-    
-    await prisma.analysisJob.update({
-      where: { id: jobId },
-      data: {
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        completedAt: new Date()
-      }
-    });
-  }
-}
+// The processManualAnalysisJob function is no longer needed since
+// jobs are now processed by the staged cron processors

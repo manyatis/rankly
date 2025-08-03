@@ -407,8 +407,11 @@ model AnalysisJob {
   userId          Int
   organizationId  Int
   businessId      Int?      // Will be set once business is created/linked
-  status          String    @default("pending") // "pending", "processing", "completed", "failed"
+  status          String    @default("not-started") // "not-started", "processing", "prompt-forming", "model-analysis", "completed", "failed"
+  currentStep     String    @default("not-started") // "not-started", "website-analysis", "prompt-forming", "model-analysis", "completed"
+  inProgress      Boolean   @default(false) // Marks if job is currently being processed
   error           String?   // Error message if failed
+  retryCount      Int       @default(0) // Number of retry attempts
   
   // Job progress tracking
   progressPercent Int       @default(0)
@@ -416,16 +419,21 @@ model AnalysisJob {
   
   // Job results
   extractedInfo   Json?     // Business info extracted from website
+  prompts         Json?     // Generated prompts for analysis
   analysisResult  Json?     // AEO analysis results
   
+  // Timing
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   completedAt     DateTime?
+  startedAt       DateTime? // When processing actually started
   
   // Relations
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
   @@index([status])
+  @@index([currentStep])
+  @@index([inProgress])
   @@index([createdAt])
 }

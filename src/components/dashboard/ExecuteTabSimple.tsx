@@ -31,10 +31,11 @@ interface UsageInfo {
 }
 
 interface AnalysisJob {
-  jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  id: string;
+  status: 'not-started' | 'processing' | 'prompt-forming' | 'model-analysis' | 'completed' | 'failed';
+  currentStep: string;
   progressPercent: number;
-  progressMessage: string;
+  progressMessage?: string;
   error?: string;
   analysisResult?: unknown;
 }
@@ -87,20 +88,34 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
         const data = await response.json();
         
         // If we find a running job, resume monitoring it
-        if (data.jobs && data.jobs.length > 0) {
-          const runningJob = data.jobs.find((job: AnalysisJob) => 
-            job.status === 'pending' || job.status === 'processing'
-          );
-          
-          if (runningJob) {
-            console.log('📊 Found existing job, resuming monitoring:', runningJob.jobId);
+        if (data && data.id) {
+          // Single job returned
+          const runningJob = data;
+          if (runningJob.status !== 'completed' && runningJob.status !== 'failed') {
+            console.log('📊 Found existing job, resuming monitoring:', runningJob.id);
             setAnalysisJob(runningJob);
             setIsAnalyzing(true);
-            setProgress(runningJob.progressPercent);
+            setProgress(runningJob.progressPercent || 0);
             setProgressMessage(runningJob.progressMessage || 'Resuming analysis...');
             
             // Start polling for this existing job
-            startJobPolling(runningJob.jobId);
+            startJobPolling(runningJob.id);
+          }
+        } else if (data.jobs && data.jobs.length > 0) {
+          // Array of jobs returned - find a running one
+          const runningJob = data.jobs.find((job: AnalysisJob) => 
+            job.status !== 'completed' && job.status !== 'failed'
+          );
+          
+          if (runningJob) {
+            console.log('📊 Found existing job, resuming monitoring:', runningJob.id);
+            setAnalysisJob(runningJob);
+            setIsAnalyzing(true);
+            setProgress(runningJob.progressPercent || 0);
+            setProgressMessage(runningJob.progressMessage || 'Resuming analysis...');
+            
+            // Start polling for this existing job
+            startJobPolling(runningJob.id);
           }
         }
       }
@@ -131,8 +146,8 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
         const jobStatus = await statusResponse.json();
         
         setAnalysisJob(jobStatus);
-        setProgress(jobStatus.progressPercent);
-        setProgressMessage(jobStatus.progressMessage);
+        setProgress(jobStatus.progressPercent || 0);
+        setProgressMessage(jobStatus.progressMessage || 'Processing...');
         
         if (jobStatus.status === 'completed') {
           if (pollIntervalRef.current) {
@@ -181,7 +196,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       } catch (error) {
         console.error('Error polling job status:', error);
       }
-    }, 1000); // Poll every second
+    }, 2000); // Poll every 2 seconds
   };
 
   const handleRunAnalysis = async () => {
@@ -217,17 +232,6 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
         },
         body: JSON.stringify({
           businessId: business.id,
-          businessName: business.websiteName,
-          industry: business.industry || 'Technology',
-          location: business.useLocationInAnalysis && business.location ? business.location : '',
-          marketDescription: business.description || `Business website at ${business.websiteUrl}`,
-          keywords: recentInput.keywords || [business.websiteName, 'business', 'services'],
-          websiteUrl: business.websiteUrl || undefined,
-          providers: [
-            { name: 'OpenAI GPT-4', model: 'gpt-4', color: '#10B981', type: 'openai' },
-            { name: 'Claude 3.5 Sonnet', model: 'claude-3-5-sonnet-20241022', color: '#8B5CF6', type: 'anthropic' },
-            { name: 'Perplexity Pro', model: 'llama-3.1-sonar-large-128k-online', color: '#F59E0B', type: 'perplexity' }
-          ],
           customPrompts: recentInput.prompts || undefined
         }),
       });
@@ -242,7 +246,7 @@ export default function ExecuteTabSimple({ businessId }: ExecuteTabSimpleProps) 
       setAnalysisJob(data);
       
       // Start polling for job status
-      startJobPolling(data.jobId);
+      startJobPolling(data.id);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
