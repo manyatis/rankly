@@ -175,6 +175,13 @@ export class JobQueue {
   }
 
   /**
+   * Get all queues (for checking if job exists in any queue)
+   */
+  getAllQueues(): Map<JobPhase, QueuedJob[]> {
+    return new Map(this.queues);
+  }
+
+  /**
    * Force release stuck jobs (cleanup for processors that died)
    */
   releaseStuckJobs(maxProcessingTime: number = 300000): number { // 5 minutes default

@@ -95,12 +95,11 @@ export class StagedAnalysisService {
   static async processNotStartedJobs(): Promise<void> {
     console.debug('🔍 Looking for not-started jobs...');
     
-    // Find and lock a single job that's not in progress
+    // Find the oldest job to process (no locking needed - pool system handles this)
     const job = await prisma.analysisJob.findFirst({
       where: {
         status: 'not-started',
         currentStep: 'not-started',
-        inProgress: false,
         retryCount: { lt: this.MAX_RETRIES }
       },
       orderBy: { createdAt: 'asc' }
@@ -111,32 +110,9 @@ export class StagedAnalysisService {
       return;
     }
 
-    console.debug(`📋 Found job ${job.id} to process`);
+    console.debug(`📋 Found job ${job.id} to process (legacy method)`);
 
-    // Try to lock the job - this will fail if another process already locked it
-    try {
-      const lockedJob = await prisma.analysisJob.updateMany({
-        where: {
-          id: job.id,
-          inProgress: false // Only update if still not in progress
-        },
-        data: {
-          inProgress: true,
-          startedAt: new Date()
-        }
-      });
-
-      // If no rows were updated, another process got the job
-      if (lockedJob.count === 0) {
-        console.debug(`⚠️ Job ${job.id} was already locked by another process`);
-        return;
-      }
-
-      console.debug(`🔒 Successfully locked job ${job.id}`);
-    } catch (error) {
-      console.error(`❌ Failed to lock job ${job.id}:`, error);
-      return;
-    }
+    // Note: No locking needed - pool-based system handles concurrency
 
     // Process the locked job using internal method
     try {
@@ -150,7 +126,6 @@ export class StagedAnalysisService {
           status: 'failed',
           error: error instanceof Error ? error.message : 'Unknown error occurred',
           retryCount: { increment: 1 },
-          inProgress: false, // Always unlock on error
           completedAt: new Date()
         }
       });
@@ -193,7 +168,6 @@ export class StagedAnalysisService {
           data: {
             status: 'prompt-forming',
             currentStep: 'prompt-forming',
-            inProgress: false, // Unlock for next stage
             progressPercent: 30,
             progressMessage: 'Generating analysis prompts...'
           }
@@ -249,7 +223,6 @@ export class StagedAnalysisService {
           extractedInfo: businessInfo as object,
           status: 'prompt-forming',
           currentStep: 'prompt-forming',
-          inProgress: false, // Unlock for next stage
           progressPercent: 30,
           progressMessage: 'Generating analysis prompts...'
         }
@@ -266,12 +239,11 @@ export class StagedAnalysisService {
   static async processPromptFormingJobs(): Promise<void> {
     console.debug('🔍 Looking for prompt-forming jobs...');
     
-    // Find and lock a single job that's not in progress
+    // Find the oldest job to process (no locking needed - pool system handles this)
     const job = await prisma.analysisJob.findFirst({
       where: {
         status: 'prompt-forming',
         currentStep: 'prompt-forming',
-        inProgress: false,
         businessId: { not: null }
       },
       include: {
@@ -285,30 +257,9 @@ export class StagedAnalysisService {
       return;
     }
 
-    console.debug(`📋 Found job ${job.id} to process`);
+    console.debug(`📋 Found job ${job.id} to process (legacy method)`);
 
-    // Try to lock the job
-    try {
-      const lockedJob = await prisma.analysisJob.updateMany({
-        where: {
-          id: job.id,
-          inProgress: false
-        },
-        data: {
-          inProgress: true
-        }
-      });
-
-      if (lockedJob.count === 0) {
-        console.debug(`⚠️ Job ${job.id} was already locked by another process`);
-        return;
-      }
-
-      console.debug(`🔒 Successfully locked job ${job.id}`);
-    } catch (error) {
-      console.error(`❌ Failed to lock job ${job.id}:`, error);
-      return;
-    }
+    // Note: No locking needed - pool-based system handles concurrency
 
     // Process the locked job using internal method
     try {
@@ -321,7 +272,6 @@ export class StagedAnalysisService {
         data: {
           status: 'failed',
           error: error instanceof Error ? error.message : 'Failed to generate prompts',
-          inProgress: false, // Always unlock on error
           completedAt: new Date()
         }
       });
@@ -354,7 +304,6 @@ export class StagedAnalysisService {
         data: {
           status: 'model-analysis',
           currentStep: 'model-analysis',
-          inProgress: false, // Unlock for next stage
           progressPercent: 50,
           progressMessage: 'Running AI model analysis...'
         }
@@ -382,7 +331,6 @@ export class StagedAnalysisService {
           prompts: { queries: promptResult.queries },
           status: 'model-analysis',
           currentStep: 'model-analysis',
-          inProgress: false, // Unlock for next stage
           progressPercent: 50,
           progressMessage: 'Running AI model analysis...'
         }
@@ -539,7 +487,6 @@ export class StagedAnalysisService {
       data: {
         status: 'completed',
         currentStep: 'completed',
-        inProgress: false, // Job is complete, unlock
         analysisResult: { results, runUuid } as unknown as object,
         progressPercent: 100,
         progressMessage: 'Analysis complete!',
@@ -557,12 +504,11 @@ export class StagedAnalysisService {
   static async processModelAnalysisJobs(): Promise<void> {
     console.debug('🔍 Looking for model-analysis jobs...');
     
-    // Find and lock a single job that's not in progress
+    // Find the oldest job to process (no locking needed - pool system handles this)
     const job = await prisma.analysisJob.findFirst({
       where: {
         status: 'model-analysis',
         currentStep: 'model-analysis',
-        inProgress: false,
         businessId: { not: null }
       },
       include: {
@@ -576,30 +522,9 @@ export class StagedAnalysisService {
       return;
     }
 
-    console.debug(`📋 Found job ${job.id} to process`);
+    console.debug(`📋 Found job ${job.id} to process (legacy method)`);
 
-    // Try to lock the job
-    try {
-      const lockedJob = await prisma.analysisJob.updateMany({
-        where: {
-          id: job.id,
-          inProgress: false
-        },
-        data: {
-          inProgress: true
-        }
-      });
-
-      if (lockedJob.count === 0) {
-        console.debug(`⚠️ Job ${job.id} was already locked by another process`);
-        return;
-      }
-
-      console.debug(`🔒 Successfully locked job ${job.id}`);
-    } catch (error) {
-      console.error(`❌ Failed to lock job ${job.id}:`, error);
-      return;
-    }
+    // Note: No locking needed - pool-based system handles concurrency
 
     // Process the locked job
     try {
@@ -737,7 +662,6 @@ export class StagedAnalysisService {
           data: {
             status: 'completed',
             currentStep: 'completed',
-            inProgress: false, // Job is complete, unlock
             analysisResult: { results, runUuid } as unknown as object,
             progressPercent: 100,
             progressMessage: 'Analysis complete!',
@@ -755,7 +679,6 @@ export class StagedAnalysisService {
         data: {
           status: 'failed',
           error: error instanceof Error ? error.message : 'Analysis failed',
-          inProgress: false, // Always unlock on error
           completedAt: new Date()
         }
       });

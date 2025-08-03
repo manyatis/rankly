@@ -142,25 +142,24 @@ export class JobScheduler {
   }
 
   /**
-   * Find and atomically lock jobs for a specific phase that are ready for processing
-   * This prevents multiple processors from picking up the same job
+   * Find jobs for a specific phase that are ready for processing
+   * Uses in-memory queue state to prevent duplicates instead of database locking
    */
-  private async findJobsForPhase(status: string, _phase: JobPhase): Promise<Array<{
+  private async findJobsForPhase(status: string, phase: JobPhase): Promise<Array<{
     id: string;
     createdAt: Date;
     retryCount: number;
     extractedInfo: JsonValue;
   }>> {
-    // First, find available jobs
+    // Find available jobs (no inProgress check - rely on queue state instead)
     const availableJobs = await prisma.analysisJob.findMany({
       where: {
         status,
         currentStep: status,
-        inProgress: false,
         retryCount: { lt: this.maxRetries },
-        // Only include jobs that haven't been updated recently (avoid race conditions)
+        // Only include jobs that haven't been updated recently (avoid rapid re-queuing)
         updatedAt: {
-          lt: new Date(Date.now() - 30000) // 30 seconds ago
+          lt: new Date(Date.now() - 10000) // 10 seconds ago (reduced from 30)
         }
       },
       select: {
@@ -172,46 +171,40 @@ export class JobScheduler {
       orderBy: [
         { createdAt: 'asc' } // Process older jobs first
       ],
-      take: 10 // Reduced batch size to prevent overwhelming the queue
+      take: 5 // Smaller batch size for more frequent processing
     });
 
-    // Atomically lock the jobs we found
-    const lockedJobs: Array<{
-      id: string;
-      createdAt: Date;
-      retryCount: number;
-      extractedInfo: JsonValue;
-    }> = [];
+    console.debug(`📋 Found ${availableJobs.length} candidate jobs for ${phase}`);
 
-    for (const job of availableJobs) {
-      try {
-        // Try to atomically lock this job
-        const result = await prisma.analysisJob.updateMany({
-          where: {
-            id: job.id,
-            inProgress: false, // Only lock if still available
-            status, // Ensure status hasn't changed
-            currentStep: status // Ensure step hasn't changed
-          },
-          data: {
-            inProgress: true,
-            updatedAt: new Date()
-          }
-        });
-
-        // If we successfully locked it, add to our list
-        if (result.count > 0) {
-          lockedJobs.push(job);
-          console.debug(`🔒 Locked job ${job.id} for ${status} processing`);
-        } else {
-          console.debug(`⚠️ Job ${job.id} was already locked by another process`);
+    // Filter out jobs that are already in queues or being processed
+    const jobQueue = JobQueue.getInstance();
+    const availableJobsNotInQueue = availableJobs.filter(job => {
+      // Check if job is already queued in any phase
+      const stats = jobQueue.getStats();
+      const allQueues = jobQueue.getAllQueues();
+      
+      for (const [queuePhase, queue] of allQueues) {
+        const jobInQueue = queue.find(queuedJob => queuedJob.jobId === job.id);
+        if (jobInQueue) {
+          console.debug(`📋 Job ${job.id} already queued in ${queuePhase}`);
+          return false;
         }
-      } catch (error) {
-        console.error(`❌ Failed to lock job ${job.id}:`, error);
       }
-    }
 
-    return lockedJobs;
+      // Check if job is currently being processed
+      const processingJobs = jobQueue.getProcessingJobs();
+      for (const [processorId, processingJob] of processingJobs) {
+        if (processingJob.jobId === job.id) {
+          console.debug(`🔄 Job ${job.id} already being processed by ${processorId}`);
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    console.debug(`📋 Filtered to ${availableJobsNotInQueue.length} jobs not in queues for ${phase}`);
+    return availableJobsNotInQueue;
   }
 
   /**
@@ -253,42 +246,14 @@ export class JobScheduler {
     try {
       console.debug('🧹 Cleaning up stuck jobs...');
 
-      const stuckJobTimeout = 5 * 60 * 1000; // 5 minutes (reduced from 10)
-      const cutoffTime = new Date(Date.now() - stuckJobTimeout);
-
-      // Find jobs that are marked as inProgress but haven't been updated recently
-      const stuckJobs = await prisma.analysisJob.findMany({
-        where: {
-          inProgress: true,
-          updatedAt: { lt: cutoffTime },
-          status: { in: ['processing', 'not-started', 'prompt-forming', 'model-analysis'] }
-        }
-      });
-
-      if (stuckJobs.length > 0) {
-        console.warn(`⚠️ Found ${stuckJobs.length} stuck jobs, releasing them`);
-
-        // Reset stuck jobs to allow reprocessing
-        await prisma.analysisJob.updateMany({
-          where: {
-            id: { in: stuckJobs.map(job => job.id) }
-          },
-          data: {
-            inProgress: false,
-            retryCount: { increment: 1 },
-            updatedAt: new Date()
-          }
-        });
-
-        console.log(`🔄 Released ${stuckJobs.length} stuck jobs`);
-      }
-
-      // Also cleanup in-memory stuck jobs
+      // Only cleanup in-memory stuck jobs since we removed database inProgress locking
       const jobQueue = JobQueue.getInstance();
       const releasedCount = jobQueue.releaseStuckJobs(300000); // 5 minutes
       
       if (releasedCount > 0) {
         console.log(`🔄 Released ${releasedCount} stuck jobs from memory queues`);
+      } else {
+        console.debug('🧹 No stuck jobs found in memory queues');
       }
 
     } catch (error) {
