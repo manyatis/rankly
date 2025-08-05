@@ -1,0 +1,439 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organization {
+    id          Int       @id @default(autoincrement())
+    name        String
+    domain      String?   // Optional company domain
+    websiteCount Int      @default(0)  // Current number of websites/businesses
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    
+    // Relations
+    users       User[]
+    businesses  OrganizationBusiness[]
+    
+    @@index([name])
+}
+
+model Business {
+    id             Int          @id @default(autoincrement())
+    websiteName    String       // e.g., "example.com" or business display name
+    websiteUrl     String?      // Full URL
+    userId         Int?         // User who created this business (nullable for competitor businesses)
+    industry       String?
+    location       String?
+    description    String?      @db.Text
+    isCompetitor   Boolean      @default(false)  // True if this is a competitor business
+    
+    // Analysis settings
+    useLocationInAnalysis Boolean @default(true)  // Whether to include location in analysis queries
+    
+    // Recurring scan settings
+    recurringScans Boolean      @default(false)  // Whether recurring scans are enabled
+    scanFrequency  String?      // "daily", "weekly", "monthly" 
+    lastScanDate   DateTime?    // When the last scan was performed
+    nextScanDate   DateTime?    // When the next scan is scheduled
+    
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+    
+    // Relations
+    user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+    organizations  OrganizationBusiness[]
+    aeoScores      AeoScore[]
+    inputHistory   InputHistory[]
+    rankingHistory RankingHistory[]
+    aiInsights     AIInsight[]
+    queryResults   QueryResult[]
+    
+    // Competitor relationships
+    competitorOf   Competitor[] @relation("BusinessCompetitors")
+    competitors    Competitor[] @relation("CompetitorBusinesses")
+    
+    @@unique([websiteUrl])  // URL is now the primary unique identifier
+    @@index([userId])
+    @@index([websiteName])
+    @@index([websiteUrl])  // Index on URL for fast lookup
+    @@index([isCompetitor])
+}
+
+model User {
+    id                Int             @id @default(autoincrement())
+    email             String          @unique
+    name              String?
+    image             String?
+    organizationId    Int?            // Link to organization
+    sessions          Session[]
+    accounts          Account[]
+    dailyUsageCount   Int             @default(0)
+    lastUsageDate     DateTime?
+    subscriptionTier  String          @default("free") // "free", "professional", "enterprise"
+    plan              String          @default("free") // "free", "indie", "professional", "enterprise"
+    role              String          @default("user") // "user", "admin"
+    
+    // Subscription management
+    subscriptionId        String?         // Stripe subscription ID
+    subscriptionStatus    String?         // "active", "past_due", "canceled", "paused", "trialing", "incomplete"
+    subscriptionStartDate DateTime?       // When subscription started
+    subscriptionEndDate   DateTime?       // When subscription ends (for canceled subscriptions)
+    stripeCustomerId      String?         // Stripe customer ID
+    stripePriceId         String?         // Stripe price ID for the current subscription
+    
+    // Rate limiting fields for 5-minute windows
+    analyzeWebsiteCount     Int       @default(0)  // Count of analyze website button uses
+    analyzeWebsiteResetTime DateTime? // When the 5-minute window resets
+    generatePromptsCount    Int       @default(0)  // Count of generate prompts button uses  
+    generatePromptsResetTime DateTime? // When the 5-minute window resets
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @updatedAt
+    
+    // Relations
+    organization      Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+    analysisJobs      AnalysisJob[]
+    businesses        Business[]      // Businesses created by this user
+    aeoScores         AeoScore[]
+    inputHistory      InputHistory[]
+    rankingHistory    RankingHistory[]
+    aiInsights        AIInsight[]
+    queryResults      QueryResult[]
+    blogPosts         BlogPost[]
+    
+    @@index([organizationId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model AeoScore {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  businessId  Int
+  date        DateTime @default(now()) @db.Date
+  score       Int      // Overall AEO score (0-100)
+  keywords    String[] // JSON array of keywords used
+  visibility  Int      // Visibility percentage
+  ranking     Int      // Average ranking score
+  relevance   Int      // Relevance score
+  accuracy    Int      // Accuracy score
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date, businessId])
+  @@index([userId, date])
+  @@index([businessId])
+}
+
+// Input History - stores business information and prompts used
+model InputHistory {
+  id                  Int       @id @default(autoincrement())
+  userId              Int?      // Optional - for userId agnostic tracking
+  businessId          Int
+  runUuid             String?   @unique // UUID linking this input to its ranking results
+  keywords            String[]  // Array of keywords
+  prompts             String[]  // Array of prompts used
+  createdAt           DateTime  @default(now())
+  
+  // Relations
+  user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  business            Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([businessId])
+  @@index([runUuid])
+}
+
+// Ranking History - stores search engine ranks and website analysis scores
+model RankingHistory {
+  id                Int       @id @default(autoincrement())
+  userId            Int?      // Optional - for userId agnostic tracking
+  businessId        Int
+  date              DateTime  // Date for daily uniqueness (date only, no time)
+  runUuid           String?   // UUID linking this result to its input (no longer unique since we upsert)
+  
+  // Search Engine Rankings (AEO scores across providers)
+  openaiRank        Int?      // OpenAI ranking/score
+  claudeRank        Int?      // Claude ranking/score  
+  perplexityRank    Int?      // Perplexity ranking/score
+  googleRank        Int?      // Google AI ranking/score
+  averageRank       Int?      // Average across all providers
+  
+  // Website Analysis Score (if website was analyzed)
+  websiteScore      Int?      // Website analysis score (0-100)
+  hasWebsiteAnalysis Boolean  @default(false)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([businessId, date]) // One ranking per business per day
+  @@index([userId, createdAt])
+  @@index([businessId, date])
+  @@index([runUuid])
+}
+
+// AI Insights - stores AI-generated recommendations and insights
+model AIInsight {
+  id               String      @id @default(cuid())
+  userId           Int
+  businessId       Int
+  date             DateTime    // Date for daily uniqueness (date only, no time)
+  runUuid          String?     // UUID linking to analysis run that generated this insight
+  
+  // Core insight data
+  title            String
+  description      String      @db.Text
+  category         String      // "Content", "Technical", "Authority", "Structure"
+  criticality      String      // "critical", "high", "medium", "low"
+  impact           String      // "high", "medium", "low"
+  effort           String      // "quick", "moderate", "significant"
+  priority         String      // "high", "medium", "low"
+  
+  // AI metadata
+  aiProvider       String?     // Which AI model generated this insight
+  confidence       Int?        // Confidence score 0-100
+  
+  // Insight status tracking
+  status           String      @default("new") // "new", "in_progress", "completed", "dismissed"
+  
+  // Structured recommendations array
+  recommendations  String[]    // Array of specific action items
+  
+  // Metrics and scoring
+  currentScore     Int?        // Current score for this area (0-100)
+  potentialImprovement Int?    // Potential point improvement
+  affectedQueries  Int?        // Number of queries this affects
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  
+  // Relations
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business         Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, businessId, date, category]) // One insight per user/business/day/category
+  @@index([userId, businessId])
+  @@index([businessId, date])
+  @@index([status])
+  @@index([runUuid])
+}
+
+// Junction table to link Organizations to Businesses
+model OrganizationBusiness {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  businessId     Int
+  role           String       @default("owner") // "owner", "viewer", etc.
+  createdAt      DateTime     @default(now())
+  
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationId, businessId])
+  @@index([organizationId])
+  @@index([businessId])
+}
+
+// Competitor relationships between businesses
+model Competitor {
+  id           Int      @id @default(autoincrement())
+  businessId   Int      // The main business
+  competitorId Int      // The competitor business
+  
+  // Competitor metadata
+  identifiedBy String?  // How this competitor was identified ("ai", "manual", "import")
+  confidence   Float?   // Confidence score from AI identification (0.0 to 1.0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  business     Business @relation("BusinessCompetitors", fields: [businessId], references: [id], onDelete: Cascade)
+  competitor   Business @relation("CompetitorBusinesses", fields: [competitorId], references: [id], onDelete: Cascade)
+  
+  @@unique([businessId, competitorId])
+  @@index([businessId])
+  @@index([competitorId])
+}
+
+// Query Results - stores individual query results showing mention status and rankings
+model QueryResult {
+  id                Int       @id @default(autoincrement())
+  userId            Int?      // Optional - for userId agnostic tracking
+  businessId        Int
+  runUuid           String?   // UUID linking to the analysis run
+  
+  // Query information
+  query             String    @db.Text // The query that was run
+  aiProvider        String    // "openai", "claude", "perplexity"
+  
+  // Response details
+  response          String    @db.Text // Full AI response
+  mentioned         Boolean   // Whether the business was mentioned
+  rankPosition      Int?      // Position in the response (1-based, null if not mentioned)
+  relevanceScore    Int?      // Relevance score (0-10 points, displayed as 0-100%)
+  
+  // Analysis metadata
+  wordCount         Int?      // Number of words in response
+  businessDensity   Float?    // How prominently the business was featured
+  
+  createdAt         DateTime  @default(now())
+  
+  // Relations
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([businessId])
+  @@index([runUuid])
+  @@index([aiProvider])
+}
+
+model SubscriptionPlan {
+  id              Int       @id @default(autoincrement())
+  planId          String    @unique   // "indie", "professional", "enterprise"
+  name            String                // "Indie", "Professional", "Enterprise"
+  priceCents      Int                   // Price in cents (e.g., 2000 for $20.00)
+  billingPeriod   String    @default("MONTHLY") // "MONTHLY", "YEARLY"
+  features        String[]              // Array of feature descriptions
+  description     String?               // Plan description
+  stripePriceId   String?               // Stripe price ID
+  stripeProductId String?               // Stripe product ID
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model BlogPost {
+  id            Int       @id @default(autoincrement())
+  title         String
+  slug          String    @unique  // URL-friendly version of title
+  content       String    @db.Text // Full blog post content
+  excerpt       String?   @db.Text // Brief description/preview
+  status        String    @default("draft") // "draft" or "published"
+  authorId      Int       // User who created the post
+  authorName    String?   // Custom author name (overrides User.name if set)
+  
+  // SEO fields
+  metaTitle     String?   // Custom meta title
+  metaDescription String? // Custom meta description
+  featuredImage String?   // URL to featured image
+  tags          String[]  // Array of tags
+  citations     String[]  @default([]) // Array of citation URLs from AI generation
+  
+  // Analytics
+  viewCount     Int       @default(0) // Total view count
+  
+  // Publishing
+  publishedAt   DateTime? // When the post was published
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  views         BlogPostView[]
+  
+  @@index([authorId])
+  @@index([status])
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([viewCount])
+}
+
+model BlogPostView {
+  id        Int      @id @default(autoincrement())
+  postId    Int      // Blog post that was viewed
+  ipAddress String   // IP address of viewer (for basic deduplication)
+  userAgent String?  // Browser user agent
+  viewedAt  DateTime @default(now())
+  
+  // Relations
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@index([postId])
+  @@index([viewedAt])
+  @@index([ipAddress, postId]) // For deduplication
+}
+
+model AnalysisJob {
+  id              String    @id @default(cuid())
+  websiteUrl      String
+  userId          Int
+  organizationId  Int
+  businessId      Int?      // Will be set once business is created/linked
+  status          String    @default("not-started") // "not-started", "processing", "prompt-forming", "model-analysis", "completed", "failed"
+  currentStep     String    @default("not-started") // "not-started", "website-analysis", "prompt-forming", "model-analysis", "completed"
+  inProgress      Boolean   @default(false) // Marks if job is currently being processed
+  error           String?   // Error message if failed
+  retryCount      Int       @default(0) // Number of retry attempts
+  
+  // Job progress tracking
+  progressPercent Int       @default(0)
+  progressMessage String?
+  
+  // Job results
+  extractedInfo   Json?     // Business info extracted from website
+  prompts         Json?     // Generated prompts for analysis
+  analysisResult  Json?     // AEO analysis results
+  
+  // Timing
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  completedAt     DateTime?
+  startedAt       DateTime? // When processing actually started
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([currentStep])
+  @@index([inProgress])
+  @@index([createdAt])
+}

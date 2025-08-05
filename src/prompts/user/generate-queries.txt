@@ -1,0 +1,29 @@
+Business Context:
+- Industry: {{industry}}{{location}}
+- Market/Customers: {{marketDescription}}
+- Primary Keywords: {{keywords}}
+
+Generate {{queryCount}} diverse search queries that would be relevant for testing businesses in this industry. These should be natural questions that potential customers or industry researchers might ask.
+
+IMPORTANT: Do NOT include any specific business names in the queries.
+
+Include queries that cover:
+- Top [number] companies/providers in the industry (e.g., "top 10 companies for [industry]", "best [industry] providers")
+- Industry leadership questions (e.g., "who leads the [industry] market", "which companies dominate [industry]")
+- Specific company finding queries (e.g., "best [industry] companies to work with", "leading [industry] firms")
+- Direct industry expertise questions (e.g., "top [industry] specialists", "which [industry] companies are most trusted")
+- Comparison and evaluation requests (e.g., "compare [industry] providers", "how to choose [industry] company")
+- Purchase intent and decision queries (e.g., "should I hire [industry] company", "worth investing in [industry] services")
+- Quality and reputation focused questions (e.g., "most reliable [industry] companies", "highest rated [industry] providers")
+- Market positioning queries (e.g., "industry leaders in [industry]", "top performers in [industry]")
+- Service/product recommendation requests (e.g., "recommended [industry] services", "best [industry] solutions")
+- Authority and expertise queries (e.g., "who are the experts in [industry]", "trusted [industry] professionals")
+
+Make queries DIRECT and SPECIFIC about finding the top companies/providers in the industry. Focus on queries that would naturally surface industry leaders and top companies.
+
+IMPORTANT: {{location}}If a location is specified in the context above, include location-aware queries that would be relevant for that geographic area (e.g., "best [industry] in [location]", "[location] [industry] providers"). If no location is specified, avoid location-based or geographic queries unless location/region is specifically mentioned in the industry, market description, or keywords.
+
+Return ONLY a JSON object with this structure and should only have {{queryCount}} queries inside the list:
+{
+  "queries": ["query1", "query2", ...]
+}

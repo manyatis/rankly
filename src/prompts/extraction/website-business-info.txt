@@ -1,0 +1,24 @@
+I need you to research and analyze the business website at: {{url}}
+
+Please search for information about this website and business, then extract comprehensive business information and provide it in the following JSON format:
+
+{
+  "businessName": "The main business/company name. Do not include generic words that may be in the business name.,
+  "industry": "The primary industry/sector (e.g., 'Software Development', 'Healthcare', 'E-commerce', 'Booking Platform', 'Banking', 'Financial Servies')",
+  "location": "Physical location if mentioned (city, state/country) or null if remote/not specified",
+  "businessDescription": "A 2-3 sentence description of what the business does and who they serve",
+  "keywords": ["array", "of", "5-10", "relevant", "SEO", "keywords"],
+  "confidence": 85
+}
+
+Guidelines for extraction:
+- businessName: Extract the main company/brand name, not taglines or slogans. Do not include generic words that may be in the business name such as ("llc", "golf", "inc"..).
+- industry: Use standard industry categories that would be searchable
+- location: Only include if there's a clear physical address or location mentioned; use null for remote/online-only businesses  
+- businessDescription: Focus on what they actually do and who they serve, avoid marketing fluff
+- keywords: Include industry terms, services offered, and relevant search terms someone might use to find this business
+- confidence: Rate 0-100 based on how clear and complete the information you can find about this business is
+
+Please research this website and business thoroughly to extract the most accurate information possible.
+
+Return only the JSON object, no additional text or explanation:
